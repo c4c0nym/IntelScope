@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iocscope report · 2026-11-24 18:03 UTC</title>
+<style>
+  :root {
+    --ivory: #ebd3a2; --mineral: #a2b0ad; --isabella: #c5a56e;
+    --greenblue: #099197; --benzol: #00978d; --lavender: #b5b1d8;
+    --ink: #1f2a2b; --paper: #fbf7ee;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink);
+         font: 15px/1.5 "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif; }
+  header { background: var(--greenblue); color: var(--ivory); padding: 36px 48px 28px; }
+  header h1 { margin: 0; font-size: 30px; letter-spacing: .5px; }
+  header h1 span { color: var(--lavender); font-weight: 400; }
+  header p { margin: 6px 0 0; color: #e6f2f1; }
+  .stripe { display: flex; height: 8px; }
+  .stripe i { flex: 1; }
+  main { max-width: 1240px; margin: 0 auto; padding: 32px 48px 56px; }
+  .tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px;
+           margin-bottom: 30px; }
+  .tile { background: #fff; border: 1px solid #e3dccb; border-top: 6px solid var(--c);
+          border-radius: 10px; padding: 14px 18px; }
+  .tile b { display: block; font-size: 30px; line-height: 1.1; }
+  .tile span { text-transform: uppercase; font-size: 12px; letter-spacing: 1px; color: #5b6766; }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff;
+          border: 1px solid #e3dccb; border-radius: 10px; overflow: hidden; }
+  th { background: var(--ivory); text-align: left; font-size: 12px; text-transform: uppercase;
+       letter-spacing: 1px; padding: 11px 14px; }
+  td { padding: 12px 14px; border-top: 1px solid #efe8d8; vertical-align: top; }
+  tr:hover td { background: #fdfaf3; }
+  code { font: 13px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; word-break: break-all; }
+  .orig { color: #6e7b79; font-size: 12px; margin-top: 2px; }
+  .pill { display: inline-block; white-space: nowrap; padding: 3px 10px; border-radius: 999px;
+          font-size: 12px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+          background: var(--c); color: var(--ink); }
+  .score { display: flex; align-items: center; gap: 8px; min-width: 110px; }
+  .bar { flex: 1; height: 8px; background: #eee7d7; border-radius: 99px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: var(--c); }
+  ul.src { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+  ul.src li { margin: 1px 0; }
+  ul.src b { color: var(--greenblue); font-weight: 600; }
+  ul.src .err { color: #8a7a55; font-style: italic; }
+  .type { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #5b6766; }
+  footer { color: #6e7b79; font-size: 12px; margin-top: 26px; display: flex;
+           justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .swatches i { display: inline-block; width: 12px; height: 12px; border-radius: 3px;
+                vertical-align: -2px; margin-left: 3px; }
+  @media (max-width: 800px) { .tiles { grid-template-columns: repeat(2, 1fr); }
+                              header, main { padding-left: 18px; padding-right: 18px; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>iocscope <span>enrichment report</span></h1>
+  <p>8 indicators · generated 2026-11-24 18:03 UTC</p>
+</header>
+<div class="stripe"><i style="background:var(--ivory)"></i><i style="background:var(--mineral)"></i><i style="background:var(--isabella)"></i><i style="background:var(--greenblue)"></i><i style="background:var(--benzol)"></i><i style="background:var(--lavender)"></i></div>
+<main>
+  <section class="tiles"><div class="tile" style="--c:var(--isabella)"><b>3</b><span>▲▲▲ malicious</span></div><div class="tile" style="--c:var(--ivory)"><b>1</b><span>▲▲ suspicious</span></div><div class="tile" style="--c:var(--lavender)"><b>1</b><span>▲ low</span></div><div class="tile" style="--c:var(--mineral)"><b>1</b><span>? unknown</span></div><div class="tile" style="--c:var(--benzol)"><b>2</b><span>✓ benign</span></div></section>
+  <table>
+    <thead><tr><th>Verdict</th><th>Score</th><th>Indicator</th><th>Type</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr style="--c:var(--isabella)"><td><span class="pill">▲▲▲ malicious</span></td><td><div class="score"><div class="bar"><i style="width:100%"></i></div><b>100</b></div></td><td><code>198.51.100.23</code><div class="orig">submitted as <code>198.51.100[.]23</code></div></td><td class="type">ipv4</td><td><ul class="src"><li><b>VirusTotal</b> 7/94 engines malicious, 2 suspicious</li><li><b>AbuseIPDB</b> 100% abuse confidence, 1,284 reports (90d) · ExampleHost / NL</li><li><b>URLhaus</b> no record</li><li><b>GreyNoise</b> classified malicious (mass scanning)</li><li><b>Shodan InternetDB</b> ports 22, 3389 · tags: self-signed</li></ul></td></tr>
+      <tr style="--c:var(--isabella)"><td><span class="pill">▲▲▲ malicious</span></td><td><div class="score"><div class="bar"><i style="width:100%"></i></div><b>100</b></div></td><td><code>http://update-check.cdn-delivery.test/payload/inv_2291.exe</code><div class="orig">submitted as <code>hxxp://update-check[.]cdn-delivery[.]test/payload/inv_2291.exe</code></div></td><td class="type">url</td><td><ul class="src"><li><b>VirusTotal</b> 18/96 engines malicious · trojan.agenttesla</li><li><b>URLhaus</b> malware_download URL, online · AgentTesla, exe</li></ul></td></tr>
+      <tr style="--c:var(--isabella)"><td><span class="pill">▲▲▲ malicious</span></td><td><div class="score"><div class="bar"><i style="width:100%"></i></div><b>100</b></div></td><td><code>44d88612fea8a8f36de82e1278abb02f</code></td><td class="type">md5</td><td><ul class="src"><li><b>VirusTotal</b> 61/72 engines malicious · eicar/test-file</li><li><b>URLhaus</b> no record</li></ul></td></tr>
+      <tr style="--c:var(--ivory)"><td><span class="pill">▲▲ suspicious</span></td><td><div class="score"><div class="bar"><i style="width:48%"></i></div><b>48</b></div></td><td><code>secure-login-micros0ft.test</code><div class="orig">submitted as <code>secure-login-micros0ft[.]test</code></div></td><td class="type">domain</td><td><ul class="src"><li><b>VirusTotal</b> 4/94 engines malicious</li><li><b>URLhaus</b> no record</li></ul></td></tr>
+      <tr style="--c:var(--lavender)"><td><span class="pill">▲ low</span></td><td><div class="score"><div class="bar"><i style="width:31%"></i></div><b>31</b></div></td><td><code>192.0.2.10</code></td><td class="type">ipv4</td><td><ul class="src"><li><b>VirusTotal</b> 1/94 engines malicious</li><li><b>AbuseIPDB</b> 34% abuse confidence, 41 reports (90d)</li><li><b>URLhaus</b> no record</li><li><b>GreyNoise</b> internet background noise</li><li><b>Shodan InternetDB</b> ports 80, 443, 8080 · 3 CVEs</li></ul></td></tr>
+      <tr style="--c:var(--mineral)"><td><span class="pill">? unknown</span></td><td><div class="score"><div class="bar"><i style="width:0%"></i></div><b>0</b></div></td><td><code>intranet-portal.example</code></td><td class="type">domain</td><td><ul class="src"><li><b>VirusTotal</b> no record</li><li><b>URLhaus</b> no record</li></ul></td></tr>
+      <tr style="--c:var(--benzol)"><td><span class="pill">✓ benign</span></td><td><div class="score"><div class="bar"><i style="width:0%"></i></div><b>0</b></div></td><td><code>203.0.113.77</code></td><td class="type">ipv4</td><td><ul class="src"><li><b>VirusTotal</b> 0/94 engines malicious</li><li><b>AbuseIPDB</b> 0% abuse confidence, 0 reports (90d)</li><li><b>URLhaus</b> no record</li><li><b>GreyNoise</b> known business service (RIOT): Example Search Crawler</li><li><b>Shodan InternetDB</b> no record</li></ul></td></tr>
+      <tr style="--c:var(--benzol)"><td><span class="pill">✓ benign</span></td><td><div class="score"><div class="bar"><i style="width:0%"></i></div><b>0</b></div></td><td><code>8.8.8.8</code></td><td class="type">ipv4</td><td><ul class="src"><li><b>Allowlist</b> allowlisted: allowlisted IP</li></ul></td></tr>
+    </tbody>
+  </table>
+  <footer>
+    <span>iocscope v0.1.0 · verdicts are decision support, not ground truth. Verify before blocking.</span>
+    <span class="swatches">Palette: Sanzo Wada #11 · #12 · #15
+      <i style="background:var(--ivory)"></i><i style="background:var(--mineral)"></i><i style="background:var(--isabella)"></i><i style="background:var(--greenblue)"></i><i style="background:var(--benzol)"></i><i style="background:var(--lavender)"></i></span>
+  </footer>
+</main>
+</body>
+</html>

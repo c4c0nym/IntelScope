@@ -1,0 +1,4 @@
+# Extra allowlist: one IP, CIDR or domain per line. Domains match subdomains too.
+# Use with: iocscope -f iocs.txt --allowlist examples/allowlist.txt
+203.0.113.0/24      # corporate egress range
+corp.example        # internal domain

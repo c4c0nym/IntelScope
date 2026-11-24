@@ -1,0 +1,9 @@
+# Example input. Defanged values, comments and mixed separators are all fine.
+# Documentation ranges (RFC 5737) and reserved TLDs are used, so these are safe to share.
+
+198.51.100[.]23                     # SSH brute-force source from alert #4411
+hxxp://update-check[.]cdn-delivery[.]test/payload/inv_2291.exe
+secure-login-micros0ft[.]test, 192.0.2.10
+44d88612fea8a8f36de82e1278abb02f    # EICAR test file (harmless)
+8.8.8.8                             # will be allowlisted
+10.20.30.40                         # internal, will be allowlisted

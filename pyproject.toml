@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "iocscope"
+version = "0.1.0"
+description = "Enrich, score and triage indicators of compromise against multiple threat intelligence sources."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "c4c0nym" }]
+keywords = ["threat-intelligence", "cti", "ioc", "enrichment", "stix", "soc", "dfir"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "Topic :: Security",
+]
+dependencies = [
+    "requests>=2.31",
+    "rich>=13.7",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.5"]
+
+[project.scripts]
+iocscope = "iocscope.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/iocscope"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/iocscope/export.py" = ["E501"]  # inline HTML template
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

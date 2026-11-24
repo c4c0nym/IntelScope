@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="iocscope: enrich, score and triage indicators of compromise">
+  <rect width="1200" height="300" fill="#099197"/>
+  <!-- palette stripe: Sanzo Wada combinations #11, #12, #15 -->
+  <g>
+    <rect x="0"   y="282" width="200" height="18" fill="#ebd3a2"/>
+    <rect x="200" y="282" width="200" height="18" fill="#a2b0ad"/>
+    <rect x="400" y="282" width="200" height="18" fill="#c5a56e"/>
+    <rect x="600" y="282" width="200" height="18" fill="#099197" stroke="#0b7c81" stroke-width="2"/>
+    <rect x="800" y="282" width="200" height="18" fill="#00978d"/>
+    <rect x="1000" y="282" width="200" height="18" fill="#b5b1d8"/>
+  </g>
+  <!-- scope reticle -->
+  <g transform="translate(1000 140)" fill="none" stroke-linecap="round">
+    <circle r="92" stroke="#ebd3a2" stroke-width="6"/>
+    <circle r="62" stroke="#b5b1d8" stroke-width="3" stroke-dasharray="6 10"/>
+    <circle r="30" stroke="#c5a56e" stroke-width="5"/>
+    <line x1="-120" y1="0" x2="-44" y2="0" stroke="#ebd3a2" stroke-width="5"/>
+    <line x1="44" y1="0" x2="120" y2="0" stroke="#ebd3a2" stroke-width="5"/>
+    <line x1="0" y1="-120" x2="0" y2="-44" stroke="#ebd3a2" stroke-width="5"/>
+    <line x1="0" y1="44" x2="0" y2="120" stroke="#ebd3a2" stroke-width="5"/>
+    <circle r="8" fill="#c5a56e" stroke="none"/>
+  </g>
+  <text x="72" y="140" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="88" font-weight="700" fill="#ebd3a2" letter-spacing="1">iocscope</text>
+  <text x="76" y="190" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="26" fill="#f6ecd6">Enrich, score and triage indicators of compromise</text>
+  <g font-family="Consolas, 'Cascadia Code', Menlo, monospace" font-size="17">
+    <rect x="76" y="214" width="122" height="32" rx="16" fill="#c5a56e"/>
+    <text x="137" y="236" text-anchor="middle" fill="#1f2a2b">▲▲▲ malicious</text>
+    <rect x="208" y="214" width="122" height="32" rx="16" fill="#ebd3a2"/>
+    <text x="269" y="236" text-anchor="middle" fill="#1f2a2b">▲▲ suspicious</text>
+    <rect x="340" y="214" width="76" height="32" rx="16" fill="#b5b1d8"/>
+    <text x="378" y="236" text-anchor="middle" fill="#1f2a2b">▲ low</text>
+    <rect x="426" y="214" width="100" height="32" rx="16" fill="#a2b0ad"/>
+    <text x="476" y="236" text-anchor="middle" fill="#1f2a2b">? unknown</text>
+    <rect x="536" y="214" width="96" height="32" rx="16" fill="#00978d" stroke="#ebd3a2" stroke-width="1.5"/>
+    <text x="584" y="236" text-anchor="middle" fill="#1f2a2b">✓ benign</text>
+  </g>
+</svg>

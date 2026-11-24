@@ -1,0 +1,28 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Generated reports (keep your incident data out of git)
+reports/
+*.report.html
+*.stix.json
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

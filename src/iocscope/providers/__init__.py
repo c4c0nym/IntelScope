@@ -1,0 +1,47 @@
+"""Threat intelligence source integrations."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from iocscope.providers.abuseipdb import AbuseIPDB
+from iocscope.providers.base import Provider
+from iocscope.providers.greynoise import GreyNoise
+from iocscope.providers.shodan import ShodanInternetDB
+from iocscope.providers.urlhaus import URLhaus
+from iocscope.providers.virustotal import VirusTotal
+
+REGISTRY: dict[str, type[Provider]] = {
+    cls.name: cls for cls in (VirusTotal, AbuseIPDB, URLhaus, GreyNoise, ShodanInternetDB)
+}
+
+ALIASES = {
+    "vt": "virustotal",
+    "abuse": "abuseipdb",
+    "gn": "greynoise",
+    "internetdb": "shodan",
+}
+
+LABELS = {name: cls.label for name, cls in REGISTRY.items()}
+
+
+def resolve_names(spec: str | None) -> list[str]:
+    if not spec:
+        return list(REGISTRY)
+    names = []
+    for raw in spec.split(","):
+        name = ALIASES.get(raw.strip().lower(), raw.strip().lower())
+        if not name:
+            continue
+        if name not in REGISTRY:
+            raise ValueError(f"unknown provider '{raw.strip()}' (choose from {', '.join(REGISTRY)})")
+        if name not in names:
+            names.append(name)
+    return names
+
+
+def build_providers(spec: str | None = None, session: Any = None) -> list[Provider]:
+    return [REGISTRY[name].from_env(session) for name in resolve_names(spec)]
+
+
+__all__ = ["Provider", "REGISTRY", "LABELS", "build_providers", "resolve_names"]
