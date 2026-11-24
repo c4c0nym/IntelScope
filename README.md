@@ -191,17 +191,6 @@ CI runs lint and tests on Python 3.10–3.12 for every push.
 - [ ] Passive DNS / WHOIS age for domains
 - [ ] Bulk mode with resumable progress
 
-## Credits
-
-Colour palette: Sanzo Wada, *A Dictionary of Color Combinations*. Combinations
-[#11, #12 and #15](https://colors.elwyn.co/):
-![](https://img.shields.io/badge/-%20-ebd3a2?style=flat-square)
-![](https://img.shields.io/badge/-%20-a2b0ad?style=flat-square)
-![](https://img.shields.io/badge/-%20-c5a56e?style=flat-square)
-![](https://img.shields.io/badge/-%20-099197?style=flat-square)
-![](https://img.shields.io/badge/-%20-00978d?style=flat-square)
-![](https://img.shields.io/badge/-%20-b5b1d8?style=flat-square)
-
 The demo data uses RFC 5737 documentation addresses and reserved TLDs only. The single
 real value is the hash of the harmless EICAR antivirus test file.
 
