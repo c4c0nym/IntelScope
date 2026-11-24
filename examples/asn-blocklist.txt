@@ -1,0 +1,8 @@
+# Your own ASN blocklist: one ASN per line ("AS64500" or "64500"), optional "# reason".
+# Checked together with Spamhaus ASN-DROP. Use with:
+#   iocscope -f iocs.txt --asn-blocklist examples/asn-blocklist.txt
+# or set IOCSCOPE_ASN_BLOCKLIST=path/to/this/file in .env
+#
+# The entries below are documentation ASNs (RFC 5398), replace them with real ones from your cases.
+AS64500   # example: bulletproof hoster seen in case 4411
+AS64501   # example: residential proxy network used for credential stuffing

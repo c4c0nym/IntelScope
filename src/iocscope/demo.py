@@ -59,6 +59,15 @@ CANNED: dict[str, dict[str, dict[str, Any]]] = {
         },
         "192.0.2.10": {"score": 20, "summary": "internet background noise"},
     },
+    # documentation ASNs (RFC 5398), never real networks
+    "asn": {
+        "198.51.100.23": {"score": 75, "summary": "AS64500 EXAMPLE-BULLETPROOF is on Spamhaus ASN-DROP"},
+        "203.0.113.77": {
+            "score": None,
+            "summary": "AS64501 EXAMPLE-SEARCH · 203.0.113.0/24 · not blocklisted",
+        },
+        "192.0.2.10": {"score": None, "summary": "AS64502 EXAMPLE-HOSTING · 192.0.2.0/24 · not blocklisted"},
+    },
     "shodan": {
         "198.51.100.23": {"score": None, "summary": "ports 22, 3389 · tags: self-signed"},
         "192.0.2.10": {"score": None, "summary": "ports 80, 443, 8080 · 3 CVEs"},

@@ -10,9 +10,10 @@ from iocscope.providers.base import Provider
 
 
 class FakeResponse:
-    def __init__(self, status_code: int = 200, payload: Any = None) -> None:
+    def __init__(self, status_code: int = 200, payload: Any = None, text: str = "") -> None:
         self.status_code = status_code
         self._payload = payload
+        self.text = text
 
     def json(self) -> Any:
         if self._payload is None:

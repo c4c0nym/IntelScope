@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from iocscope.providers.abuseipdb import AbuseIPDB
+from iocscope.providers.asn import ASNBlocklist
 from iocscope.providers.base import Provider
 from iocscope.providers.greynoise import GreyNoise
 from iocscope.providers.shodan import ShodanInternetDB
@@ -12,7 +13,8 @@ from iocscope.providers.urlhaus import URLhaus
 from iocscope.providers.virustotal import VirusTotal
 
 REGISTRY: dict[str, type[Provider]] = {
-    cls.name: cls for cls in (VirusTotal, AbuseIPDB, URLhaus, GreyNoise, ShodanInternetDB)
+    cls.name: cls
+    for cls in (VirusTotal, AbuseIPDB, URLhaus, GreyNoise, ShodanInternetDB, ASNBlocklist)
 }
 
 ALIASES = {
@@ -20,6 +22,7 @@ ALIASES = {
     "abuse": "abuseipdb",
     "gn": "greynoise",
     "internetdb": "shodan",
+    "asndrop": "asn",
 }
 
 LABELS = {name: cls.label for name, cls in REGISTRY.items()}
@@ -40,8 +43,16 @@ def resolve_names(spec: str | None) -> list[str]:
     return names
 
 
-def build_providers(spec: str | None = None, session: Any = None) -> list[Provider]:
-    return [REGISTRY[name].from_env(session) for name in resolve_names(spec)]
+def build_providers(
+    spec: str | None = None, session: Any = None, asn_blocklist: str | None = None
+) -> list[Provider]:
+    providers = []
+    for name in resolve_names(spec):
+        if name == ASNBlocklist.name:
+            providers.append(ASNBlocklist.from_env(session, blocklist_file=asn_blocklist))
+        else:
+            providers.append(REGISTRY[name].from_env(session))
+    return providers
 
 
 __all__ = ["Provider", "REGISTRY", "LABELS", "build_providers", "resolve_names"]

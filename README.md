@@ -6,7 +6,7 @@
   <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-099197?style=flat-square">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-00978d?style=flat-square">
   <img alt="STIX 2.1" src="https://img.shields.io/badge/export-STIX%202.1-c5a56e?style=flat-square">
-  <img alt="Sources" src="https://img.shields.io/badge/sources-5-b5b1d8?style=flat-square">
+  <img alt="Sources" src="https://img.shields.io/badge/sources-6-b5b1d8?style=flat-square">
 </p>
 
 **iocscope** takes a pile of indicators of compromise (IPs, domains, URLs, file hashes),
@@ -24,8 +24,9 @@ stakeholder.
 
 ## Features
 
-- **Five sources, one verdict.** VirusTotal, AbuseIPDB, abuse.ch URLhaus, GreyNoise and
-  Shodan InternetDB are queried concurrently. Each one gets the indicator types it supports.
+- **Six sources, one verdict.** VirusTotal, AbuseIPDB, abuse.ch URLhaus, GreyNoise and
+  Shodan InternetDB are queried concurrently, and every IP's network is checked against an
+  **ASN blocklist**. Each source gets the indicator types it supports.
 - **Explainable scoring.** Every verdict comes with the evidence behind it. No black box
   (see [Scoring](#scoring)).
 - **Noise reduction.** Private, reserved and documentation addresses, public DNS resolvers
@@ -68,6 +69,7 @@ iocscope --list-providers          # check what's configured
 | [URLhaus](https://auth.abuse.ch/) | `ABUSECH_AUTH_KEY` | generous | IPv4, domain, URL, MD5, SHA-256 |
 | [GreyNoise Community](https://viz.greynoise.io/signup) | `GREYNOISE_API_KEY` *(optional)* | limited | IPv4 |
 | [Shodan InternetDB](https://internetdb.shodan.io/) | none needed | free | IPv4 |
+| ASN blocklist: [RIPEstat](https://stat.ripe.net/) + [Spamhaus ASN-DROP](https://www.spamhaus.org/blocklists/do-not-route-or-peer/) | none needed (optional own list: `IOCSCOPE_ASN_BLOCKLIST`) | free | IPv4, IPv6 |
 
 Sources without a key are skipped with a notice, so you can start with just one.
 
@@ -88,6 +90,9 @@ cat alert_iocs.txt | iocscope - -p vt,abuseipdb --format json --fail-on maliciou
 
 # Only show what needs attention
 iocscope -f iocs.txt --min-verdict suspicious
+
+# Add your own bad ASNs (e.g. bulletproof hosters from past cases) to the ASN check
+iocscope -f iocs.txt --asn-blocklist examples/asn-blocklist.txt
 ```
 
 <details>
@@ -95,7 +100,7 @@ iocscope -f iocs.txt --min-verdict suspicious
 
 ```
 iocscope [IOC ...] [-f PATH] [-o PATH] [--format {table,json,csv,stix,html}]
-         [-p LIST] [--list-providers] [--allowlist PATH] [--no-allowlist]
+         [-p LIST] [--list-providers] [--allowlist PATH] [--no-allowlist] [--asn-blocklist PATH]
          [--no-cache] [--cache-ttl HOURS] [--min-verdict VERDICT]
          [--fail-on {malicious,suspicious}] [-w WORKERS] [--demo] [-q]
 ```
@@ -128,6 +133,23 @@ using a method simple enough to defend to a stakeholder:
 > Verdicts are decision support, not ground truth. Shared hosting, CDNs and sinkholes all
 > produce misleading signals, so verify before blocking.
 
+### ASN blocklist
+
+Some networks exist to host crime: bulletproof hosting, hijacked IP space, spam operations. An IP
+in such a network deserves attention even when no other source has seen it yet. For every IP,
+iocscope looks up the origin ASN with RIPEstat and checks it against:
+
+- **[Spamhaus ASN-DROP](https://www.spamhaus.org/blocklists/do-not-route-or-peer/)**:
+  autonomous systems controlled by spammers or cyber criminals. It's downloaded at most once a
+  day and cached. If a download fails, the cached copy is used.
+- **your own list** (`--asn-blocklist` or `IOCSCOPE_ASN_BLOCKLIST`): one ASN per line, `AS64500`
+  or `64500`, with an optional `# reason` that shows up in the evidence.
+
+A listed ASN scores 75 with weight 0.8. On its own that makes an IP **suspicious**, because a
+bad ASN describes the neighbourhood, not the host. Together with any other source it becomes
+**malicious**. For an IP on a clean network, the ASN, owner and prefix are shown as context
+only, so the verdict doesn't change.
+
 ## Output formats
 
 | Format | Use it for |
@@ -157,7 +179,7 @@ src/iocscope/
 ├── export.py         JSON / CSV / STIX 2.1 / HTML
 ├── render.py         terminal table
 ├── palette.py        shared colour palette
-└── providers/        one module per intel source
+└── providers/        one module per intel source (asn.py = ASN blocklist)
 ```
 
 Adding a source means one class: subclass `Provider`, declare the indicator types, rate
@@ -188,11 +210,15 @@ CI runs lint and tests on Python 3.10–3.12 for every push.
 
 - [ ] MISP and OpenCTI export
 - [ ] ATT&CK technique hints from source tags
+- [x] ASN blocklist check (Spamhaus ASN-DROP + your own list)
 - [ ] Passive DNS / WHOIS age for domains
 - [ ] Bulk mode with resumable progress
 
-The demo data uses RFC 5737 documentation addresses and reserved TLDs only. The single
-real value is the hash of the harmless EICAR antivirus test file.
+ASN-DROP is published by [The Spamhaus Project](https://www.spamhaus.org/drop/terms/) and IP-to-ASN
+data comes from [RIPEstat](https://stat.ripe.net/). Both are free; please respect their terms.
+
+The demo data uses RFC 5737 documentation addresses, RFC 5398 documentation ASNs and reserved
+TLDs only. The single real value is the hash of the harmless EICAR antivirus test file.
 
 ## License
 

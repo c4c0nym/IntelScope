@@ -53,6 +53,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help=f"comma-separated providers (default: all configured): {', '.join(REGISTRY)}")
     p.add_argument("--list-providers", action="store_true", help="show providers and key status")
     p.add_argument("--allowlist", metavar="PATH", help="extra allowlist file (IPs, CIDRs, domains)")
+    p.add_argument("--asn-blocklist", metavar="PATH",
+                   help="your own ASN blocklist, one ASN per line (checked with Spamhaus ASN-DROP)")
     p.add_argument("--no-allowlist", action="store_true", help="disable known-benign filtering")
     p.add_argument("--no-cache", action="store_true", help="ignore and don't update the result cache")
     p.add_argument("--cache-ttl", type=float, default=24.0, metavar="HOURS",
@@ -93,6 +95,9 @@ def _list_providers(console: Console) -> None:
         provider = cls.from_env()
         if cls.env_key is None:
             key, status = "not needed", "[score.benign]ready[/]"
+        elif not cls.key_required and not cls.env_key.endswith("API_KEY"):
+            key = f"not needed (own list: {cls.env_key})"
+            status = "[score.benign]ready[/]"
         elif provider.configured:
             key = cls.env_key
             status = "[score.benign]ready[/]" if provider.api_key else "[info]ready (no key)[/]"
@@ -121,6 +126,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         lines = _read_input(args)
         names = resolve_names(args.providers)
+        if args.asn_blocklist and not Path(args.asn_blocklist).is_file():
+            raise ValueError(f"ASN blocklist not found: {args.asn_blocklist}")
         allowlist = (
             None
             if args.no_allowlist
@@ -138,7 +145,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         err.print("[error]error:[/] no valid indicators given (try --help or --demo)")
         return 2
 
-    providers = build_demo_providers(names) if args.demo else build_providers(",".join(names))
+    providers = (
+        build_demo_providers(names)
+        if args.demo
+        else build_providers(",".join(names), asn_blocklist=args.asn_blocklist)
+    )
     active = [p for p in providers if p.configured]
     skipped = [p for p in providers if not p.configured]
     if skipped and not args.quiet:
