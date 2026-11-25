@@ -23,6 +23,14 @@ _DOMAIN_RE = re.compile(
     r"(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$"
 )
 _HEX_RE = re.compile(r"^[0-9a-fA-F]+$")
+# Extensions that look like a TLD to a regex but are not one: "invoice.exe" is a file, not a domain.
+# Only unambiguous ones: .zip, .mov, .sh, .py and the like are real TLDs and stay valid.
+_NOT_TLDS = frozenset({
+    "exe", "dll", "sys", "msi", "bat", "cmd", "ps1", "psm1", "vbs", "vbe", "wsf", "jar", "lnk", "scr",
+    "docx", "docm", "doc", "xls", "xlsx", "xlsm", "ppt", "pptx", "pdf", "rtf", "txt", "log", "tmp", "dat",
+    "bin", "iso", "img", "7z", "rar", "gz", "tgz", "png", "jpg", "jpeg", "gif", "bmp", "svg", "js", "json",
+    "xml", "csv", "html", "htm", "php", "asp", "aspx", "jsp", "cfg", "ini", "yml", "yaml", "md", "css",
+})
 _HASH_TYPES = {32: IOCType.MD5, 40: IOCType.SHA1, 64: IOCType.SHA256}
 _SCHEME_RE = re.compile(r"^[a-z][a-z0-9+.-]*://", re.I)
 _TOKEN_SPLIT = re.compile(r"[\s,;]+")
@@ -62,7 +70,7 @@ def classify(raw: str) -> IOC | None:
         return IOC(value.lower(), _HASH_TYPES[len(value)], original)
 
     host = value.lower().rstrip(".")
-    if _DOMAIN_RE.match(host):
+    if _DOMAIN_RE.match(host) and host.rsplit(".", 1)[1] not in _NOT_TLDS:
         return IOC(host, IOCType.DOMAIN, original)
     return None
 

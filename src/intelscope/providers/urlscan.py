@@ -35,6 +35,7 @@ class URLscan(Provider):
     label = "urlscan.io"
     env_key = "URLSCAN_API_KEY"
     key_required = False  # search works anonymously
+    cache_by_key = True  # a key adds urlscan's verdict, so keyless results are not a substitute
     note = "Works without a key at a low rate. A key adds urlscan's verdict for the newest scan."
     supports = frozenset({IOCType.IPV4, IOCType.IPV6, IOCType.DOMAIN, IOCType.URL, IOCType.SHA256})
     rate_limit = (20, 60.0)

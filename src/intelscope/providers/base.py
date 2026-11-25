@@ -70,6 +70,8 @@ class Provider(ABC):
     """Credentials this source takes. Left empty, a single API key from `env_key` is assumed."""
     settable: ClassVar[bool] = True
     """False for sources whose env variable is not a credential (e.g. a file path)."""
+    cache_by_key: ClassVar[bool] = False
+    """True when a key changes what the source returns, so keyless results must not answer keyed lookups."""
     note: ClassVar[str] = ""
     """One line shown next to the key fields (where to get a key, quirks)."""
 
@@ -97,6 +99,10 @@ class Provider(ABC):
         return cls(key, session, creds)
 
     @property
+    def cache_name(self) -> str:
+        return f"{self.name}+key" if (self.cache_by_key and self.api_key) else self.name
+
+    @property
     def configured(self) -> bool:
         if not self.key_required:
             return True
@@ -121,7 +127,7 @@ class Provider(ABC):
             return self._error(describe_http_error(exc.response))
         except requests.RequestException as exc:
             return self._error(f"network error ({exc.__class__.__name__})")
-        except (ValueError, KeyError, TypeError) as exc:
+        except (ValueError, KeyError, TypeError, AttributeError) as exc:
             return self._error(f"unexpected response ({exc.__class__.__name__})")
 
     @abstractmethod

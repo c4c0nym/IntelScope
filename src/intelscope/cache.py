@@ -9,6 +9,7 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
+from intelscope import settings
 from intelscope.models import IOC, ProviderResult
 
 
@@ -72,8 +73,5 @@ class Cache:
             if not self._dirty:
                 return
             self._data = {k: v for k, v in self._data.items() if self._fresh(v)}
-            self.path.parent.mkdir(parents=True, exist_ok=True)
-            tmp = self.path.with_suffix(".tmp")
-            tmp.write_text(json.dumps(self._data), encoding="utf-8")
-            tmp.replace(self.path)
+            settings.write_private(self.path, json.dumps(self._data))
             self._dirty = False

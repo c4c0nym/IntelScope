@@ -27,6 +27,20 @@ DEFAULT_DOMAINS = {
 }
 
 
+# Hosts where anyone can publish content. They sit under allowlisted vendor domains, but a malicious
+# file or phishing page on them is not benign, so they are never allowlisted by default.
+USER_CONTENT_HOSTS = {
+    "storage.googleapis.com", "drive.google.com", "docs.google.com", "sites.google.com",
+    "script.google.com", "firebasestorage.googleapis.com", "onedrive.live.com", "1drv.ms",
+    "sharepoint.com", "blob.core.windows.net", "web.core.windows.net", "azurewebsites.net",
+    "pages.dev", "workers.dev",
+}
+
+
+def _under(domain: str, parent: str) -> bool:
+    return domain == parent or domain.endswith("." + parent)
+
+
 class Allowlist:
     def __init__(
         self,
@@ -75,8 +89,10 @@ class Allowlist:
             if any(ip in net for net in self.networks):
                 return "allowlisted network"
         elif ioc.type is IOCType.DOMAIN:
+            if any(_under(ioc.value, host) for host in USER_CONTENT_HOSTS):
+                return None
             for entry in self.domains:
-                if ioc.value == entry or ioc.value.endswith("." + entry):
+                if _under(ioc.value, entry):
                     return f"allowlisted domain ({entry})"
         return None
 

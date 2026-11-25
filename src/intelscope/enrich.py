@@ -36,7 +36,7 @@ class Enricher:
             for provider in self.providers:
                 if not provider.supports_ioc(ioc):
                     continue
-                cached = self.cache.get(provider.name, ioc) if self.cache else None
+                cached = self.cache.get(provider.cache_name, ioc) if self.cache else None
                 if cached is not None:
                     results[ioc][provider.name] = cached
                 else:
@@ -61,7 +61,7 @@ class Enricher:
                         )
                     results[ioc][provider.name] = result
                     if self.cache:
-                        self.cache.put(provider.name, ioc, result)
+                        self.cache.put(provider.cache_name, ioc, result)
                     if on_progress:
                         on_progress(done, total)
 

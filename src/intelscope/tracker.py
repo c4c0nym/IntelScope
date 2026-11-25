@@ -12,9 +12,12 @@ be exported as a Markdown table for notes, tickets or a handover.
 
 from __future__ import annotations
 
+import contextlib
 import json
+import os
 import re
 import threading
+import time
 from dataclasses import asdict, dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -95,6 +98,42 @@ def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+@contextlib.contextmanager
+def _file_lock(path: Path, timeout: float = 10.0):
+    """An exclusive lock shared by every process (and every Tracker object) using this file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fh = open(path.with_name(path.name + ".lock"), "a+b")  # noqa: SIM115  (closed in the finally below)
+    deadline = time.monotonic() + timeout
+    try:
+        while True:
+            try:
+                if os.name == "nt":
+                    import msvcrt
+
+                    fh.seek(0)
+                    msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+                else:
+                    import fcntl
+
+                    fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except OSError:
+                if time.monotonic() > deadline:
+                    raise ValueError(f"the tracker file {path} is locked by another program") from None
+                time.sleep(0.01)
+        yield
+    finally:
+        try:
+            if os.name == "nt":
+                import msvcrt
+
+                fh.seek(0)
+                with contextlib.suppress(OSError):
+                    msvcrt.locking(fh.fileno(), msvcrt.LK_UNLCK, 1)
+        finally:
+            fh.close()
+
+
 class Tracker:
     """JSON-file backed. `path=None` keeps everything in memory (demo mode, tests)."""
 
@@ -102,6 +141,14 @@ class Tracker:
         self.path = Path(path) if path else None
         self._lock = threading.Lock()
         self._mem: dict[str, Any] = {"version": 1, "next_id": 1, "entries": []}
+
+    def _guard(self):
+        """Serialise a read-modify-write: threads of this process, then other processes."""
+        stack = contextlib.ExitStack()
+        stack.enter_context(self._lock)
+        if self.path is not None:
+            stack.enter_context(_file_lock(self.path))
+        return stack
 
     # -- storage
     def _load(self) -> dict[str, Any]:
@@ -162,7 +209,7 @@ class Tracker:
         context = _text(context, MAX_CONTEXT, "context")
         source = _text(source, MAX_SOURCE, "source")
         when_iso = normalize_date(when)
-        with self._lock:
+        with self._guard():
             doc = self._load()
             for raw in doc["entries"]:
                 if raw["type"] == ioc.type.value and raw["ioc"] == ioc.value \
@@ -193,7 +240,7 @@ class Tracker:
         unknown = set(fields) - {"tlp", "context", "source", "date"}
         if unknown:
             raise ValueError("cannot edit " + ", ".join(sorted(unknown)))
-        with self._lock:
+        with self._guard():
             doc = self._load()
             for raw in doc["entries"]:
                 if raw["id"] == entry_id:
@@ -218,7 +265,7 @@ class Tracker:
 
     def remove(self, ids: list[int]) -> int:
         wanted = set(ids)
-        with self._lock:
+        with self._guard():
             doc = self._load()
             kept = [e for e in doc["entries"] if e["id"] not in wanted]
             removed = len(doc["entries"]) - len(kept)
@@ -230,9 +277,14 @@ class Tracker:
 
 # --------------------------------------------------------------------------- Markdown
 
-def _cell(value: str) -> str:
-    """One table cell: no pipes, no line breaks, no raw HTML."""
+_URL_IN_TEXT = re.compile(r"https?://[^\s|<>]+", re.I)
+
+
+def _cell(value: str, defanged: bool = False) -> str:
+    """One table cell: no pipes, no line breaks, no raw HTML. Defanged mode also defangs links in the text."""
     text = re.sub(r"\s+", " ", value).strip()
+    if defanged:
+        text = _URL_IN_TEXT.sub(lambda m: defang(m.group(0)), text)
     text = text.replace("\\", "\\\\").replace("|", "\\|").replace("<", "&lt;").replace(">", "&gt;")
     return text or "-"
 
@@ -260,7 +312,8 @@ def to_markdown(entries: list[Entry], *, defanged: bool = True, title: str = "IO
         lines += ["", "| IOC | Type | TLP | Source | Date | Context |", "|---|---|---|---|---|---|"]
         for e in rows:
             value = defang(e.ioc) if defanged else e.ioc
-            cells = [_code(value), e.type, e.tlp, _cell(e.source), e.date, _cell(e.context)]
+            source, context = _cell(e.source, defanged), _cell(e.context, defanged)
+            cells = [_code(value), e.type, e.tlp, source, e.date, context]
             lines.append("| " + " | ".join(cells) + " |")
     else:
         lines += [f"> Exported {today} by IntelScope {__version__}.", "", "No indicators tracked yet."]

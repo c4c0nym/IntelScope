@@ -6,7 +6,7 @@
   <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-099197?style=flat-square">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-00978d?style=flat-square">
   <img alt="STIX 2.1" src="https://img.shields.io/badge/export-STIX%202.1-c5a56e?style=flat-square">
-  <img alt="Sources" src="https://img.shields.io/badge/sources-10-b5b1d8?style=flat-square">
+  <img alt="Sources" src="https://img.shields.io/badge/sources-12-b5b1d8?style=flat-square">
 </p>
 
 **IntelScope** is an OSINT desk and an IOC triage engine in one tool. The desk is a
@@ -75,17 +75,18 @@ go next: a SIEM, a TIP, a ticket or a stakeholder.
 
 ## Features
 
-- **Ten sources, one verdict.** VirusTotal, AbuseIPDB, abuse.ch URLhaus, GreyNoise, Shodan
-  InternetDB, Censys, urlscan.io, Intel 471 and your own OpenCTI are queried concurrently, and
-  every IP's network is checked against an **ASN blocklist**. Each source gets the indicator
-  types it supports.
+- **Twelve sources, one verdict.** VirusTotal, AbuseIPDB, abuse.ch URLhaus, GreyNoise, Shodan
+  InternetDB, Censys, urlscan.io, Intel 471, your own OpenCTI, **RDAP** (domain age and registrar)
+  and **passive DNS** are queried concurrently, and every IP's network is checked against an
+  **ASN blocklist**. Each source gets the indicator types it supports.
 - **An IOC tracker.** Keep what you follow as IOC, TLP, context, source and date, and export it
   as Markdown (see [IOC tracker](#ioc-tracker)).
 - **Explainable scoring.** Every verdict comes with the evidence behind it. No black box
   (see [Scoring](#scoring)).
 - **Noise reduction.** Private, reserved and documentation addresses, public DNS resolvers
-  and major vendor domains are allowlisted before any API call. Bring your own allowlist
-  for corporate ranges.
+  and major vendor domains are allowlisted before any API call. Places where anyone can
+  publish (`storage.googleapis.com`, `drive.google.com`, `sharepoint.com` ...) are never
+  allowlisted by default. Bring your own allowlist for corporate ranges.
 - **Defang-aware input.** Handles `hxxps://evil[.]com`, `1.2.3[.]4`, `evil(.)com`,
   `[dot]`, inline comments, mixed separators and duplicates.
 - **Quota-friendly.** Per-source rate limiting tuned to free tiers, and an on-disk cache
@@ -130,6 +131,8 @@ intelscope --list-providers          # check what's configured
 | [urlscan.io](https://urlscan.io/user/signup) | `URLSCAN_API_KEY` *(optional)* | works without a key; a key adds the verdict | IPv4, IPv6, domain, URL, SHA-256 |
 | [Intel 471 Verity471](https://intel471.com/) *(not yet run live)* | `INTEL471_CLIENT_ID`, `INTEL471_CLIENT_SECRET`, `INTEL471_URL` *(optional)* | commercial | IPv4, domain, URL, hashes |
 | [OpenCTI](https://filigran.io/platforms/opencti/) *(untested)* | `OPENCTI_URL`, `OPENCTI_TOKEN` | your own platform | all types |
+| RDAP (WHOIS): registration date and registrar, through [rdap.org](https://about.rdap.org/) | none needed | free | domain |
+| [Passive DNS](https://docs.mnemonic.no/service-integration-guides/passivedns/docs/public/01-public_api.html) from mnemonic | `PDNS_API_KEY` *(optional)* | 10/min, 1,000/day, public data only | domain, IPv4, IPv6 |
 | ASN blocklist: [RIPEstat](https://stat.ripe.net/) + [Spamhaus ASN-DROP](https://www.spamhaus.org/blocklists/do-not-route-or-peer/) | none needed (optional own list: `INTELSCOPE_ASN_BLOCKLIST`) | free | IPv4, IPv6 |
 
 Sources without a key are skipped with a notice, so you can start with just one.
@@ -145,6 +148,19 @@ Neither Intel 471 nor OpenCTI has been run against a live tenant or platform, be
 paid credentials: use **Test** on the API keys view first. OpenCTI was written from the public
 GraphQL schema.
 Censys accepts a Platform personal access token, or the older `API_ID:API_SECRET` pair.
+
+### Domain age and passive DNS
+
+**RDAP** tells you when a domain was registered and by which registrar. Phishing and
+command-and-control domains are overwhelmingly young, so a domain registered in the last week
+scores 70, the last month 55 and the last three months 30. An old domain gets no score, because
+age is not proof of innocence. A subdomain is looked up through its registered parent domain.
+
+**Passive DNS** shows where a domain has pointed and which domains an IP has served, with first
+and last seen. It is context and never changes the score: an IP carrying 200 unrelated domains is
+shared hosting, one carrying a single odd domain is not. The public service returns public data
+only and is capped at 1,000 records, which the summary marks as `1,000+`. Both lookups send the
+indicator to a third party (rdap.org and the registry, and mnemonic), like every source.
 
 ## API keys
 
@@ -350,14 +366,35 @@ CI runs lint and tests on Python 3.10–3.12 for every push.
 
 ## Roadmap
 
+**Done**
+
 - [x] IOC tracker with TLP, context, source and date, exported as Markdown
-- [x] Censys, urlscan.io, Intel 471 and OpenCTI lookups, with API keys entered in the dashboard
-- [ ] MISP and OpenCTI export (the dashboard already exports STIX 2.1)
-- [ ] Run Intel 471 and OpenCTI against live tenants
-- [ ] ATT&CK technique hints from source tags
+- [x] Censys, urlscan.io, Intel 471 (Verity) and OpenCTI lookups, with API keys entered in the dashboard
 - [x] ASN blocklist check (Spamhaus ASN-DROP + your own list)
-- [ ] Passive DNS / WHOIS age for domains
-- [ ] Bulk mode with resumable progress
+- [x] Domain registration age and registrar (RDAP, the successor to WHOIS)
+- [x] Passive DNS (mnemonic): where a domain pointed, which domains an IP served
+- [x] Tracker file lock, so the CLI and the dashboard cannot overwrite each other's writes
+
+**Next, in this order**
+
+- [ ] Run Intel 471 and OpenCTI against live tenants (needs paid credentials, so it is up to the owner of one)
+- [ ] ThreatFox and MalwareBazaar from abuse.ch (the URLhaus key already covers them): C2 and malware-sample context
+- [ ] Tracker as STIX 2.1 with TLP marking definitions, then push to MISP and OpenCTI
+- [ ] Re-check tracked indicators on a schedule and show when a verdict changes
+- [ ] Certificate transparency (crt.sh): other names on the same certificate, a good pivot from a phishing domain
+- [ ] Tracker status and review date: active, revoked, false positive, "review by"; flag stale rows
+- [ ] Import into the tracker from Markdown, CSV, STIX and MISP, with duplicate detection by indicator and source
+- [ ] Blocklist and SIEM exports filtered by verdict: plain list, firewall formats, Splunk / Sentinel watchlist CSV
+- [ ] Keep credentials in the OS keystore (Windows Credential Manager) instead of a plain JSON file
+- [ ] Bulk mode that saves progress, for lists in the thousands (the 24 h cache already makes a rerun cheap)
+
+**Later, or if there is demand**
+
+- [ ] Email addresses and CVE ids as indicator types
+- [ ] ATT&CK technique hints from source tags (tags are inconsistent, so treat as hints to check)
+- [ ] A single Windows `.exe` of the dashboard, like a double-click app
+- [ ] Configurable source weights and verdict thresholds
+- [ ] Docker image and a PyPI release
 
 ASN-DROP is published by [The Spamhaus Project](https://www.spamhaus.org/drop/terms/) and IP-to-ASN
 data comes from [RIPEstat](https://stat.ripe.net/). Both are free; please respect their terms.
