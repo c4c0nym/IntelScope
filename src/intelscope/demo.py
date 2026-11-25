@@ -94,6 +94,26 @@ CANNED: dict[str, dict[str, dict[str, Any]]] = {
         "198.51.100.23": {"score": 90, "summary": "2 Intel 471 indicators · ExampleLoader · c2"},
         _URL: {"score": 65, "summary": "1 Intel 471 indicator · AgentTesla · malware"},
     },
+    "rdap": {
+        "secure-login-micros0ft.test": {
+            "score": 70,
+            "summary": "registered 2026-11-22 (3 days ago) · Example Registrar Inc.",
+        },
+    },
+    "pdns": {
+        "198.51.100.23": {
+            "score": None,
+            "summary": "38 records · 3 distinct domains · 2026-09-14 to 2026-11-20 · e.g. update-check.cdn-delivery.test, secure-login-micros0ft.test",  # noqa: E501
+        },
+        "secure-login-micros0ft.test": {
+            "score": None,
+            "summary": "6 records · 1 distinct addresses · 2026-11-22 to 2026-11-24 · e.g. 198.51.100.23",
+        },
+        "192.0.2.10": {
+            "score": None,
+            "summary": "412 records · 87 distinct domains · 2024-02-01 to 2026-11-25 · e.g. shop-one.example, blog-two.example (+85)",  # noqa: E501
+        },
+    },
     "opencti": {
         "198.51.100.23": {"score": 80, "summary": "known observable · score 80 · labels: c2, tlp-amber"},
         "secure-login-micros0ft.test": {"score": None, "summary": "known observable · labels: phishing"},

@@ -11,6 +11,8 @@ from intelscope.providers.censys import Censys
 from intelscope.providers.greynoise import GreyNoise
 from intelscope.providers.intel471 import Intel471
 from intelscope.providers.opencti import OpenCTI
+from intelscope.providers.pdns import PassiveDNS
+from intelscope.providers.rdap import RDAP
 from intelscope.providers.shodan import ShodanInternetDB
 from intelscope.providers.urlhaus import URLhaus
 from intelscope.providers.urlscan import URLscan
@@ -19,7 +21,7 @@ from intelscope.providers.virustotal import VirusTotal
 REGISTRY: dict[str, type[Provider]] = {
     cls.name: cls
     for cls in (VirusTotal, AbuseIPDB, URLhaus, GreyNoise, ShodanInternetDB, Censys, URLscan,
-                Intel471, OpenCTI, ASNBlocklist)
+                Intel471, OpenCTI, RDAP, PassiveDNS, ASNBlocklist)
 }
 
 ALIASES = {
@@ -31,6 +33,9 @@ ALIASES = {
     "i471": "intel471",
     "octi": "opencti",
     "urlscan.io": "urlscan",
+    "whois": "rdap",
+    "dns": "pdns",
+    "passivedns": "pdns",
 }
 
 LABELS = {name: cls.label for name, cls in REGISTRY.items()}
