@@ -70,6 +70,8 @@ class Provider(ABC):
     """Credentials this source takes. Left empty, a single API key from `env_key` is assumed."""
     settable: ClassVar[bool] = True
     """False for sources whose env variable is not a credential (e.g. a file path)."""
+    shares_key_with: ClassVar[str | None] = None
+    """Name of another source that uses the same API key (a key entered for either one serves both)."""
     cache_by_key: ClassVar[bool] = False
     """True when a key changes what the source returns, so keyless results must not answer keyed lookups."""
     note: ClassVar[str] = ""
@@ -95,6 +97,10 @@ class Provider(ABC):
         """Build from credentials: given layers (session keys), the credentials file, then the environment."""
         stored = settings.load_stored()
         creds = settings.resolve(cls.name, cls.credential_fields(), *layers, stored)
+        if cls.shares_key_with and "api_key" not in creds:
+            sibling = settings.resolve(cls.shares_key_with, cls.credential_fields(), *layers, stored)
+            if "api_key" in sibling:
+                creds["api_key"] = sibling["api_key"]
         key = creds.pop("api_key", None)
         return cls(key, session, creds)
 

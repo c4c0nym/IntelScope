@@ -12,6 +12,8 @@ class URLhaus(Provider):
     name = "urlhaus"
     label = "URLhaus"
     env_key = "ABUSECH_AUTH_KEY"
+    shares_key_with = "threatfox"
+    note = "The same free abuse.ch key as ThreatFox, so entering it once covers both."
     supports = frozenset(
         {IOCType.IPV4, IOCType.DOMAIN, IOCType.URL, IOCType.MD5, IOCType.SHA256}
     )

@@ -14,14 +14,15 @@ from intelscope.providers.opencti import OpenCTI
 from intelscope.providers.pdns import PassiveDNS
 from intelscope.providers.rdap import RDAP
 from intelscope.providers.shodan import ShodanInternetDB
+from intelscope.providers.threatfox import ThreatFox
 from intelscope.providers.urlhaus import URLhaus
 from intelscope.providers.urlscan import URLscan
 from intelscope.providers.virustotal import VirusTotal
 
 REGISTRY: dict[str, type[Provider]] = {
     cls.name: cls
-    for cls in (VirusTotal, AbuseIPDB, URLhaus, GreyNoise, ShodanInternetDB, Censys, URLscan,
-                Intel471, OpenCTI, RDAP, PassiveDNS, ASNBlocklist)
+    for cls in (VirusTotal, AbuseIPDB, URLhaus, ThreatFox, GreyNoise, ShodanInternetDB, Censys,
+                URLscan, Intel471, OpenCTI, RDAP, PassiveDNS, ASNBlocklist)
 }
 
 ALIASES = {
@@ -33,6 +34,7 @@ ALIASES = {
     "i471": "intel471",
     "octi": "opencti",
     "urlscan.io": "urlscan",
+    "tf": "threatfox",
     "whois": "rdap",
     "dns": "pdns",
     "passivedns": "pdns",
