@@ -97,8 +97,8 @@ go next: a SIEM, a TIP, a ticket or a stakeholder.
 ## Quick start
 
 ```bash
-git clone https://github.com/c4c0nym/intelscope.git
-cd intelscope
+git clone https://github.com/c4c0nym/IntelScope.git
+cd IntelScope
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e .
 
