@@ -391,36 +391,15 @@ CI runs lint and tests on Python 3.10–3.12 for every push.
 
 ## Roadmap
 
-**Done**
+Roughly in this order:
 
-- [x] IOC tracker with TLP, context, source and date, exported as Markdown
-- [x] Censys, urlscan.io, Intel 471 (Verity) and OpenCTI lookups, with API keys entered in the dashboard
-- [x] ASN blocklist check (Spamhaus ASN-DROP + your own list)
-- [x] ThreatFox (abuse.ch): confirmed C2 and payload-delivery indicators with malware family and confidence
-- [x] Domain registration age and registrar (RDAP, the successor to WHOIS)
-- [x] Passive DNS (mnemonic): where a domain pointed, which domains an IP served
-- [x] Tracker file lock, so the CLI and the dashboard cannot overwrite each other's writes
-
-**Next, in this order**
-
-- [ ] Run Intel 471 and OpenCTI against live tenants (needs paid credentials, so it is up to the owner of one)
-- [ ] MalwareBazaar from abuse.ch (the URLhaus / ThreatFox key already covers it): malware-sample context
-- [ ] Tracker as STIX 2.1 with TLP marking definitions, then push to MISP and OpenCTI
-- [ ] Re-check tracked indicators on a schedule and show when a verdict changes
-- [ ] Certificate transparency (crt.sh): other names on the same certificate, a good pivot from a phishing domain
-- [ ] Tracker status and review date: active, revoked, false positive, "review by"; flag stale rows
-- [ ] Import into the tracker from Markdown, CSV, STIX and MISP, with duplicate detection by indicator and source
-- [ ] Blocklist and SIEM exports filtered by verdict: plain list, firewall formats, Splunk / Sentinel watchlist CSV
-- [ ] Keep credentials in the OS keystore (Windows Credential Manager) instead of a plain JSON file
-- [ ] Bulk mode that saves progress, for lists in the thousands (the 24 h cache already makes a rerun cheap)
-
-**Later, or if there is demand**
-
-- [ ] Email addresses and CVE ids as indicator types
-- [ ] ATT&CK technique hints from source tags (tags are inconsistent, so treat as hints to check)
-- [ ] A single Windows `.exe` of the dashboard, like a double-click app
-- [ ] Configurable source weights and verdict thresholds
-- [ ] Docker image and a PyPI release
+1. **Prove Intel 471 and OpenCTI live.** Both are written from the vendors' documentation and need a real tenant to confirm.
+2. **More sources.** MalwareBazaar for malware-sample context and crt.sh certificate transparency to pivot from a phishing domain to its sibling names.
+3. **Share the tracker.** Export as STIX 2.1 with TLP markings, push to MISP and OpenCTI, and import from CSV, STIX and MISP.
+4. **Re-check on a schedule.** Re-run tracked indicators automatically and show when a verdict changes.
+5. **Tracker lifecycle.** Status (active, revoked, false positive), a review-by date, and a flag on stale rows.
+6. **Blocklist and SIEM exports.** Filter by verdict and write plain lists, firewall formats and Splunk or Sentinel watchlists.
+7. **Reach and polish.** Email and CVE indicator types, a bulk mode that resumes after an interruption, configurable source weights, a Windows `.exe`, Docker and a PyPI release.
 
 ASN-DROP is published by [The Spamhaus Project](https://www.spamhaus.org/drop/terms/) and IP-to-ASN
 data comes from [RIPEstat](https://stat.ripe.net/). Both are free; please respect their terms.
