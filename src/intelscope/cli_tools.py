@@ -125,6 +125,8 @@ def keys_main(argv: Sequence[str]) -> int:
 def add_meta_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--tlp", default="", metavar="LEVEL",
                    help=f"handling label: {', '.join(TLP_LEVELS)} (default: AMBER)")
+    p.add_argument("--confidence", default="", metavar="LEVEL",
+                   help="how sure you are it is malicious: low, medium, high (default: medium)")
     p.add_argument("--context", default="", help="why it matters: campaign, report, ticket, what you saw")
     p.add_argument("--source", default="", help="where it came from: a report, feed, person or case")
     p.add_argument("--date", default="", metavar="YYYY-MM-DD", help="date observed (default: today)")
@@ -136,10 +138,11 @@ def _tracker(args: argparse.Namespace) -> Tracker:
 
 def _rows_table(rows: list) -> Table:
     table = Table(title="IOC tracker", title_style="accent", header_style="accent")
-    for col in ("id", "ioc", "type", "tlp", "source", "date", "context"):
+    for col in ("id", "ioc", "type", "tlp", "confidence", "source", "date", "context"):
         table.add_column(col, overflow="fold")
     for e in rows:
-        table.add_row(str(e.id), e.ioc, e.type, e.tlp, e.source or "-", e.date, e.context or "-")
+        table.add_row(str(e.id), e.ioc, e.type, e.tlp, e.confidence or "-", e.source or "-", e.date,
+                      e.context or "-")
     return table
 
 
@@ -161,9 +164,10 @@ def track_main(argv: Sequence[str]) -> int:
     ls.add_argument("--source", default="", help="substring of the source")
     ls.add_argument("--search", default="", help="substring of the indicator, context or source")
 
-    e = sub.add_parser("edit", help="change the TLP, context, source or date of one row")
+    e = sub.add_parser("edit", help="change the TLP, confidence, context, source or date of one row")
     e.add_argument("id", type=int)
     e.add_argument("--tlp")
+    e.add_argument("--confidence")
     e.add_argument("--context")
     e.add_argument("--source")
     e.add_argument("--date")
@@ -202,7 +206,7 @@ def track_main(argv: Sequence[str]) -> int:
             created = updated = 0
             for ioc in iocs:
                 _, new = tr.add(ioc.value, tlp=args.tlp, context=args.context,
-                                source=args.source, when=args.date)
+                                source=args.source, when=args.date, confidence=args.confidence)
                 created += new
                 updated += not new
             err.print(f"[accent]tracked[/] {created} new, {updated} updated [muted]({tr.path})[/]")
@@ -221,10 +225,12 @@ def track_main(argv: Sequence[str]) -> int:
             out.print(_rows_table(sorted(rows, key=lambda r: (r.date, r.id), reverse=True)))
             return 0
         if args.cmd == "edit":
-            fields = {k: v for k, v in (("tlp", args.tlp), ("context", args.context),
+            fields = {k: v for k, v in (("tlp", args.tlp), ("confidence", args.confidence),
+                                        ("context", args.context),
                                         ("source", args.source), ("date", args.date)) if v is not None}
             if not fields:
-                err.print("[error]error:[/] give at least one of --tlp, --context, --source, --date")
+                err.print("[error]error:[/] give at least one of --tlp, --confidence, --context, "
+                          "--source, --date")
                 return 2
             tr.update(args.id, **fields)
             err.print(f"[accent]updated[/] row {args.id}")

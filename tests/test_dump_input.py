@@ -98,3 +98,46 @@ def test_markdown_without_a_table_says_so(tmp_path):
     with pytest.raises(ValueError, match="table"):
         t.import_markdown("just some text, 1.2.3.4")
     assert parse_markdown("| a | b |\n|---|---|\n| 1 | 2 |") == []  # a table without an IOC column
+
+
+# --------------------------------------------------------------------------- confidence
+
+
+def test_confidence_defaults_validates_and_round_trips(tmp_path):
+    from intelscope.tracker import normalize_confidence
+
+    assert [normalize_confidence(x) for x in ("High", " MED ", "confidence: low", "")] == ["high", "medium", "low", ""]
+    with pytest.raises(ValueError, match="confidence"):
+        normalize_confidence("certain")
+
+    t = Tracker(tmp_path / "t.json")
+    t.add("198.51.100.23", source="a")  # nothing given -> medium
+    t.add("203.0.113.77", source="a", confidence="HIGH")
+    t.add("203.0.113.77", source="a", context="more")  # re-adding without one keeps high
+    t.add("192.0.2.10", source="a", confidence="low")
+    got = {e.ioc: e.confidence for e in t.entries()}
+    assert got == {"198.51.100.23": "medium", "203.0.113.77": "high", "192.0.2.10": "low"}
+    with pytest.raises(ValueError):
+        t.add("8.8.8.8", confidence="sure")
+    first = t.entries()[0]
+    assert t.update(first.id, confidence="low").confidence == "low"
+
+    md = to_markdown(t.entries())
+    assert "| IOC | Type | TLP | Confidence | Source | Date | Context |" in md
+    other = Tracker(tmp_path / "o.json")
+    assert other.import_markdown(md)["added"] == 3
+    assert {e.ioc: e.confidence for e in other.entries()} == {e.ioc: e.confidence for e in t.entries()}
+
+
+def test_import_without_a_confidence_column_and_legacy_rows(tmp_path):
+    t = Tracker(tmp_path / "t.json")
+    t.import_markdown("| IOC | TLP |\n|---|---|\n| 198.51.100.23 | green |\n")
+    assert t.entries()[0].confidence == "medium"
+    t.import_markdown("| IOC | Confidence |\n|---|---|\n| 198.51.100.23 | High |\n| 203.0.113.77 | sure |\n")
+    assert t.entries()[0].confidence == "high"  # updated, not duplicated
+    # a row saved before the field existed is shown as unset, not guessed
+    import json
+    doc = json.loads((tmp_path / "t.json").read_text())
+    del doc["entries"][0]["confidence"]
+    (tmp_path / "t.json").write_text(json.dumps(doc))
+    assert t.entries()[0].confidence == ""

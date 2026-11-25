@@ -30,6 +30,10 @@ TLP_LEVELS = ("CLEAR", "GREEN", "AMBER", "AMBER+STRICT", "RED")
 """TLP 2.0, least to most restricted."""
 TLP_RANK = {level: i for i, level in enumerate(TLP_LEVELS)}
 
+CONFIDENCE_LEVELS = ("low", "medium", "high")
+"""How sure you are that the indicator is really malicious (your judgement, not a triage score)."""
+DEFAULT_CONFIDENCE = "medium"
+
 MAX_CONTEXT = 2000
 MAX_SOURCE = 200
 MAX_ENTRIES = 50_000
@@ -47,6 +51,15 @@ def normalize_tlp(value: str | None) -> str:
     raw = _TLP_ALIASES.get(raw, raw)
     if raw not in TLP_RANK:
         raise ValueError(f"unknown TLP '{value}' (use {', '.join(TLP_LEVELS)})")
+    return raw
+
+
+def normalize_confidence(value: str | None) -> str:
+    """'High', 'MEDIUM', 'med', 'confidence:low' ... -> low, medium or high. Empty stays empty."""
+    raw = re.sub(r"^confidence\s*[:\-]?\s*", "", (value or "").strip().lower())
+    raw = {"med": "medium", "mid": "medium", "moderate": "medium", "lo": "low", "hi": "high"}.get(raw, raw)
+    if raw and raw not in CONFIDENCE_LEVELS:
+        raise ValueError(f"unknown confidence '{value}' (use {', '.join(CONFIDENCE_LEVELS)})")
     return raw
 
 
@@ -89,6 +102,7 @@ class Entry:
     updated: str
     verdict: str = ""
     score: int | None = None
+    confidence: str = ""  # empty only on rows saved before this field existed
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -200,12 +214,17 @@ class Tracker:
 
     # -- writing
     def add(self, value: str, *, tlp: str = "", context: str = "", source: str = "",
-            when: str = "", verdict: str = "", score: int | None = None) -> tuple[Entry, bool]:
-        """Add one indicator. Returns (entry, created). Same indicator + same source updates the row."""
+            when: str = "", verdict: str = "", score: int | None = None,
+            confidence: str = "") -> tuple[Entry, bool]:
+        """Add one indicator. Returns (entry, created). Same indicator + same source updates the row.
+
+        An empty confidence means medium on a new row and leaves an existing row's confidence alone.
+        """
         ioc = classify(value)
         if ioc is None:
             raise ValueError(f"not a recognised indicator: {value[:80]}")
         level = normalize_tlp(tlp)
+        conf = normalize_confidence(confidence)
         context = _text(context, MAX_CONTEXT, "context")
         source = _text(source, MAX_SOURCE, "source")
         when_iso = normalize_date(when)
@@ -215,6 +234,8 @@ class Tracker:
                 if raw["type"] == ioc.type.value and raw["ioc"] == ioc.value \
                         and raw.get("source", "").lower() == source.lower():
                     raw["tlp"] = level
+                    if conf:
+                        raw["confidence"] = conf
                     if context:
                         raw["context"] = context
                     if when:
@@ -229,15 +250,15 @@ class Tracker:
             now = _now()
             raw = Entry(id=doc["next_id"], ioc=ioc.value, type=ioc.type.value, tlp=level, context=context,
                         source=source, date=when_iso, added=now, updated=now, verdict=verdict,
-                        score=score).to_dict()
+                        score=score, confidence=conf or DEFAULT_CONFIDENCE).to_dict()
             doc["next_id"] += 1
             doc["entries"].append(raw)
             self._save(doc)
             return self._entry(raw), True
 
     def update(self, entry_id: int, **fields: str) -> Entry:
-        """Change tlp, context, source or date of one row."""
-        unknown = set(fields) - {"tlp", "context", "source", "date"}
+        """Change tlp, confidence, context, source or date of one row."""
+        unknown = set(fields) - {"tlp", "confidence", "context", "source", "date"}
         if unknown:
             raise ValueError("cannot edit " + ", ".join(sorted(unknown)))
         with self._guard():
@@ -246,6 +267,8 @@ class Tracker:
                 if raw["id"] == entry_id:
                     if "tlp" in fields:
                         raw["tlp"] = normalize_tlp(fields["tlp"])
+                    if "confidence" in fields:
+                        raw["confidence"] = normalize_confidence(fields["confidence"]) or DEFAULT_CONFIDENCE
                     if "context" in fields:
                         raw["context"] = _text(fields["context"], MAX_CONTEXT, "context")
                     if "source" in fields:
@@ -283,13 +306,14 @@ class Tracker:
         rows = parse_markdown(text)
         if not rows:
             raise ValueError("no table with an IOC column found (expected columns like "
-                             "IOC | Type | TLP | Source | Date | Context)")
+                             "IOC | Type | TLP | Confidence | Source | Date | Context)")
         added = updated = 0
         errors: list[str] = []
         for number, row in enumerate(rows, start=1):
             try:
                 _, created = self.add(row["ioc"], tlp=row.get("tlp", ""), context=row.get("context", ""),
-                                      source=row.get("source", ""), when=row.get("date", ""))
+                                      source=row.get("source", ""), when=row.get("date", ""),
+                                      confidence=row.get("confidence", ""))
             except ValueError as exc:
                 errors.append(f"row {number}: {exc}")
                 continue
@@ -300,7 +324,8 @@ class Tracker:
 
 # --------------------------------------------------------------------------- Markdown
 
-_HEADER_ALIASES = {"ioc": "ioc", "indicator": "ioc", "value": "ioc", "tlp": "tlp", "source": "source",
+_HEADER_ALIASES = {"ioc": "ioc", "indicator": "ioc", "value": "ioc", "tlp": "tlp",
+                   "confidence": "confidence", "source": "source",
                    "date": "date", "context": "context", "notes": "context", "note": "context",
                    "description": "context"}
 _PIPE = re.compile(r"(?<!\\)\|")
@@ -373,11 +398,12 @@ def to_markdown(entries: list[Entry], *, defanged: bool = True, title: str = "IO
                      + (f" Only rows up to TLP:{normalize_tlp(max_tlp)}." if max_tlp else ""))
         lines.append(">")
         lines.append("> Indicators are defanged." if defanged else "> Indicators are live: do not click.")
-        lines += ["", "| IOC | Type | TLP | Source | Date | Context |", "|---|---|---|---|---|---|"]
+        lines += ["", "| IOC | Type | TLP | Confidence | Source | Date | Context |",
+                  "|---|---|---|---|---|---|---|"]
         for e in rows:
             value = defang(e.ioc) if defanged else e.ioc
             source, context = _cell(e.source, defanged), _cell(e.context, defanged)
-            cells = [_code(value), e.type, e.tlp, source, e.date, context]
+            cells = [_code(value), e.type, e.tlp, e.confidence or "-", source, e.date, context]
             lines.append("| " + " | ".join(cells) + " |")
     else:
         lines += [f"> Exported {today} by IntelScope {__version__}.", "", "No indicators tracked yet."]

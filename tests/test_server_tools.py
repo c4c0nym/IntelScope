@@ -235,6 +235,7 @@ def test_whole_flow_paste_check_list_export_import(demo_server, tmp_path):
     rows = call(base, token, "/api/tracker")[1]["entries"]
     mal = next(r for r in rows if r["ioc"] == "198.51.100.23")
     assert mal["verdict"] == "malicious" and mal["score"] == 100 and mal["tlp"] == "AMBER"
+    assert mal["confidence"] == "medium"
 
     md = call(base, token, "/api/tracker/export", {})[1]["markdown"]
     assert md.count("| Dump 2026-11-25 |") == 6

@@ -28,8 +28,28 @@ into the case file, or out as STIX 2.1, CSV or JSON.
 
 ## The dashboard
 
+After cloning the repo, this is all it takes to get the web interface running (Python 3.10 or newer):
+
 ```bash
-intelscope serve --open        # http://127.0.0.1:8765, live lookups with your API keys
+git clone https://github.com/c4c0nym/IntelScope.git
+cd IntelScope
+python -m venv .venv
+source .venv/bin/activate          # Windows PowerShell: .venv\Scripts\Activate.ps1   (cmd: .venv\Scripts\activate.bat)
+pip install -e .
+intelscope serve --open            # opens http://127.0.0.1:8765 in your browser
+```
+
+1. Try it first with `intelscope serve --demo --open`: the same interface on canned data, no keys, no network.
+2. For real lookups, open **API keys** in the sidebar and paste a key for any source (it works with just
+   one), or put keys in a `.env` file (see [API keys](#api-keys)).
+3. Paste indicators under **IOC triage**, in any mix of lines, spaces, commas or tabs, and press *Run triage*.
+4. Stop the server with `Ctrl+C`. If port 8765 is taken, use `intelscope serve --port 8800`.
+
+The server listens on `127.0.0.1` only. Without `--open`, copy the `http://127.0.0.1:8765/` link it
+prints into your browser.
+
+```bash
+intelscope serve --open        # live lookups with your API keys
 intelscope serve --demo        # same UI on canned data, no keys, no network
 ```
 
@@ -195,6 +215,7 @@ Keep the indicators you follow. Every row is one indicator seen from one source:
 |---|---|
 | **IOC** | The indicator, refanged and normalised. Defanged input is fine |
 | **TLP** | `CLEAR`, `GREEN`, `AMBER`, `AMBER+STRICT` or `RED` (TLP 2.0). Unlabelled means `AMBER` |
+| **Confidence** | `low`, `medium` or `high`: how sure you are it is malicious. Your own call, separate from the triage score. Unset means `medium` |
 | **Context** | Why it matters: campaign, what you saw, ticket |
 | **Source** | Where it came from: a report, feed, person or case |
 | **Date** | When it was observed (default: today) |
@@ -204,21 +225,21 @@ context and date. Adding it again from the same source updates that row. Rows th
 a triage run also keep the verdict and score.
 
 ```bash
-intelscope track add 198.51.100[.]23 evil[.]example --tlp AMBER --source "CERT report 12" --context "phishing wave"
+intelscope track add 198.51.100[.]23 evil[.]example --tlp AMBER --confidence high --source "CERT report 12" --context "phishing wave"
 intelscope -f iocs.txt --track --tlp GREEN --source "feed X"     # enrich, then track everything checked
 intelscope track list --tlp AMBER --search phishing
-intelscope track edit 3 --tlp RED
+intelscope track edit 3 --tlp RED --confidence low
 intelscope track import iocs.md                                # read a Markdown table back in (an export, or your own)
 intelscope track export -o iocs.md                               # all rows, defanged
 intelscope track export --max-tlp GREEN -o shareable.md          # leave out AMBER and RED
 ```
 
 In the dashboard, **IOC tracker** adds, searches, edits and exports the same rows, and the
-triage view has **Track** (one row) and **Track shown...** (everything on screen). The file
+triage view has an **Add to IOC list** form for everything on screen. The file
 is `%LOCALAPPDATA%\intelscope\tracker.json` (or `$INTELSCOPE_TRACKER`), and the dashboard and
 the command line share it.
 
-The Markdown export is a table (`IOC | Type | TLP | Source | Date | Context`), newest first,
+The Markdown export is a table (`IOC | Type | TLP | Confidence | Source | Date | Context`), newest first,
 with the highest TLP of its rows stated at the top. Indicators are defanged unless you ask
 for `--raw`. Share only what the label allows: `--max-tlp` exists for that.
 

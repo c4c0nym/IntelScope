@@ -303,6 +303,8 @@ ul.ev .cn{color:var(--mineral)}
 .tlp{display:inline-block;font:700 10px var(--mono);letter-spacing:.08em;padding:2px 7px;border-radius:3px;background:#000;border:1px solid currentColor;white-space:nowrap}
 .tlp[data-t="CLEAR"]{color:#fff}.tlp[data-t="GREEN"]{color:#33ff00}.tlp[data-t="AMBER"]{color:#ffc000}
 .tlp[data-t="AMBER+STRICT"]{color:#ffc000;border-style:double;border-width:3px}.tlp[data-t="RED"]{color:#ff2b2b}
+.conf{font:700 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.conf[data-c="high"]{color:#ff6b6b}.conf[data-c="medium"]{color:#ffc000}.conf[data-c="low"]{color:var(--muted)}
 .tkform{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
 .tkform label,.kf label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
 .tkform .wide{grid-column:1/-1}
@@ -469,6 +471,7 @@ code{font-family:var(--mono);color:var(--ivory)}
       <p class="note">Saves the results shown above, with the label and details you set here. The same indicator from the same source updates its row instead of adding a second one.</p>
       <div class="tkform">
         <div><label for="ts-tlp">TLP</label><select class="t" id="ts-tlp"></select></div>
+        <div><label for="ts-conf">Confidence</label><select class="t" id="ts-conf"><option>low</option><option selected>medium</option><option>high</option></select></div>
         <div><label for="ts-date">Date</label><input class="t" type="date" id="ts-date"></div>
         <div class="wide"><label for="ts-source">Source</label><input class="t" id="ts-source" maxlength="200" placeholder="Report, feed, person or case it came from" autocomplete="off"></div>
         <div class="wide"><label for="ts-context">Context</label><input class="t" id="ts-context" maxlength="2000" placeholder="Why it matters: campaign, what you saw, ticket" autocomplete="off"></div>
@@ -499,6 +502,7 @@ code{font-family:var(--mono);color:var(--ivory)}
         <textarea class="t" id="tk-in" style="min-height:96px" spellcheck="false" placeholder="198.51.100[.]23&#10;evil-login[.]example"></textarea>
         <div class="tkform">
           <div><label for="tk-tlp">TLP</label><select class="t" id="tk-tlp"><option>CLEAR</option><option>GREEN</option><option>AMBER</option><option>AMBER+STRICT</option><option>RED</option></select></div>
+          <div><label for="tk-conf">Confidence</label><select class="t" id="tk-conf"><option>low</option><option selected>medium</option><option>high</option></select></div>
           <div><label for="tk-date">Date</label><input class="t" type="date" id="tk-date"></div>
           <div class="wide"><label for="tk-source">Source</label><input class="t" id="tk-source" maxlength="200" placeholder="Report, feed, person or case it came from" autocomplete="off"></div>
           <div class="wide"><label for="tk-context">Context</label><input class="t" id="tk-context" maxlength="2000" placeholder="Why it matters: campaign, what you saw, ticket" autocomplete="off"></div>
@@ -526,7 +530,7 @@ code{font-family:var(--mono);color:var(--ivory)}
     </div>
     <div class="card" style="overflow-x:auto">
       <table class="tb" id="tk-table">
-        <thead><tr><th>Indicator</th><th>Type</th><th>TLP</th><th>Source</th><th>Date</th><th>Context</th><th></th></tr></thead>
+        <thead><tr><th>Indicator</th><th>Type</th><th>TLP</th><th>Confidence</th><th>Source</th><th>Date</th><th>Context</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -2787,6 +2791,8 @@ async function liveApi(path,body){
   return j;
 }
 function tlpBadge(t){return `<span class="tlp" data-t="${esc(t)}">TLP:${esc(t)}</span>`;}
+function confBadge(c){return c?`<span class="conf" data-c="${esc(c)}">${esc(c)}</span>`:'<span class="mut">-</span>';}
+function confSelect(cls,val){return `<select class="t ${cls}">${['low','medium','high'].map(x=>`<option${x===val?' selected':''}>${x}</option>`).join('')}</select>`;}
 function tlpSelect(cls,val){return `<select class="t ${cls}">${TK.tlp.map(x=>`<option${x===val?' selected':''}>${esc(x)}</option>`).join('')}</select>`;}
 function tkMode(){
   const el=$('#tk-mode');
@@ -2815,16 +2821,16 @@ function tkRender(){
   $('#tk-count').textContent=TK.entries.length?(rows.length===TK.entries.length?TK.entries.length+' rows':rows.length+' of '+TK.entries.length+' rows'):'';
   $('#tk-table').querySelector('tbody').innerHTML=rows.map(e=>{
     if(TK.editing===e.id)return `<tr data-id="${e.id}"><td style="color:var(--paper)">${esc(e.ioc)}</td><td class="mut">${esc(e.type)}</td>
-      <td>${tlpSelect('ed-tlp',e.tlp)}</td><td><input class="t ed-source" maxlength="200" value="${esc(e.source)}"></td>
+      <td>${tlpSelect('ed-tlp',e.tlp)}</td><td>${confSelect('ed-conf',e.confidence||'medium')}</td><td><input class="t ed-source" maxlength="200" value="${esc(e.source)}"></td>
       <td><input class="t ed-date" type="date" value="${esc(e.date)}"></td><td><input class="t ed-context" maxlength="2000" value="${esc(e.context)}"></td>
       <td style="white-space:nowrap"><button class="btn sm p" data-act="save">Save</button> <button class="btn sm" data-act="cancel">Cancel</button></td></tr>`;
     const verdict=e.verdict?`<div class="mut" style="font-size:10.5px">triage: ${esc(e.verdict)}${e.score!=null?' ('+(+e.score)+')':''}</div>`:'';
     return `<tr data-id="${e.id}"><td style="color:var(--paper)">${esc(e.ioc)}${verdict}</td>
-      <td class="mut" style="text-transform:uppercase;letter-spacing:.1em;font-size:10px;white-space:nowrap">${esc(e.type)}</td><td>${tlpBadge(e.tlp)}</td>
+      <td class="mut" style="text-transform:uppercase;letter-spacing:.1em;font-size:10px;white-space:nowrap">${esc(e.type)}</td><td>${tlpBadge(e.tlp)}</td><td>${confBadge(e.confidence)}</td>
       <td>${esc(e.source)||'<span class="mut">-</span>'}</td><td style="white-space:nowrap">${esc(e.date)}</td>
       <td class="ctx">${esc(e.context)||'<span class="mut">-</span>'}</td>
       <td style="white-space:nowrap"><button class="btn sm" data-act="edit">Edit</button> <button class="btn sm" data-act="del">${TK.armed===e.id?'Sure?':'Delete'}</button></td></tr>`;
-  }).join('')||`<tr><td colspan="7" class="mut">${TK.entries.length?'No row matches.':'Nothing tracked yet. Add indicators above, or press Track on a triage result.'}</td></tr>`;
+  }).join('')||`<tr><td colspan="8" class="mut">${TK.entries.length?'No row matches.':'Nothing tracked yet. Add indicators above, or press Track on a triage result.'}</td></tr>`;
 }
 async function tkImport(markdown){
   try{
@@ -2842,7 +2848,7 @@ async function tkAdd(){
   TR.results.forEach(r=>{if(Object.keys(r.sources||{}).length)known[r.ioc]={verdict:r.verdict,score:r.score};});
   const btn=$('#tk-add');btn.disabled=true;
   try{
-    const j=await liveApi('/api/tracker/add',{text,known,tlp:$('#tk-tlp').value,context:$('#tk-context').value,source:$('#tk-source').value,date:$('#tk-date').value});
+    const j=await liveApi('/api/tracker/add',{text,known,tlp:$('#tk-tlp').value,confidence:$('#tk-conf').value,context:$('#tk-context').value,source:$('#tk-source').value,date:$('#tk-date').value});
     toast(j.added+' added, '+j.updated+' updated'+(j.rejected.length?', '+j.rejected.length+' skipped':''));
     $('#tk-in').value='';await tkLoad();
   }catch(e){toast(e.message);}
@@ -2880,7 +2886,7 @@ function tkWire(){
     const btn=$('#ts-add');btn.disabled=true;
     try{
       const j=await liveApi('/api/tracker/add',{items:rows.map(r=>({ioc:r.ioc,verdict:r.verdict,score:r.score})),
-        tlp:$('#ts-tlp').value,context:$('#ts-context').value,source:$('#ts-source').value,date:$('#ts-date').value});
+        tlp:$('#ts-tlp').value,confidence:$('#ts-conf').value,context:$('#ts-context').value,source:$('#ts-source').value,date:$('#ts-date').value});
       toast(j.added+' added, '+j.updated+' updated in the IOC list');
       tkLoad();
     }catch(e){toast(e.message);}
@@ -2898,7 +2904,7 @@ function tkWire(){
     else if(b.dataset.act==='cancel'){TK.editing=null;tkRender();}
     else if(b.dataset.act==='save'){
       try{
-        await liveApi('/api/tracker/update',{id,fields:{tlp:$('.ed-tlp',tr).value,source:$('.ed-source',tr).value,date:$('.ed-date',tr).value,context:$('.ed-context',tr).value}});
+        await liveApi('/api/tracker/update',{id,fields:{tlp:$('.ed-tlp',tr).value,confidence:$('.ed-conf',tr).value,source:$('.ed-source',tr).value,date:$('.ed-date',tr).value,context:$('.ed-context',tr).value}});
         TK.editing=null;await tkLoad();toast('Saved');
       }catch(e){toast(e.message);}
     }else if(b.dataset.act==='del'){

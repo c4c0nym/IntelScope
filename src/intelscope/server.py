@@ -31,6 +31,7 @@ from intelscope.providers import REGISTRY, build_providers
 from intelscope.tracker import (
     TLP_LEVELS,
     Tracker,
+    normalize_confidence,
     normalize_date,
     normalize_tlp,
     to_markdown,
@@ -215,6 +216,7 @@ class _State:
         try:
             tlp = normalize_tlp(str(doc.get("tlp") or ""))
             when = normalize_date(str(doc.get("date") or ""))
+            confidence = normalize_confidence(str(doc.get("confidence") or ""))
         except ValueError as exc:
             raise ApiError(str(exc)) from exc
         context, source = str(doc.get("context") or ""), str(doc.get("source") or "")
@@ -241,7 +243,7 @@ class _State:
             score = it.get("score")
             try:
                 _, created = self.tracker.add(
-                    it["ioc"], tlp=tlp, context=context, source=source, when=when,
+                    it["ioc"], tlp=tlp, context=context, source=source, when=when, confidence=confidence,
                     verdict=str(it.get("verdict") or ""),
                     score=int(score) if isinstance(score, (int, float)) else None,
                 )
@@ -398,7 +400,7 @@ def make_handler(state: _State) -> type[BaseHTTPRequestHandler]:
                 return state.tracker_add(doc)
             if route == "/api/tracker/update":
                 fields = {k: str(v) for k, v in (doc.get("fields") or {}).items() if k in
-                          ("tlp", "context", "source", "date")}
+                          ("tlp", "confidence", "context", "source", "date")}
                 try:
                     entry = state.tracker.update(int(doc.get("id")), **fields)
                 except (TypeError, ValueError) as exc:
