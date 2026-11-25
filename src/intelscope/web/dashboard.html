@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>intelscope</title>
+<title>IntelScope</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-20 -20 40 40'%3E%3Crect x='-20' y='-20' width='40' height='40' rx='8' fill='%23099197'/%3E%3Cg fill='none' stroke-linecap='round'%3E%3Ccircle r='12' stroke='%23ebd3a2' stroke-width='2.4'/%3E%3Ccircle r='5' stroke='%23c5a56e' stroke-width='2.2'/%3E%3Cpath d='M-17 0h6M11 0h6M0-17v6M0 11v6' stroke='%23ebd3a2' stroke-width='2.4'/%3E%3C/g%3E%3C/svg%3E">
 <style>
 :root{
@@ -62,7 +62,7 @@ a:hover{text-decoration:underline}
 }
 .brand{padding:16px 14px 12px;border-bottom:1px solid var(--line)}
 .brand h1{
-  display:flex;align-items:center;gap:9px;margin:0;font-size:15px;letter-spacing:.16em;text-transform:uppercase;
+  display:flex;align-items:center;gap:9px;margin:0;font-size:15px;letter-spacing:.03em;font-size:17px;
   font-weight:700;color:var(--paper);
 }
 .brand .logo{width:24px;height:24px;flex:none}
@@ -318,7 +318,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 <div class="shell">
 <aside class="rail">
   <div class="brand">
-    <h1><svg class="logo" viewBox="-30 -30 60 60" aria-hidden="true"><g fill="none" stroke-linecap="round"><circle r="22" stroke="#ebd3a2" stroke-width="4"/><circle r="15" stroke="#b5b1d8" stroke-width="2" stroke-dasharray="3 5"/><circle r="7" stroke="#c5a56e" stroke-width="3.4"/><path d="M-29 0h11M18 0h11M0-29v11M0 18v11" stroke="#ebd3a2" stroke-width="4"/></g><circle r="2.4" fill="#c5a56e"/></svg>intelscope</h1>
+    <h1><svg class="logo" viewBox="-30 -30 60 60" aria-hidden="true"><g fill="none" stroke-linecap="round"><circle r="22" stroke="#ebd3a2" stroke-width="4"/><circle r="15" stroke="#b5b1d8" stroke-width="2" stroke-dasharray="3 5"/><circle r="7" stroke="#c5a56e" stroke-width="3.4"/><path d="M-29 0h11M18 0h11M0-29v11M0 18v11" stroke="#ebd3a2" stroke-width="4"/></g><circle r="2.4" fill="#c5a56e"/></svg>IntelScope</h1>
     <div class="sub">OSINT desk &middot; IOC triage</div>
     <div class="stripe" aria-hidden="true"><i style="background:#ebd3a2"></i><i style="background:#a2b0ad"></i><i style="background:#c5a56e"></i><i style="background:#099197"></i><i style="background:#00978d"></i><i style="background:#b5b1d8"></i></div>
   </div>
@@ -358,7 +358,7 @@ code{font-family:var(--mono);color:var(--ivory)}
   </div>
 
   <div class="railfoot">
-    Pivots, validators and parsers run in your browser.<br>Indicators leave this page only through an external link, or when you press Run in IOC triage and your local intelscope server queries its sources.
+    Pivots, validators and parsers run in your browser.<br>Indicators leave this page only through an external link, or when you press Run in IOC triage and your local IntelScope server queries its sources.
   </div>
 </aside>
 
@@ -368,7 +368,7 @@ code{font-family:var(--mono);color:var(--ivory)}
     <div class="abrow">
       <input class="q" id="q" placeholder="Paste an artifact: TOX ID, .onion, email, domain, IP, hash, BTC/XMR address, username, coordinates" spellcheck="false" autocomplete="off">
       <button class="btn p" id="qgo">Pivot</button>
-      <button class="btn" id="qtriage" disabled title="Enrich an IP, domain, URL or hash with intelscope">Triage</button>
+      <button class="btn" id="qtriage" disabled title="Enrich an IP, domain, URL or hash with IntelScope">Triage</button>
       <button class="btn" id="qsave">Log to case</button>
       <button class="btn" id="qclear">Clear</button>
     </div>
@@ -2457,7 +2457,7 @@ $('#cs-json').addEventListener('click',()=>{
 $('#cs-md').addEventListener('click',()=>{
   if(!CASE.length)return toast('Nothing to export');
   const ref=$('#cs-ref').value.trim()||'unreferenced';
-  let md=`# intelscope working log - ${ref}\n\nExported ${new Date().toISOString()}\n\n`;
+  let md=`# IntelScope working log - ${ref}\n\nExported ${new Date().toISOString()}\n\n`;
   md+=`| Logged (UTC) | Type | Entity | Note | SHA-256 |\n|---|---|---|---|---|\n`;
   CASE.forEach(c=>{md+=`| ${c.ts} | ${c.type} | \`${c.value}\` | ${c.note.replace(/\|/g,'/')} | ${c.sha} |\n`;});
   md+=`\n## Caveats\n\n- Entries are analyst observations, not verified attributions.\n- Hashes cover the entity string as logged, not the original source file.\n- Confirm every finding against a second independent source before reporting.\n`;
@@ -2470,7 +2470,7 @@ $('#cs-file').addEventListener('change',async e=>{
     const j=JSON.parse(await f.text());
     if(!Array.isArray(j.entries))throw 0;
     CASE=CASE.concat(j.entries);renderCase();toast(j.entries.length+' entries imported');
-  }catch(err){toast('That file is not an intelscope case export');}
+  }catch(err){toast('That file is not an IntelScope case export');}
 });
 $('#cs-wipe').addEventListener('click',()=>{
   if(!CASE.length)return;
@@ -2570,7 +2570,7 @@ function trMode(){
   const names=Object.keys(PROVIDER_LABELS);
   if(TR.live){
     const ready=TR.providers.filter(p=>p.configured);
-    el.innerHTML=`<b>${TR.demo?'Demo engine':'Live engine'}</b> intelscope ${esc(TR.version)} on this machine. `+
+    el.innerHTML=`<b>${TR.demo?'Demo engine':'Live engine'}</b> IntelScope ${esc(TR.version)} on this machine. `+
       (TR.demo?'Answers are canned sample data, nothing leaves your computer.':`${ready.length} of ${TR.providers.length} sources ready.`);
     src.innerHTML=TR.providers.map(p=>`<span class="src ${p.configured?'ready':'nokey'}" title="${esc(p.types.join(', '))}">${esc(p.label)}${p.configured?'':' &middot; no key'}</span>`).join('');
   }else{
@@ -2653,7 +2653,7 @@ function stixPattern(r){
 async function trStix(){
   const now=new Date().toISOString().replace(/(\.\d{3})\d*Z$/,'$1Z');
   const idn='identity--'+await uuid5(STIX_NS,'intelscope');
-  const objs=[{type:'identity',spec_version:'2.1',id:idn,created:now,modified:now,name:'intelscope',identity_class:'system'}];
+  const objs=[{type:'identity',spec_version:'2.1',id:idn,created:now,modified:now,name:'IntelScope',identity_class:'system'}];
   for(const r of TR.results){
     if(r.verdict!=='malicious'&&r.verdict!=='suspicious')continue;
     objs.push({type:'indicator',spec_version:'2.1',id:'indicator--'+await uuid5(STIX_NS,r.type+':'+r.ioc),created_by_ref:idn,
@@ -2692,12 +2692,12 @@ function trWire(){
       if(!Array.isArray(list)||!list.every(x=>x&&x.ioc&&x.verdict&&x.type))throw 0;
       TR.results=list.map(x=>({...x,score:+x.score||0,reasons:x.reasons||[],sources:x.sources||{}}));TR.filter=null;trRender();
       toast(list.length+' results imported');
-    }catch(err){toast('That is not intelscope JSON output');}
+    }catch(err){toast('That is not IntelScope JSON output');}
     e.target.value='';
   });
   $('#tr-json').addEventListener('click',()=>{
     if(!TR.results.length)return toast('Nothing to export');
-    dl('intelscope-'+Date.now()+'.json',JSON.stringify({tool:'intelscope dashboard',generated:new Date().toISOString(),count:TR.results.length,results:TR.results},null,2)+'\n','application/json');
+    dl('intelscope-'+Date.now()+'.json',JSON.stringify({tool:'IntelScope dashboard',generated:new Date().toISOString(),count:TR.results.length,results:TR.results},null,2)+'\n','application/json');
   });
   $('#tr-csv').addEventListener('click',()=>{if(!TR.results.length)return toast('Nothing to export');dl('intelscope-'+Date.now()+'.csv',trCsv(),'text/csv');});
   $('#tr-stix').addEventListener('click',async()=>{
@@ -2711,7 +2711,7 @@ function trWire(){
   });
   $('#tr-case').addEventListener('click',()=>{
     const rows=trShown();if(!rows.length)return toast('Nothing to log');
-    rows.forEach(r=>addCase(r.ioc,r.type,`intelscope: ${r.verdict}, score ${r.score}`+((r.reasons||[])[0]?' ('+r.reasons[0]+')':''),true));
+    rows.forEach(r=>addCase(r.ioc,r.type,`IntelScope: ${r.verdict}, score ${r.score}`+((r.reasons||[])[0]?' ('+r.reasons[0]+')':''),true));
     renderCase();toast(rows.length+' logged to case');
   });
   $('#qtriage').addEventListener('click',()=>{const q=$('#q').value.trim();if(q)trSend([q]);});

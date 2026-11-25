@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.svg" alt="intelscope: an OSINT desk with IOC triage built in" width="100%">
+  <img src="docs/banner.svg" alt="IntelScope: an OSINT desk with IOC triage built in" width="100%">
 </p>
 
 <p align="center">
@@ -9,7 +9,7 @@
   <img alt="Sources" src="https://img.shields.io/badge/sources-6-b5b1d8?style=flat-square">
 </p>
 
-**intelscope** is an OSINT desk and an IOC triage engine in one tool. The desk is a
+**IntelScope** is an OSINT desk and an IOC triage engine in one tool. The desk is a
 single-file web dashboard for working an artifact: classify it, validate it offline, pivot
 to the right lookups, and keep a case log. The triage engine checks indicators of compromise
 (IPs, domains, URLs, file hashes) against several threat intelligence sources at once and
@@ -19,11 +19,11 @@ They share one flow. Paste an artifact, pivot on it, and when it is an IP, domai
 hash, send it to triage. Anything that comes back malicious or suspicious can go straight
 into the case file, or out as STIX 2.1, CSV or JSON.
 
-> intelscope is the former **iocscope** (the triage CLI) combined with the OSINT Dashboard.
+> IntelScope is the former **iocscope** (the triage CLI) combined with the OSINT Dashboard.
 > The `iocscope` command is now `intelscope`; the options are unchanged.
 
 <p align="center">
-  <img src="docs/screenshots/triage.png" alt="IOC triage view of the intelscope dashboard" width="100%">
+  <img src="docs/screenshots/triage.png" alt="IOC triage view of the IntelScope dashboard" width="100%">
 </p>
 
 ## The dashboard
@@ -61,14 +61,14 @@ out of it (see the OPSEC view).
 
 ## The triage engine
 
-intelscope takes a pile of indicators, checks them against several threat intelligence
+IntelScope takes a pile of indicators, checks them against several threat intelligence
 sources at once, and tells you which ones to look at first. It is built around a real analyst
 workflow: paste in IOCs from a report or an alert (defanged is fine), drop the noise, enrich
 what's left without blowing through API quotas, and export the result to wherever it needs to
 go next: a SIEM, a TIP, a ticket or a stakeholder.
 
 <p align="center">
-  <img src="docs/demo.svg" alt="intelscope terminal output" width="100%">
+  <img src="docs/demo.svg" alt="IntelScope terminal output" width="100%">
 </p>
 
 ## Features
@@ -165,7 +165,7 @@ intelscope serve [--port PORT] [--demo] [--no-cache] [-w WORKERS] [--open]
 
 ## Scoring
 
-Each source reports an opinion from 0 to 100, or no opinion at all. intelscope combines them
+Each source reports an opinion from 0 to 100, or no opinion at all. IntelScope combines them
 using a method simple enough to defend to a stakeholder:
 
 1. **Weight** each source by how directly it measures maliciousness. A URLhaus payload hit
@@ -193,7 +193,7 @@ using a method simple enough to defend to a stakeholder:
 
 Some networks exist to host crime: bulletproof hosting, hijacked IP space, spam operations. An IP
 in such a network deserves attention even when no other source has seen it yet. For every IP,
-intelscope looks up the origin ASN with RIPEstat and checks it against:
+IntelScope looks up the origin ASN with RIPEstat and checks it against:
 
 - **[Spamhaus ASN-DROP](https://www.spamhaus.org/blocklists/do-not-route-or-peer/)**:
   autonomous systems controlled by spammers or cyber criminals. It's downloaded at most once a
@@ -249,7 +249,7 @@ limit and weight, implement `_lookup()`, then register it in `providers/__init__
   passed as arguments, logged or written to output.
 - Every indicator is treated as hostile input: HTML output is escaped, CSV cells are
   neutralised, and STIX patterns are escaped.
-- intelscope only *looks up* indicators. It never connects to them.
+- IntelScope only *looks up* indicators. It never connects to them.
 - `intelscope serve` listens on `127.0.0.1` only, rejects requests with a foreign `Host`
   header (DNS rebinding) and needs a per-run token that only the page it serves can read, so
   another website in your browser cannot spend your API quota. Keys never reach the browser.

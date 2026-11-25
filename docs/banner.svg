@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="intelscope: an OSINT desk with built-in IOC triage">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="IntelScope: an OSINT desk with built-in IOC triage">
   <rect width="1200" height="300" fill="#099197"/>
   <!-- palette stripe: Sanzo Wada combinations #11, #12, #15 -->
   <g>
@@ -20,7 +20,7 @@
     <line x1="0" y1="44" x2="0" y2="120" stroke="#ebd3a2" stroke-width="5"/>
     <circle r="8" fill="#c5a56e" stroke="none"/>
   </g>
-  <text x="72" y="140" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="84" font-weight="700" fill="#ebd3a2" letter-spacing="1">intelscope</text>
+  <text x="72" y="140" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="84" font-weight="700" fill="#ebd3a2" letter-spacing="1">IntelScope</text>
   <text x="76" y="190" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="26" fill="#f6ecd6">An OSINT desk with IOC triage built in</text>
   <g font-family="Consolas, 'Cascadia Code', Menlo, monospace" font-size="17">
     <!-- verdict pills: every glyph sits in its own fixed 24px slot, so nothing clips the pill -->

@@ -57,7 +57,7 @@ def main() -> None:
     render_table(console, results)
     console.print("[accent]wrote[/] report.html [muted](html)[/]")
     DOCS.mkdir(exist_ok=True)
-    console.save_svg(str(DOCS / "demo.svg"), title="intelscope", theme=TERMINAL)
+    console.save_svg(str(DOCS / "demo.svg"), title="IntelScope", theme=TERMINAL)
 
     (DOCS / "sample-report.html").write_text(to_html(results), encoding="utf-8")
 

@@ -68,7 +68,7 @@ def infer_format(path: str | None) -> str | None:
 # --------------------------------------------------------------------------- JSON
 def to_json(items: Sequence[EnrichedIOC]) -> str:
     doc = {
-        "tool": f"intelscope {__version__}",
+        "tool": f"IntelScope {__version__}",
         "generated": _now().isoformat(timespec="seconds"),
         "count": len(items),
         "results": [i.to_dict() for i in items],
@@ -150,7 +150,7 @@ def to_stix(
             "id": identity_id,
             "created": ts,
             "modified": ts,
-            "name": "intelscope",
+            "name": "IntelScope",
             "identity_class": "system",
         }
     ]
@@ -191,7 +191,7 @@ _HTML = Template("""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>intelscope report · $generated</title>
+<title>IntelScope report · $generated</title>
 <style>
   :root {
     --ivory: $ivory; --mineral: $mineral; --isabella: $isabella;
@@ -249,7 +249,7 @@ _HTML = Template("""<!doctype html>
 </head>
 <body>
 <header>
-  <h1>intelscope <span>enrichment report</span></h1>
+  <h1>IntelScope <span>enrichment report</span></h1>
   <p>$count indicators · generated $generated</p>
 </header>
 <div class="stripe"><i style="background:var(--ivory)"></i><i style="background:var(--mineral)"></i><i style="background:var(--isabella)"></i><i style="background:var(--greenblue)"></i><i style="background:var(--benzol)"></i><i style="background:var(--lavender)"></i></div>
@@ -262,7 +262,7 @@ $rows
     </tbody>
   </table>
   <footer>
-    <span>intelscope v$version · verdicts are decision support, not ground truth. Verify before blocking.</span>
+    <span>IntelScope v$version · verdicts are decision support, not ground truth. Verify before blocking.</span>
     <span class="swatches">Palette: Sanzo Wada #11 · #12 · #15
       <i style="background:var(--ivory)"></i><i style="background:var(--mineral)"></i><i style="background:var(--isabella)"></i><i style="background:var(--greenblue)"></i><i style="background:var(--benzol)"></i><i style="background:var(--lavender)"></i></span>
   </footer>

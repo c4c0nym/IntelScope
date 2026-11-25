@@ -48,7 +48,7 @@ def _evidence(item: EnrichedIOC) -> Text:
 
 def render_table(console: Console, items: Sequence[EnrichedIOC]) -> None:
     table = Table(
-        title=Text("intelscope · enrichment results", style="accent"),
+        title=Text("IntelScope · enrichment results", style="accent"),
         box=box.SIMPLE_HEAD,
         header_style=f"bold {GREEN_BLUE}",
         border_style=MINERAL_GRAY,
