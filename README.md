@@ -15,7 +15,7 @@ to the right lookups, and keep a case log. The triage engine checks indicators o
 (IPs, domains, URLs, file hashes) against several threat intelligence sources at once and
 turns the results into one score and a verdict with the reasons behind it.
 
-They share one flow. Paste an artifact, pivot on it, and when it is an IP, domain, URL or
+They share one flow. Paste an artifact, pivot on it, and when it is an IP-adres, domain, URL or
 hash, send it to triage. Anything that comes back malicious or suspicious can go straight
 into the case file, or out as STIX 2.1, CSV or JSON.
 
