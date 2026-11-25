@@ -1,6 +1,6 @@
 import json
 
-from iocscope.cli import main
+from intelscope.cli import main
 
 
 def test_demo_json(capsys):
@@ -33,7 +33,7 @@ def test_min_verdict_filters(capsys):
 def test_writes_html_file(tmp_path):
     out = tmp_path / "report.html"
     assert main(["--demo", "-q", "-o", str(out)]) == 0
-    assert "iocscope" in out.read_text(encoding="utf-8")
+    assert "intelscope" in out.read_text(encoding="utf-8")
 
 
 def test_no_providers_configured(capsys):

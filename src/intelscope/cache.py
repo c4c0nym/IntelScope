@@ -9,13 +9,13 @@ import time
 from collections.abc import Callable
 from pathlib import Path
 
-from iocscope.models import IOC, ProviderResult
+from intelscope.models import IOC, ProviderResult
 
 
 def default_cache_path() -> Path:
     base = os.environ.get("XDG_CACHE_HOME")
     root = Path(base) if base else Path.home() / ".cache"
-    return root / "iocscope" / "cache.json"
+    return root / "intelscope" / "cache.json"
 
 
 class Cache:

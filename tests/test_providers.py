@@ -1,12 +1,12 @@
 from conftest import FakeResponse, FakeSession, ioc
 
-from iocscope.models import IOCType
-from iocscope.providers import build_providers, resolve_names
-from iocscope.providers.abuseipdb import AbuseIPDB
-from iocscope.providers.greynoise import GreyNoise
-from iocscope.providers.shodan import ShodanInternetDB
-from iocscope.providers.urlhaus import URLhaus
-from iocscope.providers.virustotal import VirusTotal, url_id
+from intelscope.models import IOCType
+from intelscope.providers import build_providers, resolve_names
+from intelscope.providers.abuseipdb import AbuseIPDB
+from intelscope.providers.greynoise import GreyNoise
+from intelscope.providers.shodan import ShodanInternetDB
+from intelscope.providers.urlhaus import URLhaus
+from intelscope.providers.virustotal import VirusTotal, url_id
 
 VT_FILE = {
     "data": {

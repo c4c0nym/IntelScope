@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.svg" alt="iocscope: IOC enrichment and triage" width="100%">
+  <img src="docs/banner.svg" alt="intelscope: an OSINT desk with IOC triage built in" width="100%">
 </p>
 
 <p align="center">
@@ -9,17 +9,66 @@
   <img alt="Sources" src="https://img.shields.io/badge/sources-6-b5b1d8?style=flat-square">
 </p>
 
-**iocscope** takes a pile of indicators of compromise (IPs, domains, URLs, file hashes),
-checks them against several threat intelligence sources at once, and turns the results into
-one score and a verdict with the reasons behind it, so you know which ones to look at first.
+**intelscope** is an OSINT desk and an IOC triage engine in one tool. The desk is a
+single-file web dashboard for working an artifact: classify it, validate it offline, pivot
+to the right lookups, and keep a case log. The triage engine checks indicators of compromise
+(IPs, domains, URLs, file hashes) against several threat intelligence sources at once and
+turns the results into one score and a verdict with the reasons behind it.
 
-It is built around a real analyst workflow: paste in IOCs from a report or an alert
-(defanged is fine), drop the noise, enrich what's left without blowing through API
-quotas, and export the result to wherever it needs to go next: a SIEM, a TIP, a ticket or a
-stakeholder.
+They share one flow. Paste an artifact, pivot on it, and when it is an IP, domain, URL or
+hash, send it to triage. Anything that comes back malicious or suspicious can go straight
+into the case file, or out as STIX 2.1, CSV or JSON.
+
+> intelscope is the former **iocscope** (the triage CLI) combined with the OSINT Dashboard.
+> The `iocscope` command is now `intelscope`; the options are unchanged.
 
 <p align="center">
-  <img src="docs/demo.svg" alt="iocscope terminal output" width="100%">
+  <img src="docs/screenshots/triage.png" alt="IOC triage view of the intelscope dashboard" width="100%">
+</p>
+
+## The dashboard
+
+```bash
+intelscope serve --open        # http://127.0.0.1:8765, live lookups with the keys in your .env
+intelscope serve --demo        # same UI on canned data, no keys, no network
+```
+
+Or just open `src/intelscope/web/dashboard.html` in a browser. Without the server it still
+parses, filters and exports indicators and runs every offline tool; it only lacks live
+lookups. You can also load the output of `intelscope --format json` with **Import CLI JSON**.
+
+| View | What it does |
+|---|---|
+| **Domain map** and **Pivot engine** | Classify any artifact (TOX ID, onion, email, IP, hash, wallet, username, coordinates) and build the lookups that accept that type |
+| **IOC triage** | Defang-aware paste box, verdict filter, score, per-source evidence, **Pivot** per row, export to JSON / CSV / STIX 2.1, log to case |
+| **Search, Usernames, Email, Images, Geo, Network, Darkweb** | Collection tools and a curated library of resources |
+| **Ransom note triage, Artifact lab, Crypto trail** | Local validators and parsers: checksums, EXIF, hashing, timestamps |
+| **Case file** | A timestamped, hashed working log you can export and re-import |
+| **Playbooks, Library, OPSEC** | Reference |
+
+The artifact bar has a **Triage** button that lights up for IPs, domains, URLs and hashes,
+and the indicator extractor in *Network* has **Send to triage**.
+
+<p align="center">
+  <img src="docs/screenshots/pivot.png" alt="Pivot engine" width="49%">
+  <img src="docs/screenshots/map.png" alt="Domain map" width="49%">
+</p>
+
+Pivots, validators and parsers run in your browser and make no network calls. Only IOC
+triage talks to a server, and only your own `intelscope serve`, which then queries the
+sources. Run sends the indicators to every ready source, so keep victim-specific artifacts
+out of it (see the OPSEC view).
+
+## The triage engine
+
+intelscope takes a pile of indicators, checks them against several threat intelligence
+sources at once, and tells you which ones to look at first. It is built around a real analyst
+workflow: paste in IOCs from a report or an alert (defanged is fine), drop the noise, enrich
+what's left without blowing through API quotas, and export the result to wherever it needs to
+go next: a SIEM, a TIP, a ticket or a stakeholder.
+
+<p align="center">
+  <img src="docs/demo.svg" alt="intelscope terminal output" width="100%">
 </p>
 
 ## Features
@@ -40,26 +89,27 @@ stakeholder.
   reported per source and never crash the run.
 - **Exports:** a rich terminal table, JSON, CSV, a **STIX 2.1** bundle and a self-contained
   **HTML report**.
+- **A dashboard on top.** `intelscope serve` opens the OSINT desk with the engine behind it.
 - **Automation-ready.** It reads from stdin and writes to stdout, and `--fail-on malicious`
   sets a non-zero exit code for pipelines and SOAR playbooks.
-- **Offline demo.** `iocscope --demo` runs end to end on synthetic data with no keys.
+- **Offline demo.** `intelscope --demo` runs end to end on synthetic data with no keys.
 
 ## Quick start
 
 ```bash
-git clone https://github.com/c4c0nym/iocscope.git
-cd iocscope
+git clone https://github.com/c4c0nym/intelscope.git
+cd intelscope
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e .
 
-iocscope --demo                    # try it without any API keys
+intelscope --demo                    # try it without any API keys
 ```
 
 Then add your keys:
 
 ```bash
 cp .env.example .env               # fill in the keys you have
-iocscope --list-providers          # check what's configured
+intelscope --list-providers          # check what's configured
 ```
 
 | Source | Env variable | Free tier | Indicator types |
@@ -69,7 +119,7 @@ iocscope --list-providers          # check what's configured
 | [URLhaus](https://auth.abuse.ch/) | `ABUSECH_AUTH_KEY` | generous | IPv4, domain, URL, MD5, SHA-256 |
 | [GreyNoise Community](https://viz.greynoise.io/signup) | `GREYNOISE_API_KEY` *(optional)* | limited | IPv4 |
 | [Shodan InternetDB](https://internetdb.shodan.io/) | none needed | free | IPv4 |
-| ASN blocklist: [RIPEstat](https://stat.ripe.net/) + [Spamhaus ASN-DROP](https://www.spamhaus.org/blocklists/do-not-route-or-peer/) | none needed (optional own list: `IOCSCOPE_ASN_BLOCKLIST`) | free | IPv4, IPv6 |
+| ASN blocklist: [RIPEstat](https://stat.ripe.net/) + [Spamhaus ASN-DROP](https://www.spamhaus.org/blocklists/do-not-route-or-peer/) | none needed (optional own list: `INTELSCOPE_ASN_BLOCKLIST`) | free | IPv4, IPv6 |
 
 Sources without a key are skipped with a notice, so you can start with just one.
 
@@ -77,39 +127,45 @@ Sources without a key are skipped with a notice, so you can start with just one.
 
 ```bash
 # A few indicators straight from a report
-iocscope 185.220.101.47 "hxxps://login-portal[.]example/verify" 44d88612fea8a8f36de82e1278abb02f
+intelscope 185.220.101.47 "hxxps://login-portal[.]example/verify" 44d88612fea8a8f36de82e1278abb02f
 
 # A file of IOCs -> HTML report for a stakeholder
-iocscope -f examples/iocs.txt -o report.html
+intelscope -f examples/iocs.txt -o report.html
 
 # STIX 2.1 for a TIP / SIEM (only malicious + suspicious become Indicators)
-iocscope -f iocs.txt --format stix > indicators.stix.json
+intelscope -f iocs.txt --format stix > indicators.stix.json
 
 # Pipeline use: only VirusTotal + AbuseIPDB, fail the job if anything is malicious
-cat alert_iocs.txt | iocscope - -p vt,abuseipdb --format json --fail-on malicious
+cat alert_iocs.txt | intelscope - -p vt,abuseipdb --format json --fail-on malicious
 
 # Only show what needs attention
-iocscope -f iocs.txt --min-verdict suspicious
+intelscope -f iocs.txt --min-verdict suspicious
 
 # Add your own bad ASNs (e.g. bulletproof hosters from past cases) to the ASN check
-iocscope -f iocs.txt --asn-blocklist examples/asn-blocklist.txt
+intelscope -f iocs.txt --asn-blocklist examples/asn-blocklist.txt
+
+# The dashboard, with live lookups
+intelscope serve --open
 ```
+
 
 <details>
 <summary>All options</summary>
 
 ```
-iocscope [IOC ...] [-f PATH] [-o PATH] [--format {table,json,csv,stix,html}]
+intelscope [IOC ...] [-f PATH] [-o PATH] [--format {table,json,csv,stix,html}]
          [-p LIST] [--list-providers] [--allowlist PATH] [--no-allowlist] [--asn-blocklist PATH]
          [--no-cache] [--cache-ttl HOURS] [--min-verdict VERDICT]
          [--fail-on {malicious,suspicious}] [-w WORKERS] [--demo] [-q]
+
+intelscope serve [--port PORT] [--demo] [--no-cache] [-w WORKERS] [--open]
 ```
 
 </details>
 
 ## Scoring
 
-Each source reports an opinion from 0 to 100, or no opinion at all. iocscope combines them
+Each source reports an opinion from 0 to 100, or no opinion at all. intelscope combines them
 using a method simple enough to defend to a stakeholder:
 
 1. **Weight** each source by how directly it measures maliciousness. A URLhaus payload hit
@@ -124,7 +180,7 @@ using a method simple enough to defend to a stakeholder:
 
 | Verdict | Score | Meaning |
 |---|---|---|
-| ▲▲▲ **malicious** | ≥ 70 | Strong or corroborated evidence. Prioritise. |
+| ⟁ **malicious** | ≥ 70 | Strong or corroborated evidence. Prioritise. |
 | ▲▲ **suspicious** | 40–69 | Some evidence. Investigate. |
 | ▲ **low** | < 40 | Known to sources, little or no malicious evidence |
 | ? **unknown** | n/a | No source has a record. Absence of evidence is not evidence of absence. |
@@ -137,12 +193,12 @@ using a method simple enough to defend to a stakeholder:
 
 Some networks exist to host crime: bulletproof hosting, hijacked IP space, spam operations. An IP
 in such a network deserves attention even when no other source has seen it yet. For every IP,
-iocscope looks up the origin ASN with RIPEstat and checks it against:
+intelscope looks up the origin ASN with RIPEstat and checks it against:
 
 - **[Spamhaus ASN-DROP](https://www.spamhaus.org/blocklists/do-not-route-or-peer/)**:
   autonomous systems controlled by spammers or cyber criminals. It's downloaded at most once a
   day and cached. If a download fails, the cached copy is used.
-- **your own list** (`--asn-blocklist` or `IOCSCOPE_ASN_BLOCKLIST`): one ASN per line, `AS64500`
+- **your own list** (`--asn-blocklist` or `INTELSCOPE_ASN_BLOCKLIST`): one ASN per line, `AS64500`
   or `64500`, with an optional `# reason` that shows up in the evidence.
 
 A listed ASN scores 75 with weight 0.8. On its own that makes an IP **suspicious**, because a
@@ -168,8 +224,10 @@ input ─▶ refang + classify ─▶ dedupe ─▶ allowlist ─▶ cache ─�
 ```
 
 ```
-src/iocscope/
-├── cli.py            argument parsing, progress, exit codes
+src/intelscope/
+├── cli.py            argument parsing, progress, exit codes, `serve`
+├── server.py         local dashboard + enrichment API (127.0.0.1 only)
+├── web/dashboard.html  the single-file dashboard
 ├── detect.py         refanging and IOC type detection
 ├── allowlist.py      known-benign filtering
 ├── enrich.py         thread pool fan-out, error isolation
@@ -191,7 +249,10 @@ limit and weight, implement `_lookup()`, then register it in `providers/__init__
   passed as arguments, logged or written to output.
 - Every indicator is treated as hostile input: HTML output is escaped, CSV cells are
   neutralised, and STIX patterns are escaped.
-- iocscope only *looks up* indicators. It never connects to them.
+- intelscope only *looks up* indicators. It never connects to them.
+- `intelscope serve` listens on `127.0.0.1` only, rejects requests with a foreign `Host`
+  header (DNS rebinding) and needs a per-run token that only the page it serves can read, so
+  another website in your browser cannot spend your API quota. Keys never reach the browser.
 - Looking up an indicator in a third-party service can tip off an adversary or leak
   sensitive context (for example, an internal hostname). Know your OPSEC requirements before
   submitting indicators from an active incident.
@@ -208,7 +269,7 @@ CI runs lint and tests on Python 3.10–3.12 for every push.
 
 ## Roadmap
 
-- [ ] MISP and OpenCTI export
+- [ ] MISP and OpenCTI export (the dashboard already exports STIX 2.1)
 - [ ] ATT&CK technique hints from source tags
 - [x] ASN blocklist check (Spamhaus ASN-DROP + your own list)
 - [ ] Passive DNS / WHOIS age for domains

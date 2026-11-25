@@ -10,9 +10,9 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from iocscope import __version__
-from iocscope.models import IOC, IOCType, ProviderResult
-from iocscope.ratelimit import RateLimiter
+from intelscope import __version__
+from intelscope.models import IOC, IOCType, ProviderResult
+from intelscope.ratelimit import RateLimiter
 
 
 def build_session() -> requests.Session:
@@ -26,7 +26,7 @@ def build_session() -> requests.Session:
     )
     adapter = HTTPAdapter(max_retries=retry, pool_maxsize=16)
     session.mount("https://", adapter)
-    session.headers["User-Agent"] = f"iocscope/{__version__}"
+    session.headers["User-Agent"] = f"intelscope/{__version__}"
     return session
 
 

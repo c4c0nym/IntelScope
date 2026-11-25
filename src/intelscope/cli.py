@@ -12,31 +12,32 @@ from rich.console import Console
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
-from iocscope import __version__
-from iocscope.allowlist import load_allowlist
-from iocscope.cache import Cache, default_cache_path
-from iocscope.demo import DEMO_IOCS, build_demo_providers
-from iocscope.detect import parse_iocs
-from iocscope.enrich import Enricher, triage_order
-from iocscope.export import FORMATS, infer_format, render
-from iocscope.models import Verdict
-from iocscope.palette import THEME
-from iocscope.providers import REGISTRY, build_providers, resolve_names
-from iocscope.render import render_table
+from intelscope import __version__
+from intelscope.allowlist import load_allowlist
+from intelscope.cache import Cache, default_cache_path
+from intelscope.demo import DEMO_IOCS, build_demo_providers
+from intelscope.detect import parse_iocs
+from intelscope.enrich import Enricher, triage_order
+from intelscope.export import FORMATS, infer_format, render
+from intelscope.models import Verdict
+from intelscope.palette import THEME
+from intelscope.providers import REGISTRY, build_providers, resolve_names
+from intelscope.render import render_table
 
 EPILOG = """\
 examples:
-  iocscope 8.8.8.8 "hxxps://evil[.]example/login" 44d88612fea8a8f36de82e1278abb02f
-  iocscope -f iocs.txt -o report.html
-  cat iocs.txt | iocscope - --format stix > indicators.stix.json
-  iocscope -f iocs.txt --providers vt,abuseipdb --fail-on malicious
-  iocscope --demo                      # offline sample run, no API keys needed
+  intelscope 8.8.8.8 "hxxps://evil[.]example/login" 44d88612fea8a8f36de82e1278abb02f
+  intelscope -f iocs.txt -o report.html
+  cat iocs.txt | intelscope - --format stix > indicators.stix.json
+  intelscope -f iocs.txt --providers vt,abuseipdb --fail-on malicious
+  intelscope --demo                      # offline sample run, no API keys needed
+  intelscope serve --open                # the dashboard, with live enrichment
 """
 
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="iocscope",
+        prog="intelscope",
         description="Enrich, score and triage indicators of compromise "
         "(IPs, domains, URLs, file hashes) across threat intel sources.",
         epilog=EPILOG,
@@ -67,7 +68,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--demo", action="store_true",
                    help="run offline against canned sample data (no keys, no network)")
     p.add_argument("-q", "--quiet", action="store_true", help="suppress progress and warnings")
-    p.add_argument("--version", action="version", version=f"iocscope {__version__}")
+    p.add_argument("--version", action="version", version=f"intelscope {__version__}")
     return p
 
 
@@ -108,9 +109,48 @@ def _list_providers(console: Console) -> None:
     console.print(table)
 
 
+def _serve_main(argv: Sequence[str]) -> int:
+    from intelscope.server import serve
+
+    p = argparse.ArgumentParser(
+        prog="intelscope serve",
+        description="Open the intelscope dashboard on 127.0.0.1 with live enrichment.",
+    )
+    p.add_argument("--port", type=int, default=8765, help="port to listen on (default: 8765)")
+    p.add_argument("--demo", action="store_true", help="canned offline data, no keys or network")
+    p.add_argument("--no-cache", action="store_true", help="ignore and don't update the result cache")
+    p.add_argument("-w", "--workers", type=int, default=8, help="concurrent lookups (default: 8)")
+    p.add_argument("--open", action="store_true", help="open the dashboard in your browser")
+    args = p.parse_args(argv)
+    err = Console(theme=THEME, stderr=True)
+    try:
+        httpd = serve(args.port, args.demo, not args.no_cache, args.workers, args.open)
+    except OSError as exc:
+        err.print(f"[error]error:[/] cannot listen on 127.0.0.1:{args.port} ({exc.strerror or exc})")
+        return 2
+    mode = "demo data" if args.demo else "live lookups"
+    err.print(
+        f"[accent]intelscope[/] dashboard on http://127.0.0.1:{args.port}/ "
+        f"[muted]({mode}, ctrl+c to stop)[/]"
+    )
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        err.print("[muted]stopped[/]")
+    finally:
+        httpd.server_close()
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     load_dotenv(find_dotenv(usecwd=True))
-    args = build_parser().parse_args(argv)
+    for stream in (sys.stdout, sys.stderr):  # a legacy console must not crash on a glyph
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="replace")
+    raw = list(sys.argv[1:] if argv is None else argv)
+    if raw and raw[0] == "serve":
+        return _serve_main(raw[1:])
+    args = build_parser().parse_args(raw)
     err = Console(theme=THEME, stderr=True)
     out = Console(theme=THEME)
 

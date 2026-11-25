@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from iocscope.models import IOC, IOCType, ProviderResult
-from iocscope.providers.base import Provider
+from intelscope.models import IOC, IOCType, ProviderResult
+from intelscope.providers.base import Provider
 
 
 class AbuseIPDB(Provider):

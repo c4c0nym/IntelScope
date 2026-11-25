@@ -1,7 +1,7 @@
 import pytest
 
-from iocscope.detect import classify, parse_iocs, refang
-from iocscope.models import IOCType
+from intelscope.detect import classify, parse_iocs, refang
+from intelscope.models import IOCType
 
 
 @pytest.mark.parametrize(

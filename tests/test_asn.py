@@ -1,8 +1,8 @@
 from conftest import FakeResponse, FakeSession, ioc
 
-from iocscope.cli import main
-from iocscope.models import IOCType
-from iocscope.providers.asn import DROP_URL, ASNBlocklist, parse_custom, parse_drop
+from intelscope.cli import main
+from intelscope.models import IOCType
+from intelscope.providers.asn import DROP_URL, ASNBlocklist, parse_custom, parse_drop
 
 DROP = (
     '{"asn":64500,"rir":"ripencc","domain":"bad.example","cc":"NL","asname":"EXAMPLE-BULLETPROOF"}\n'
@@ -52,7 +52,7 @@ def test_ip_in_clean_asn_gives_context_only(tmp_path):
     assert not r.found  # every routed IP has an ASN: context, not a sighting
     assert r.summary == "AS13335 CLOUDFLARENET · 1.1.1.0/24 · not blocklisted"
 
-    from iocscope.scoring import assess
+    from intelscope.scoring import assess
     assert assess([r], {"asn": 0.8})[1].value == "unknown"  # does not turn "unknown" into "low"
 
 

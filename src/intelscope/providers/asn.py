@@ -19,9 +19,9 @@ import time
 from pathlib import Path
 from typing import Any
 
-from iocscope.cache import default_cache_path
-from iocscope.models import IOC, IOCType, ProviderResult
-from iocscope.providers.base import Provider
+from intelscope.cache import default_cache_path
+from intelscope.models import IOC, IOCType, ProviderResult
+from intelscope.providers.base import Provider
 
 DROP_URL = "https://www.spamhaus.org/drop/asndrop.json"
 RIPESTAT = "https://stat.ripe.net/data"
@@ -63,7 +63,7 @@ def parse_custom(text: str) -> dict[int, dict[str, Any]]:
 class ASNBlocklist(Provider):
     name = "asn"
     label = "ASN blocklist"
-    env_key = "IOCSCOPE_ASN_BLOCKLIST"  # optional: path to your own ASN list
+    env_key = "INTELSCOPE_ASN_BLOCKLIST"  # optional: path to your own ASN list
     key_required = False
     supports = frozenset({IOCType.IPV4, IOCType.IPV6})
     rate_limit = (60, 60.0)
@@ -125,7 +125,7 @@ class ASNBlocklist(Provider):
     def _ripestat(self, call: str, resource: str) -> dict[str, Any]:
         resp = self.session.get(
             f"{RIPESTAT}/{call}/data.json",
-            params={"resource": resource, "sourceapp": "iocscope"},
+            params={"resource": resource, "sourceapp": "intelscope"},
             timeout=self.timeout,
         )
         resp.raise_for_status()

@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
-from iocscope.models import ProviderResult, Verdict
+from intelscope.models import ProviderResult, Verdict
 
 MALICIOUS_AT = 70
 SUSPICIOUS_AT = 40

@@ -10,9 +10,9 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
-from iocscope.models import EnrichedIOC, Verdict
-from iocscope.palette import GREEN_BLUE, MINERAL_GRAY, VERDICT_GLYPHS
-from iocscope.providers import LABELS
+from intelscope.models import EnrichedIOC, Verdict
+from intelscope.palette import GREEN_BLUE, MINERAL_GRAY, VERDICT_GLYPHS
+from intelscope.providers import LABELS
 
 
 def verdict_badge(verdict: Verdict) -> Text:
@@ -48,7 +48,7 @@ def _evidence(item: EnrichedIOC) -> Text:
 
 def render_table(console: Console, items: Sequence[EnrichedIOC]) -> None:
     table = Table(
-        title=Text("iocscope · enrichment results", style="accent"),
+        title=Text("intelscope · enrichment results", style="accent"),
         box=box.SIMPLE_HEAD,
         header_style=f"bold {GREEN_BLUE}",
         border_style=MINERAL_GRAY,

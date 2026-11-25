@@ -3,8 +3,8 @@ requires = ["hatchling>=1.24"]
 build-backend = "hatchling.build"
 
 [project]
-name = "iocscope"
-version = "0.1.0"
+name = "intelscope"
+version = "0.2.0"
 description = "Enrich, score and triage indicators of compromise against multiple threat intelligence sources."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,10 +27,10 @@ dependencies = [
 dev = ["pytest>=8.0", "ruff>=0.5"]
 
 [project.scripts]
-iocscope = "iocscope.cli:main"
+intelscope = "intelscope.cli:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/iocscope"]
+packages = ["src/intelscope"]
 
 [tool.ruff]
 line-length = 110
@@ -40,7 +40,7 @@ target-version = "py310"
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
-"src/iocscope/export.py" = ["E501"]  # inline HTML template
+"src/intelscope/export.py" = ["E501"]  # inline HTML template
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

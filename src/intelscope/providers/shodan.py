@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from iocscope.models import IOC, IOCType, ProviderResult
-from iocscope.providers.base import Provider
+from intelscope.models import IOC, IOCType, ProviderResult
+from intelscope.providers.base import Provider
 
 # InternetDB tags that indicate the host itself is attacker-controlled or compromised.
 _HOSTILE_TAGS = {"c2", "compromised", "malware", "botnet"}

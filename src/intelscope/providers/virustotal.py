@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import base64
 
-from iocscope.models import IOC, IOCType, ProviderResult
-from iocscope.providers.base import Provider
+from intelscope.models import IOC, IOCType, ProviderResult
+from intelscope.providers.base import Provider
 
 _COLLECTIONS = {
     IOCType.IPV4: "ip_addresses",

@@ -32,6 +32,7 @@ PALETTE = {
 }
 
 # The palette has no red, so severity is carried by glyphs as well as colour.
+# Malicious is a single triforce (U+27C1) instead of three stacked triangles.
 # That also keeps the output readable for colour-blind analysts and in plain text.
 VERDICT_COLOURS = {
     "malicious": ISABELLA,
@@ -42,7 +43,7 @@ VERDICT_COLOURS = {
 }
 
 VERDICT_GLYPHS = {
-    "malicious": "▲▲▲",
+    "malicious": "⟁",  # one triforce: fixed width, never overflows a pill or column
     "suspicious": "▲▲",
     "low": "▲",
     "benign": "✓",

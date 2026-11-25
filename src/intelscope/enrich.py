@@ -6,11 +6,11 @@ from collections.abc import Callable, Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 
-from iocscope.allowlist import Allowlist
-from iocscope.cache import Cache
-from iocscope.models import IOC, EnrichedIOC, ProviderResult
-from iocscope.providers.base import Provider
-from iocscope.scoring import assess
+from intelscope.allowlist import Allowlist
+from intelscope.cache import Cache
+from intelscope.models import IOC, EnrichedIOC, ProviderResult
+from intelscope.providers.base import Provider
+from intelscope.scoring import assess
 
 ProgressCallback = Callable[[int, int], None]
 """Called with (completed, total) lookups."""

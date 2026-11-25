@@ -7,7 +7,7 @@ import re
 from collections.abc import Iterable
 from urllib.parse import urlsplit
 
-from iocscope.models import IOC, IOCType
+from intelscope.models import IOC, IOCType
 
 _REFANG_RULES: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"\[\s*\.\s*\]|\(\s*\.\s*\)|\{\s*\.\s*\}|\[dot\]|\(dot\)", re.I), "."),

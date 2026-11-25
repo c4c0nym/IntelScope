@@ -1,5 +1,5 @@
-from iocscope.allowlist import Allowlist, load_allowlist
-from iocscope.detect import classify
+from intelscope.allowlist import Allowlist, load_allowlist
+from intelscope.detect import classify
 
 
 def check(allowlist, raw):

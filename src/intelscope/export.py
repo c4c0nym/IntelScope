@@ -12,9 +12,9 @@ from collections.abc import Sequence
 from datetime import datetime, timezone
 from string import Template
 
-from iocscope import __version__
-from iocscope.models import EnrichedIOC, IOCType, Verdict
-from iocscope.palette import (
+from intelscope import __version__
+from intelscope.models import EnrichedIOC, IOCType, Verdict
+from intelscope.palette import (
     BENZOL_GREEN,
     GRAYISH_LAVENDER,
     GREEN_BLUE,
@@ -25,9 +25,21 @@ from iocscope.palette import (
     PAPER,
     VERDICT_GLYPHS,
 )
-from iocscope.providers import LABELS
+from intelscope.providers import LABELS
 
 FORMATS = ("table", "json", "csv", "stix", "html")
+
+# Malicious is shown as a triforce in HTML: one fixed-size icon, so it cannot overflow the pill.
+TRIFORCE_SVG = (
+    '<svg class="tf" viewBox="0 0 16 16" role="img" aria-label="malicious">'
+    '<path d="M8 1l3.5 7h-7zM4.5 8L8 15H1zM11.5 8L15 15H8z"/></svg>'
+)
+
+
+def glyph_html(verdict: Verdict) -> str:
+    if verdict is Verdict.MALICIOUS:
+        return TRIFORCE_SVG
+    return html.escape(VERDICT_GLYPHS[verdict.value])
 
 # Fixed namespace so the same indicator always maps to the same STIX id across runs.
 STIX_NAMESPACE = uuid.UUID("6f1c3f6e-2b7a-4d43-9a49-0c8f3b8f1a52")
@@ -56,7 +68,7 @@ def infer_format(path: str | None) -> str | None:
 # --------------------------------------------------------------------------- JSON
 def to_json(items: Sequence[EnrichedIOC]) -> str:
     doc = {
-        "tool": f"iocscope {__version__}",
+        "tool": f"intelscope {__version__}",
         "generated": _now().isoformat(timespec="seconds"),
         "count": len(items),
         "results": [i.to_dict() for i in items],
@@ -130,7 +142,7 @@ def to_stix(
 ) -> str:
     """STIX 2.1 bundle of Indicator objects for actionable verdicts only."""
     ts = _stix_time(_now())
-    identity_id = f"identity--{uuid.uuid5(STIX_NAMESPACE, 'iocscope')}"
+    identity_id = f"identity--{uuid.uuid5(STIX_NAMESPACE, 'intelscope')}"
     objects: list[dict] = [
         {
             "type": "identity",
@@ -138,7 +150,7 @@ def to_stix(
             "id": identity_id,
             "created": ts,
             "modified": ts,
-            "name": "iocscope",
+            "name": "intelscope",
             "identity_class": "system",
         }
     ]
@@ -179,7 +191,7 @@ _HTML = Template("""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>iocscope report · $generated</title>
+<title>intelscope report · $generated</title>
 <style>
   :root {
     --ivory: $ivory; --mineral: $mineral; --isabella: $isabella;
@@ -201,7 +213,9 @@ _HTML = Template("""<!doctype html>
   .tile { background: #fff; border: 1px solid #e3dccb; border-top: 6px solid var(--c);
           border-radius: 10px; padding: 14px 18px; }
   .tile b { display: block; font-size: 30px; line-height: 1.1; }
-  .tile span { text-transform: uppercase; font-size: 12px; letter-spacing: 1px; color: #5b6766; }
+  .tile span { display: flex; align-items: center; gap: 7px; white-space: nowrap;
+               text-transform: uppercase; font-size: 12px; letter-spacing: 1px; color: #5b6766; }
+  .tile .tf { color: var(--ink); }
   table { width: 100%; border-collapse: separate; border-spacing: 0; background: #fff;
           border: 1px solid #e3dccb; border-radius: 10px; overflow: hidden; }
   th { background: var(--ivory); text-align: left; font-size: 12px; text-transform: uppercase;
@@ -210,9 +224,13 @@ _HTML = Template("""<!doctype html>
   tr:hover td { background: #fdfaf3; }
   code { font: 13px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; word-break: break-all; }
   .orig { color: #6e7b79; font-size: 12px; margin-top: 2px; }
-  .pill { display: inline-block; white-space: nowrap; padding: 3px 10px; border-radius: 999px;
+  .pill { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+          padding: 3px 11px 3px 9px; border-radius: 999px;
           font-size: 12px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
           background: var(--c); color: var(--ink); }
+  .g { display: inline-grid; place-items: center; min-width: 15px; height: 15px; line-height: 1;
+       letter-spacing: 0; }
+  .tf { width: 15px; height: 15px; fill: currentColor; display: block; }
   .score { display: flex; align-items: center; gap: 8px; min-width: 110px; }
   .bar { flex: 1; height: 8px; background: #eee7d7; border-radius: 99px; overflow: hidden; }
   .bar i { display: block; height: 100%; background: var(--c); }
@@ -231,7 +249,7 @@ _HTML = Template("""<!doctype html>
 </head>
 <body>
 <header>
-  <h1>iocscope <span>enrichment report</span></h1>
+  <h1>intelscope <span>enrichment report</span></h1>
   <p>$count indicators · generated $generated</p>
 </header>
 <div class="stripe"><i style="background:var(--ivory)"></i><i style="background:var(--mineral)"></i><i style="background:var(--isabella)"></i><i style="background:var(--greenblue)"></i><i style="background:var(--benzol)"></i><i style="background:var(--lavender)"></i></div>
@@ -244,7 +262,7 @@ $rows
     </tbody>
   </table>
   <footer>
-    <span>iocscope v$version · verdicts are decision support, not ground truth. Verify before blocking.</span>
+    <span>intelscope v$version · verdicts are decision support, not ground truth. Verify before blocking.</span>
     <span class="swatches">Palette: Sanzo Wada #11 · #12 · #15
       <i style="background:var(--ivory)"></i><i style="background:var(--mineral)"></i><i style="background:var(--isabella)"></i><i style="background:var(--greenblue)"></i><i style="background:var(--benzol)"></i><i style="background:var(--lavender)"></i></span>
   </footer>
@@ -265,7 +283,7 @@ _VERDICT_VARS = {
 def _html_row(item: EnrichedIOC) -> str:
     e = html.escape
     colour = _VERDICT_VARS[item.verdict]
-    glyph = VERDICT_GLYPHS[item.verdict.value]
+    glyph = glyph_html(item.verdict)
     original = ""
     if item.ioc.original != item.ioc.value:
         original = f'<div class="orig">submitted as <code>{e(item.ioc.original)}</code></div>'
@@ -285,7 +303,7 @@ def _html_row(item: EnrichedIOC) -> str:
 
     return (
         f'      <tr style="--c:{colour}">'
-        f'<td><span class="pill">{glyph} {e(item.verdict.value)}</span></td>'
+        f'<td><span class="pill"><span class="g">{glyph}</span>{e(item.verdict.value)}</span></td>'
         f'<td><div class="score"><div class="bar"><i style="width:{item.score}%"></i></div>'
         f"<b>{item.score}</b></div></td>"
         f"<td><code>{e(item.ioc.value)}</code>{original}</td>"
@@ -298,7 +316,7 @@ def to_html(items: Sequence[EnrichedIOC]) -> str:
     counts = Counter(i.verdict for i in items)
     tiles = "".join(
         f'<div class="tile" style="--c:{_VERDICT_VARS[v]}"><b>{counts.get(v, 0)}</b>'
-        f"<span>{VERDICT_GLYPHS[v.value]} {v.value}</span></div>"
+        f'<span><span class="g">{glyph_html(v)}</span>{v.value}</span></div>'
         for v in (Verdict.MALICIOUS, Verdict.SUSPICIOUS, Verdict.LOW, Verdict.UNKNOWN, Verdict.BENIGN)
     )
     return _HTML.substitute(

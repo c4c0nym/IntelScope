@@ -1,7 +1,7 @@
 from conftest import result
 
-from iocscope.models import Verdict
-from iocscope.scoring import assess
+from intelscope.models import Verdict
+from intelscope.scoring import assess
 
 W = {"vt": 1.0, "abuse": 0.9, "gn": 0.7}
 

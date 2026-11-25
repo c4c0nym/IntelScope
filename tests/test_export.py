@@ -4,8 +4,8 @@ import json
 
 from conftest import result
 
-from iocscope.export import infer_format, stix_pattern, to_csv, to_html, to_json, to_stix
-from iocscope.models import IOC, EnrichedIOC, IOCType, Verdict
+from intelscope.export import infer_format, stix_pattern, to_csv, to_html, to_json, to_stix
+from intelscope.models import IOC, EnrichedIOC, IOCType, Verdict
 
 
 def item(value, kind, verdict, score=0, original=None, results=None):

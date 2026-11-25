@@ -1,10 +1,10 @@
 from conftest import StubProvider, ioc, result
 
-from iocscope.allowlist import load_allowlist
-from iocscope.cache import Cache
-from iocscope.enrich import Enricher, triage_order
-from iocscope.models import IOCType, Verdict
-from iocscope.ratelimit import RateLimiter
+from intelscope.allowlist import load_allowlist
+from intelscope.cache import Cache
+from intelscope.enrich import Enricher, triage_order
+from intelscope.models import IOCType, Verdict
+from intelscope.ratelimit import RateLimiter
 
 
 def test_enrich_scores_and_orders():

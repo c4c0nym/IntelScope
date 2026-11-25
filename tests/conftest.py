@@ -5,8 +5,8 @@ from typing import Any
 import pytest
 import requests
 
-from iocscope.models import IOC, IOCType, ProviderResult
-from iocscope.providers.base import Provider
+from intelscope.models import IOC, IOCType, ProviderResult
+from intelscope.providers.base import Provider
 
 
 class FakeResponse:

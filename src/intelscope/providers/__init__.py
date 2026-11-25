@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from iocscope.providers.abuseipdb import AbuseIPDB
-from iocscope.providers.asn import ASNBlocklist
-from iocscope.providers.base import Provider
-from iocscope.providers.greynoise import GreyNoise
-from iocscope.providers.shodan import ShodanInternetDB
-from iocscope.providers.urlhaus import URLhaus
-from iocscope.providers.virustotal import VirusTotal
+from intelscope.providers.abuseipdb import AbuseIPDB
+from intelscope.providers.asn import ASNBlocklist
+from intelscope.providers.base import Provider
+from intelscope.providers.greynoise import GreyNoise
+from intelscope.providers.shodan import ShodanInternetDB
+from intelscope.providers.urlhaus import URLhaus
+from intelscope.providers.virustotal import VirusTotal
 
 REGISTRY: dict[str, type[Provider]] = {
     cls.name: cls

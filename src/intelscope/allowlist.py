@@ -6,7 +6,7 @@ import ipaddress
 from collections.abc import Iterable
 from pathlib import Path
 
-from iocscope.models import IOC, IOCType
+from intelscope.models import IOC, IOCType
 
 IPNetwork = ipaddress.IPv4Network | ipaddress.IPv6Network
 

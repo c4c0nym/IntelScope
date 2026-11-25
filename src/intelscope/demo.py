@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from iocscope.models import IOC, ProviderResult
-from iocscope.providers import REGISTRY
-from iocscope.providers.base import Provider
+from intelscope.models import IOC, ProviderResult
+from intelscope.providers import REGISTRY
+from intelscope.providers.base import Provider
 
 DEMO_IOCS = [
     "198.51.100[.]23",

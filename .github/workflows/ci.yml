@@ -24,4 +24,4 @@ jobs:
       - run: ruff check .
       - run: pytest -q
       - name: Smoke test (offline demo)
-        run: iocscope --demo --format stix > /dev/null
+        run: intelscope --demo --format stix > /dev/null
