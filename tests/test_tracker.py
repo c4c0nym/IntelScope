@@ -114,7 +114,7 @@ def test_markdown_has_every_field_and_a_tlp_banner(tmp_path):
     assert "**TLP:AMBER**" in md and "1 AMBER" in md and "1 GREEN" in md
     assert "| IOC | Type | TLP | Confidence | Source | Date | Context |" in md
     assert "| `198[.]51[.]100[.]23` | ipv4 | AMBER | medium | Report 12 | 2026-11-24 | C2 \\| seen in &lt;logs&gt; |" in md
-    assert "| `hxxps://evil[.]test/x` | url | GREEN | Feed | 2026-11-25 | line one line two |" in md
+    assert "| `hxxps://evil[.]test/x` | url | GREEN | medium | Feed | 2026-11-25 | line one line two |" in md
     assert md.index("evil[.]test") < md.index("198[.]51")  # newest first
     assert "https://evil.test" not in md  # defanged, so nothing renders as a live link
 
