@@ -59,7 +59,7 @@ lookups. You can also load the output of `intelscope --format json` with **Impor
 
 | View | What it does |
 |---|---|
-| **Domain map** and **Pivot engine** | Classify any artifact (TOX ID, onion, email, IP, hash, wallet, username, coordinates) and build the lookups that accept that type |
+| **Domain map** & **Pivot engine** | Classify any artifact (TOX ID, onion, email, IP, hash, wallet, username, coordinates) and build the lookups that accept that type |
 | **IOC triage** | Defang-aware paste box, verdict filter, score, per-source evidence, **Pivot** and **Track** per row, export to JSON / CSV / STIX 2.1, log to case |
 | **IOC tracker** | Keep indicators with TLP, context, source and date; search, edit, export as Markdown ([details](#ioc-tracker)) |
 | **API keys** | Enter, test and save the keys for every source without touching a file ([details](#api-keys)) |
