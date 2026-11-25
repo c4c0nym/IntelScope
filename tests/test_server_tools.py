@@ -176,3 +176,80 @@ def test_dashboard_has_tracker_and_key_views(live_server):
     base, _ = live_server
     page = urllib.request.urlopen(base + "/", timeout=5).read()
     assert b'id="v-tracker"' in page and b'id="v-keys"' in page
+
+
+def test_the_abusech_key_entered_on_one_card_shows_as_set_on_the_other(live_server):
+    base, token = live_server
+    _, doc = call(base, token, "/api/settings", {"provider": "threatfox", "values": {"api_key": "abuse-ch-key"},
+                                                 "persist": False})
+    cards = {p["name"]: p for p in doc["providers"]}
+    assert cards["threatfox"]["configured"] and cards["urlhaus"]["configured"]
+    assert cards["urlhaus"]["fields"][0]["set"] and "abuse-ch-key" not in json.dumps(doc)
+
+
+# --------------------------------------------------------------------------- dump -> check -> list -> Markdown
+
+MESSY = "198.51.100[.]23, 203.0.113.77\t192.0.2.10;secure-login-micros0ft[.]test\nintranet-portal.example | 8.8.8.8"
+
+
+def _wait_for(base, token, job_id):
+    import time
+
+    for _ in range(100):
+        _, doc = call(base, token, "/api/enrich/status", {"id": job_id})
+        if doc["state"] != "running":
+            return doc
+        time.sleep(0.1)
+    raise AssertionError("the check did not finish")
+
+
+def test_enrich_job_reports_progress_and_the_result(demo_server):
+    base, token = demo_server
+    status, doc = call(base, token, "/api/enrich/start", {"iocs": MESSY.splitlines()})
+    assert status == 200
+    done = _wait_for(base, token, doc["id"])
+    assert done["state"] == "done" and done["total"] > 0 and done["done"] == done["total"]
+    assert {r["ioc"] for r in done["result"]["results"]} >= {"198.51.100.23", "203.0.113.77", "192.0.2.10",
+                                                             "secure-login-micros0ft.test", "8.8.8.8"}
+    assert done["result"]["results"][0]["verdict"] == "malicious"  # most urgent first
+
+
+def test_enrich_job_validation(demo_server):
+    base, token = demo_server
+    assert call(base, token, "/api/enrich/start", {"iocs": ["nothing useful here"]})[0] == 400
+    assert call(base, token, "/api/enrich/start", {"iocs": "x"})[0] == 400
+    assert call(base, token, "/api/enrich/status", {"id": "nope"})[0] == 404
+    assert call(base, "wrong", "/api/enrich/start", {"iocs": ["1.2.3.4"]})[0] == 403
+
+
+def test_whole_flow_paste_check_list_export_import(demo_server, tmp_path):
+    base, token = demo_server
+    _, job = call(base, token, "/api/enrich/start", {"iocs": MESSY.splitlines()})
+    results = _wait_for(base, token, job["id"])["result"]["results"]
+    known = {r["ioc"]: {"verdict": r["verdict"], "score": r["score"]} for r in results}
+
+    status, doc = call(base, token, "/api/tracker/add", {
+        "text": MESSY, "known": known, "tlp": "amber", "source": "Dump 2026-11-25",
+        "context": "pasted from a ticket", "date": "2026-11-25"})
+    assert status == 200 and doc["added"] == 6 and doc["rejected"] == []
+    rows = call(base, token, "/api/tracker")[1]["entries"]
+    mal = next(r for r in rows if r["ioc"] == "198.51.100.23")
+    assert mal["verdict"] == "malicious" and mal["score"] == 100 and mal["tlp"] == "AMBER"
+
+    md = call(base, token, "/api/tracker/export", {})[1]["markdown"]
+    assert md.count("| Dump 2026-11-25 |") == 6
+    call(base, token, "/api/tracker/delete", {"ids": [r["id"] for r in rows]})
+    assert call(base, token, "/api/tracker")[1]["entries"] == []
+
+    status, doc = call(base, token, "/api/tracker/import", {"markdown": md})
+    assert status == 200 and doc == {"added": 6, "updated": 0, "errors": []}
+    back = call(base, token, "/api/tracker")[1]["entries"]
+    assert {r["ioc"] for r in back} == {r["ioc"] for r in rows}
+    assert {r["tlp"] for r in back} == {"AMBER"} and {r["context"] for r in back} == {"pasted from a ticket"}
+
+
+def test_markdown_import_errors_are_plain(demo_server):
+    base, token = demo_server
+    assert call(base, token, "/api/tracker/import", {"markdown": "no table here"})[0] == 400
+    assert call(base, token, "/api/tracker/import", {"markdown": 5})[0] == 400
+    assert call(base, "wrong", "/api/tracker/import", {"markdown": "| IOC |\n|---|\n| 1.2.3.4 |"})[0] == 403

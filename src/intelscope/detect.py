@@ -33,7 +33,11 @@ _NOT_TLDS = frozenset({
 })
 _HASH_TYPES = {32: IOCType.MD5, 40: IOCType.SHA1, 64: IOCType.SHA256}
 _SCHEME_RE = re.compile(r"^[a-z][a-z0-9+.-]*://", re.I)
-_TOKEN_SPLIT = re.compile(r"[\s,;]+")
+_TOKEN_SPLIT = re.compile(r"[\s,;|]+")
+# Bullets, list numbering and stray punctuation pasted along with indicators are not indicators.
+_JUNK_TOKEN = re.compile(r"^(?:[\W_]+|\d{1,3}[.)])$")
+_LEADING = "([{<\"'"
+_TRAILING = ")]}>\"',;!?"
 _INLINE_COMMENT = re.compile(r"\s#")
 
 
@@ -45,10 +49,30 @@ def refang(value: str) -> str:
     return value
 
 
+def _trim(value: str) -> str:
+    """Drop quotes and brackets pasted around an indicator: (1.2.3.4), "evil.test", <1.2.3.4>.
+
+    URLs keep their ends, since a closing bracket can belong to the URL. A trailing colon stays,
+    because an IPv6 address may end with one.
+    """
+    if _SCHEME_RE.match(value):
+        return value
+    return value.lstrip(_LEADING).rstrip(_TRAILING)
+
+
+def _drop_port(value: str) -> str:
+    """198.51.100.23:443 and evil.test:8080 name a host; IPv6 (several colons) is left alone."""
+    if value.count(":") == 1 and not _SCHEME_RE.match(value):
+        host, _, port = value.partition(":")
+        if port.isdigit() and 0 < int(port) < 65536:
+            return host
+    return value
+
+
 def classify(raw: str) -> IOC | None:
     """Return a normalised IOC, or None if the string is not a supported indicator."""
     original = raw.strip()
-    value = refang(original)
+    value = _drop_port(_trim(refang(original)))
     if not value:
         return None
 
@@ -93,7 +117,8 @@ def parse_iocs(lines: Iterable[str]) -> tuple[list[IOC], list[str]]:
                 continue
             ioc = classify(token)
             if ioc is None:
-                rejected.append(token)
+                if not _JUNK_TOKEN.match(token):
+                    rejected.append(token)
                 continue
             key = (ioc.type, ioc.value)
             if key not in seen:

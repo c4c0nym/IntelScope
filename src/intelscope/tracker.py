@@ -274,8 +274,72 @@ class Tracker:
                 self._save(doc)
             return removed
 
+    def import_markdown(self, text: str) -> dict[str, Any]:
+        """Add the rows of a Markdown table (this tool's own export, or any table with an IOC column).
+
+        Existing rows (same indicator, same source) are updated. A row that cannot be used is reported
+        and skipped, never fatal. Raises ValueError when the text holds no table with an IOC column.
+        """
+        rows = parse_markdown(text)
+        if not rows:
+            raise ValueError("no table with an IOC column found (expected columns like "
+                             "IOC | Type | TLP | Source | Date | Context)")
+        added = updated = 0
+        errors: list[str] = []
+        for number, row in enumerate(rows, start=1):
+            try:
+                _, created = self.add(row["ioc"], tlp=row.get("tlp", ""), context=row.get("context", ""),
+                                      source=row.get("source", ""), when=row.get("date", ""))
+            except ValueError as exc:
+                errors.append(f"row {number}: {exc}")
+                continue
+            added += created
+            updated += not created
+        return {"added": added, "updated": updated, "errors": errors}
+
 
 # --------------------------------------------------------------------------- Markdown
+
+_HEADER_ALIASES = {"ioc": "ioc", "indicator": "ioc", "value": "ioc", "tlp": "tlp", "source": "source",
+                   "date": "date", "context": "context", "notes": "context", "note": "context",
+                   "description": "context"}
+_PIPE = re.compile(r"(?<!\\)\|")
+_SEPARATOR_CELL = re.compile(r"^:?-{1,}:?$")
+
+
+def _split_row(line: str) -> list[str]:
+    body = line.strip()
+    body = body[1:] if body.startswith("|") else body
+    body = body[:-1] if body.endswith("|") and not body.endswith("\\|") else body
+    return [c.strip() for c in _PIPE.split(body)]
+
+
+def _unescape(cell: str) -> str:
+    text = re.sub(r"\\([\\|])", r"\1", cell)
+    text = text.replace("&lt;", "<").replace("&gt;", ">")
+    return "" if text.strip() == "-" else text.strip()
+
+
+def parse_markdown(text: str) -> list[dict[str, str]]:
+    """Rows of every table that has an IOC column. Column order does not matter; extra columns are ignored."""
+    rows: list[dict[str, str]] = []
+    columns: list[str | None] | None = None
+    for line in text.splitlines():
+        if not line.strip().startswith("|"):
+            columns = None  # a table ends at the first line that is not part of it
+            continue
+        cells = _split_row(line)
+        if columns is None:
+            names = [_HEADER_ALIASES.get(c.strip("` :*").lower()) for c in cells]
+            columns = names if "ioc" in names else []
+            continue
+        if not columns or all(_SEPARATOR_CELL.match(c) for c in cells if c):
+            continue
+        row = {name: _unescape(cell) for name, cell in zip(columns, cells, strict=False) if name}
+        row["ioc"] = row.get("ioc", "").strip("`").strip()
+        if row["ioc"]:
+            rows.append(row)
+    return rows
 
 _URL_IN_TEXT = re.compile(r"https?://[^\s|<>]+", re.I)
 

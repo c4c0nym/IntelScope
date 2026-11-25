@@ -50,6 +50,16 @@ CANNED: dict[str, dict[str, dict[str, Any]]] = {
     "urlhaus": {
         _URL: {"score": 95, "summary": "malware_download URL, online · AgentTesla, exe"},
     },
+    "threatfox": {
+        "198.51.100.23": {
+            "score": 85,
+            "summary": "1 ThreatFox indicator · ExampleLoader · botnet C2 · confidence 85%",
+        },
+        _URL: {
+            "score": 75,
+            "summary": "1 ThreatFox indicator · AgentTesla · payload delivery · confidence 75%",
+        },
+    },
     "greynoise": {
         "198.51.100.23": {"score": 70, "summary": "classified malicious (mass scanning)"},
         "203.0.113.77": {

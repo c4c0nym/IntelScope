@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import os
 import secrets
+import threading
 from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import resources
@@ -67,6 +68,8 @@ class _State:
     def __init__(self, demo: bool, use_cache: bool, workers: int, tracker_path: str | None = None) -> None:
         self.demo = demo
         self.session_keys: dict[str, dict[str, str]] = {}  # typed into the dashboard, never written to disk
+        self.enrich_jobs: dict[str, dict[str, Any]] = {}
+        self._jobs_lock = threading.Lock()
         self.providers = self._build()
         self.allowlist = load_allowlist(skip_reserved=not demo)
         self.cache = None if (demo or not use_cache) else Cache(default_cache_path(), ttl_seconds=24 * 3600)
@@ -82,13 +85,13 @@ class _State:
         return build_providers(session_keys=self.session_keys)
 
     # -- enrichment
-    def enrich(self, lines: list[str]) -> dict[str, Any]:
+    def enrich(self, lines: list[str], on_progress: Any = None) -> dict[str, Any]:
         iocs, rejected = parse_iocs(lines)
         active = [p for p in self.providers if p.configured]
         enricher = Enricher(
             active, allowlist=self.allowlist, cache=self.cache, max_workers=self.workers
         )
-        results = triage_order(enricher.enrich(iocs)) if iocs else []
+        results = triage_order(enricher.enrich(iocs, on_progress)) if iocs else []
         if self.cache:
             self.cache.save()
         return {
@@ -97,6 +100,38 @@ class _State:
             "rejected": rejected,
             "results": [r.to_dict() for r in results],
         }
+
+    def start_enrich(self, lines: list[str]) -> str:
+        """Run a check in the background so the page can show progress (free tiers make big lists slow)."""
+        iocs, _ = parse_iocs(lines)
+        if not iocs:
+            raise ApiError("no valid indicators found")
+        job: dict[str, Any] = {"state": "running", "done": 0, "total": 0, "result": None, "error": ""}
+        job_id = secrets.token_hex(6)
+        with self._jobs_lock:
+            self.enrich_jobs[job_id] = job
+            for old in list(self.enrich_jobs)[:-20]:  # keep the last twenty
+                del self.enrich_jobs[old]
+
+        def progress(done: int, total: int) -> None:
+            job["done"], job["total"] = done, total
+
+        def run() -> None:
+            try:
+                job["result"] = self.enrich(lines, progress)
+                job["state"] = "done"
+            except Exception as exc:  # the page shows the message; the server keeps running
+                job["state"], job["error"] = "error", f"{exc.__class__.__name__}: {exc}"
+
+        threading.Thread(target=run, daemon=True).start()
+        return job_id
+
+    def enrich_status(self, job_id: str) -> dict[str, Any]:
+        job = self.enrich_jobs.get(job_id)
+        if job is None:
+            raise ApiError("unknown job", 404)
+        return {"state": job["state"], "done": job["done"], "total": job["total"], "error": job["error"],
+                "result": job["result"] if job["state"] == "done" else None}
 
     # -- API keys
     def settings_view(self) -> dict[str, Any]:
@@ -109,8 +144,10 @@ class _State:
                 continue
             rows = []
             for f in fields:
-                mine = self.session_keys.get(name, {}).get(f.name, "")
-                saved = stored.get(name, {}).get(f.name, "")
+                shared = [cls.shares_key_with] if cls.shares_key_with and f.name == "api_key" else []
+                owners = [name, *shared]
+                mine = next((v for o in owners if (v := self.session_keys.get(o, {}).get(f.name, ""))), "")
+                saved = next((v for o in owners if (v := stored.get(o, {}).get(f.name, ""))), "")
                 env = os.environ.get(f.env, "") if f.env else ""
                 value = mine or saved or env
                 rows.append({
@@ -185,7 +222,10 @@ class _State:
         rejected: list[str] = []
         if isinstance(doc.get("text"), str):
             iocs, rejected = parse_iocs(doc["text"].splitlines())
-            items = [{"ioc": i.original} for i in iocs]
+            known = doc.get("known") if isinstance(doc.get("known"), dict) else {}
+            for i in iocs:
+                hint = known.get(i.value) if isinstance(known.get(i.value), dict) else {}
+                items.append({"ioc": i.original, "verdict": hint.get("verdict"), "score": hint.get("score")})
         for it in doc.get("items") or []:
             if isinstance(it, str):
                 items.append({"ioc": it})
@@ -329,6 +369,23 @@ def make_handler(state: _State) -> type[BaseHTTPRequestHandler]:
                 if len(lines) > MAX_IOCS:
                     raise ApiError(f"at most {MAX_IOCS} indicators per request", 413)
                 return state.enrich(lines)
+            if route == "/api/enrich/start":
+                lines = doc.get("iocs")
+                if not isinstance(lines, list) or not all(isinstance(x, str) for x in lines):
+                    raise ApiError('expected {"iocs": ["..."]}')
+                if len(lines) > MAX_IOCS:
+                    raise ApiError(f"at most {MAX_IOCS} lines per request", 413)
+                return {"id": state.start_enrich(lines)}
+            if route == "/api/enrich/status":
+                return state.enrich_status(str(doc.get("id") or ""))
+            if route == "/api/tracker/import":
+                text = doc.get("markdown")
+                if not isinstance(text, str):
+                    raise ApiError('expected {"markdown": "..."}')
+                try:
+                    return state.tracker.import_markdown(text)
+                except ValueError as exc:
+                    raise ApiError(str(exc)) from exc
             if route == "/api/settings":
                 values = doc.get("values")
                 if not isinstance(doc.get("provider"), str) or not isinstance(values, dict):

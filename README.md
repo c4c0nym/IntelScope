@@ -6,7 +6,7 @@
   <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-099197?style=flat-square">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-00978d?style=flat-square">
   <img alt="STIX 2.1" src="https://img.shields.io/badge/export-STIX%202.1-c5a56e?style=flat-square">
-  <img alt="Sources" src="https://img.shields.io/badge/sources-12-b5b1d8?style=flat-square">
+  <img alt="Sources" src="https://img.shields.io/badge/sources-13-b5b1d8?style=flat-square">
 </p>
 
 **IntelScope** is an OSINT desk and an IOC triage engine in one tool. The desk is a
@@ -75,7 +75,7 @@ go next: a SIEM, a TIP, a ticket or a stakeholder.
 
 ## Features
 
-- **Twelve sources, one verdict.** VirusTotal, AbuseIPDB, abuse.ch URLhaus, GreyNoise, Shodan
+- **Thirteen sources, one verdict.** VirusTotal, AbuseIPDB, abuse.ch URLhaus and ThreatFox, GreyNoise, Shodan
   InternetDB, Censys, urlscan.io, Intel 471, your own OpenCTI, **RDAP** (domain age and registrar)
   and **passive DNS** are queried concurrently, and every IP's network is checked against an
   **ASN blocklist**. Each source gets the indicator types it supports.
@@ -125,6 +125,7 @@ intelscope --list-providers          # check what's configured
 | [VirusTotal](https://www.virustotal.com/gui/my-apikey) | `VT_API_KEY` | 4 req/min, 500/day | IP, domain, URL, hashes |
 | [AbuseIPDB](https://www.abuseipdb.com/account/api) | `ABUSEIPDB_API_KEY` | 1,000/day | IPv4, IPv6 |
 | [URLhaus](https://auth.abuse.ch/) | `ABUSECH_AUTH_KEY` | generous | IPv4, domain, URL, MD5, SHA-256 |
+| [ThreatFox](https://threatfox.abuse.ch/) (confirmed C2 and payload-delivery IOCs) | `ABUSECH_AUTH_KEY` (same key as URLhaus) | fair use | IPv4, domain, URL, MD5, SHA-256 |
 | [GreyNoise Community](https://viz.greynoise.io/signup) | `GREYNOISE_API_KEY` *(optional)* | limited | IPv4 |
 | [Shodan InternetDB](https://internetdb.shodan.io/) | none needed | free | IPv4 |
 | [Censys](https://platform.censys.io/) | `CENSYS_API_KEY` (token, or `API_ID:API_SECRET`), `CENSYS_ORG_ID` *(optional)* | small monthly quota | IPv4, IPv6 |
@@ -207,6 +208,7 @@ intelscope track add 198.51.100[.]23 evil[.]example --tlp AMBER --source "CERT r
 intelscope -f iocs.txt --track --tlp GREEN --source "feed X"     # enrich, then track everything checked
 intelscope track list --tlp AMBER --search phishing
 intelscope track edit 3 --tlp RED
+intelscope track import iocs.md                                # read a Markdown table back in (an export, or your own)
 intelscope track export -o iocs.md                               # all rows, defanged
 intelscope track export --max-tlp GREEN -o shareable.md          # leave out AMBER and RED
 ```
@@ -219,6 +221,8 @@ the command line share it.
 The Markdown export is a table (`IOC | Type | TLP | Source | Date | Context`), newest first,
 with the highest TLP of its rows stated at the top. Indicators are defanged unless you ask
 for `--raw`. Share only what the label allows: `--max-tlp` exists for that.
+
+Paste any list of indicators, separated by spaces, tabs, commas, semicolons, pipes or new lines in any mix. Defanged forms, ports, quotes, brackets and list bullets are cleaned up. In the dashboard, check them in IOC triage (with progress, since free API tiers are rate limited), then use **Add to IOC list** to save the results with a TLP, source, context and date. **Import Markdown** reads a table with an IOC column back in; rows already there are updated, not duplicated.
 
 ## Usage
 
@@ -371,6 +375,7 @@ CI runs lint and tests on Python 3.10–3.12 for every push.
 - [x] IOC tracker with TLP, context, source and date, exported as Markdown
 - [x] Censys, urlscan.io, Intel 471 (Verity) and OpenCTI lookups, with API keys entered in the dashboard
 - [x] ASN blocklist check (Spamhaus ASN-DROP + your own list)
+- [x] ThreatFox (abuse.ch): confirmed C2 and payload-delivery indicators with malware family and confidence
 - [x] Domain registration age and registrar (RDAP, the successor to WHOIS)
 - [x] Passive DNS (mnemonic): where a domain pointed, which domains an IP served
 - [x] Tracker file lock, so the CLI and the dashboard cannot overwrite each other's writes
@@ -378,7 +383,7 @@ CI runs lint and tests on Python 3.10–3.12 for every push.
 **Next, in this order**
 
 - [ ] Run Intel 471 and OpenCTI against live tenants (needs paid credentials, so it is up to the owner of one)
-- [ ] ThreatFox and MalwareBazaar from abuse.ch (the URLhaus key already covers them): C2 and malware-sample context
+- [ ] MalwareBazaar from abuse.ch (the URLhaus / ThreatFox key already covers it): malware-sample context
 - [ ] Tracker as STIX 2.1 with TLP marking definitions, then push to MISP and OpenCTI
 - [ ] Re-check tracked indicators on a schedule and show when a verdict changes
 - [ ] Certificate transparency (crt.sh): other names on the same certificate, a good pivot from a phishing domain

@@ -171,6 +171,9 @@ def track_main(argv: Sequence[str]) -> int:
     rm = sub.add_parser("remove", help="delete rows by id")
     rm.add_argument("ids", nargs="+", type=int)
 
+    im = sub.add_parser("import", help="add the rows of a Markdown table (an earlier export, or your own)")
+    im.add_argument("file", help="Markdown file, or '-' for standard input")
+
     ex = sub.add_parser("export", help="write the tracker as a Markdown table")
     ex.add_argument("-o", "--output", metavar="PATH", help="file to write (default: standard output)")
     ex.add_argument("--max-tlp", default="", metavar="LEVEL",
@@ -204,6 +207,15 @@ def track_main(argv: Sequence[str]) -> int:
                 updated += not new
             err.print(f"[accent]tracked[/] {created} new, {updated} updated [muted]({tr.path})[/]")
             return 0
+        if args.cmd == "import":
+            text = sys.stdin.read() if args.file == "-" else Path(args.file).read_text(encoding="utf-8-sig")
+            result = tr.import_markdown(text)
+            for message in result["errors"][:10]:
+                err.print(f"[warn]skipped {message}[/]")
+            err.print(f"[accent]imported[/] {result['added']} new, {result['updated']} updated"
+                      + (f", {len(result['errors'])} skipped" if result["errors"] else "")
+                      + f" [muted]({tr.path})[/]")
+            return 0 if (result["added"] or result["updated"]) else 1
         if args.cmd == "list":
             rows = tr.search(tlp=args.tlp or None, source=args.source or None, text=args.search or None)
             out.print(_rows_table(sorted(rows, key=lambda r: (r.date, r.id), reverse=True)))

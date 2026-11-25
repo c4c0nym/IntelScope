@@ -433,12 +433,12 @@ code{font-family:var(--mono);color:var(--ivory)}
   <!-- 03 TRIAGE -->
   <section class="view" id="v-triage">
     <div class="vhead"><span class="kicker">03</span><h2>IOC triage</h2></div>
-    <p class="vsub">Paste indicators from a report or an alert, defanged is fine. Each one is checked against up to twelve threat-intel sources and gets one score and a verdict, with the evidence behind it, so you know what to look at first.</p>
+    <p class="vsub">Paste indicators from a report or an alert, defanged is fine. Each one is checked against up to thirteen threat-intel sources and gets one score and a verdict, with the evidence behind it, so you know what to look at first.</p>
     <div class="banner" id="tr-mode"></div>
     <div class="grid g2">
       <div class="card">
         <h3><span class="dot"></span>Indicators</h3>
-        <p class="note">IPs, domains, URLs and file hashes. One or more per line; comments after <code>#</code> are ignored.</p>
+        <p class="note">IPs, domains, URLs and file hashes, as many as you like. Separate them with spaces, tabs, commas, semicolons or new lines, in any mix. Defanged is fine, and so are ports, quotes and brackets around them; comments after <code>#</code> are ignored.</p>
         <textarea class="t" id="tr-in" style="min-height:150px" spellcheck="false" placeholder="198.51.100[.]23&#10;hxxp://update-check[.]cdn-delivery[.]test/payload/inv_2291.exe&#10;44d88612fea8a8f36de82e1278abb02f"></textarea>
         <div class="row">
           <button class="btn p" id="tr-go">Run triage</button>
@@ -447,6 +447,7 @@ code{font-family:var(--mono);color:var(--ivory)}
           <button class="btn" id="tr-clear">Clear</button>
         </div>
         <input type="file" id="tr-file" accept="application/json,.json" style="display:none">
+        <div class="mut" id="tr-prog" style="font-size:11px;margin-top:8px" aria-live="polite"></div>
       </div>
       <div class="card">
         <h3><span class="dot"></span>Sources</h3>
@@ -463,13 +464,25 @@ code{font-family:var(--mono);color:var(--ivory)}
         <tbody></tbody>
       </table>
     </div>
+    <div class="card" id="tr-save" style="margin-top:12px">
+      <h3><span class="dot"></span>Add to IOC list</h3>
+      <p class="note">Saves the results shown above, with the label and details you set here. The same indicator from the same source updates its row instead of adding a second one.</p>
+      <div class="tkform">
+        <div><label for="ts-tlp">TLP</label><select class="t" id="ts-tlp"></select></div>
+        <div><label for="ts-date">Date</label><input class="t" type="date" id="ts-date"></div>
+        <div class="wide"><label for="ts-source">Source</label><input class="t" id="ts-source" maxlength="200" placeholder="Report, feed, person or case it came from" autocomplete="off"></div>
+        <div class="wide"><label for="ts-context">Context</label><input class="t" id="ts-context" maxlength="2000" placeholder="Why it matters: campaign, what you saw, ticket" autocomplete="off"></div>
+        <div class="wide"><label for="ts-scope">Which results</label><select class="t" id="ts-scope"><option value="all">Everything shown</option><option value="bad">Malicious and suspicious only</option></select></div>
+      </div>
+      <div class="row"><button class="btn p" id="ts-add">Add to IOC list</button><button class="btn" id="ts-open">Open the IOC list</button></div>
+    </div>
+
     <div class="row">
       <button class="btn p" id="tr-case">Log shown to case</button>
       <button class="btn" id="tr-json">Export JSON</button>
       <button class="btn" id="tr-csv">Export CSV</button>
       <button class="btn" id="tr-stix">Export STIX 2.1</button>
       <button class="btn" id="tr-defang">Copy malicious, defanged</button>
-      <button class="btn p" id="tr-track">Track shown...</button>
     </div>
     <p class="mut" style="font-size:11px;margin-top:10px">Verdicts are decision support, not ground truth. Verify before blocking. STIX export contains malicious and suspicious indicators only.</p>
   </section>
@@ -499,7 +512,10 @@ code{font-family:var(--mono);color:var(--ivory)}
           <div><label for="tk-max">Rows to include</label><select class="t" id="tk-max"><option value="">All rows</option><option>CLEAR</option><option>GREEN</option><option>AMBER</option><option>AMBER+STRICT</option><option>RED</option></select></div>
           <div><label for="tk-defang">Indicators</label><select class="t" id="tk-defang"><option value="1">Defanged (safe to paste)</option><option value="0">Live (do not click)</option></select></div>
         </div>
-        <div class="row"><button class="btn p" id="tk-export">Download Markdown</button><button class="btn" id="tk-copy">Copy Markdown</button></div>
+        <div class="row"><button class="btn p" id="tk-export">Download Markdown</button><button class="btn" id="tk-copy">Copy Markdown</button><button class="btn" id="tk-import">Import Markdown...</button></div>
+        <input type="file" id="tk-file" accept=".md,.markdown,.txt,text/markdown,text/plain" style="display:none">
+        <p class="note" style="margin-top:10px">Import reads a table with an <b>IOC</b> column (and any of TLP, Source, Date, Context), such as an earlier export. You can also paste the table into the box on the left. Rows already there are updated, not duplicated.</p>
+        <p class="note" id="tk-msg" aria-live="polite"></p>
         <p class="note" style="margin-top:12px" id="tk-path"></p>
       </div>
     </div>
@@ -2594,7 +2610,7 @@ const VRANK={benign:0,unknown:1,low:2,suspicious:3,malicious:4};
 /* One triforce instead of three stacked triangles: fixed width, so it can never overflow a pill or a button. */
 const TRIFORCE='<svg class="tf" viewBox="0 0 16 16" role="img" aria-label="malicious"><path d="M8 1l3.5 7h-7zM4.5 8L8 15H1zM11.5 8L15 15H8z"/></svg>';
 const VGLYPH={malicious:TRIFORCE,suspicious:'▲▲',low:'▲',unknown:'?',benign:'✓'};
-const PROVIDER_LABELS={virustotal:'VirusTotal',abuseipdb:'AbuseIPDB',urlhaus:'URLhaus',greynoise:'GreyNoise',shodan:'Shodan InternetDB',censys:'Censys',urlscan:'urlscan.io',intel471:'Intel 471',opencti:'OpenCTI',rdap:'RDAP / WHOIS',pdns:'Passive DNS',asn:'ASN blocklist'};
+const PROVIDER_LABELS={virustotal:'VirusTotal',abuseipdb:'AbuseIPDB',urlhaus:'URLhaus',threatfox:'ThreatFox',greynoise:'GreyNoise',shodan:'Shodan InternetDB',censys:'Censys',urlscan:'urlscan.io',intel471:'Intel 471',opencti:'OpenCTI',rdap:'RDAP / WHOIS',pdns:'Passive DNS',asn:'ASN blocklist'};
 const TR={live:false,demo:false,token:'',providers:[],results:[],filter:null,version:'',demoIocs:[]};
 const TR_DEMO=/*DEMO*/[{"ioc":"198.51.100.23","type":"ipv4","original":"198.51.100[.]23","verdict":"malicious","score":100,"allowlisted":false,"reasons":["abuseipdb: 100% abuse confidence, 1,284 reports (90d) · ExampleHost / NL","virustotal: 7/94 engines malicious, 2 suspicious","asn: AS64500 EXAMPLE-BULLETPROOF is on Spamhaus ASN-DROP","greynoise: classified malicious (mass scanning)"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":84,"benign":false,"summary":"7/94 engines malicious, 2 suspicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":100,"benign":false,"summary":"100% abuse confidence, 1,284 reports (90d) · ExampleHost / NL","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":70,"benign":false,"summary":"classified malicious (mass scanning)","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":true,"score":null,"benign":false,"summary":"ports 22, 3389 · tags: self-signed","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":75,"benign":false,"summary":"AS64500 EXAMPLE-BULLETPROOF is on Spamhaus ASN-DROP","data":{},"error":null,"cached":false}}},{"ioc":"http://update-check.cdn-delivery.test/payload/inv_2291.exe","type":"url","original":"hxxp://update-check[.]cdn-delivery[.]test/payload/inv_2291.exe","verdict":"malicious","score":100,"allowlisted":false,"reasons":["virustotal: 18/96 engines malicious · trojan.agenttesla","urlhaus: malware_download URL, online · AgentTesla, exe"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":100,"benign":false,"summary":"18/96 engines malicious · trojan.agenttesla","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":true,"score":95,"benign":false,"summary":"malware_download URL, online · AgentTesla, exe","data":{},"error":null,"cached":false}}},{"ioc":"44d88612fea8a8f36de82e1278abb02f","type":"md5","original":"44d88612fea8a8f36de82e1278abb02f","verdict":"malicious","score":100,"allowlisted":false,"reasons":["virustotal: 61/72 engines malicious · eicar/test-file"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":100,"benign":false,"summary":"61/72 engines malicious · eicar/test-file","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"secure-login-micros0ft.test","type":"domain","original":"secure-login-micros0ft[.]test","verdict":"suspicious","score":48,"allowlisted":false,"reasons":["virustotal: 4/94 engines malicious"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":48,"benign":false,"summary":"4/94 engines malicious","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"192.0.2.10","type":"ipv4","original":"192.0.2.10","verdict":"low","score":31,"allowlisted":false,"reasons":["abuseipdb: 34% abuse confidence, 41 reports (90d)","greynoise: internet background noise","virustotal: 1/94 engines malicious"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":12,"benign":false,"summary":"1/94 engines malicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":34,"benign":false,"summary":"34% abuse confidence, 41 reports (90d)","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":20,"benign":false,"summary":"internet background noise","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":true,"score":null,"benign":false,"summary":"ports 80, 443, 8080 · 3 CVEs","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":null,"benign":false,"summary":"AS64502 EXAMPLE-HOSTING · 192.0.2.0/24 · not blocklisted","data":{},"error":null,"cached":false}}},{"ioc":"intranet-portal.example","type":"domain","original":"intranet-portal.example","verdict":"unknown","score":0,"allowlisted":false,"reasons":["no source has a record of this indicator"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"203.0.113.77","type":"ipv4","original":"203.0.113.77","verdict":"benign","score":0,"allowlisted":false,"reasons":["greynoise: known business service (RIOT): Example Search Crawler"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":0,"benign":false,"summary":"0/94 engines malicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":0,"benign":false,"summary":"0% abuse confidence, 0 reports (90d)","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":0,"benign":true,"summary":"known business service (RIOT): Example Search Crawler","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":null,"benign":false,"summary":"AS64501 EXAMPLE-SEARCH · 203.0.113.0/24 · not blocklisted","data":{},"error":null,"cached":false}}},{"ioc":"8.8.8.8","type":"ipv4","original":"8.8.8.8","verdict":"benign","score":0,"allowlisted":true,"reasons":["allowlisted: allowlisted IP"],"sources":{}}]/*END*/;
 
@@ -2617,7 +2633,7 @@ function trPrivate(v){
 function trParse(text){
   const seen=new Set(),res=[],rejected=[];
   text.split(/\r?\n/).forEach(line=>{
-    line.replace(/(^|\s)#.*$/,'').split(/[\s,;]+/).filter(Boolean).forEach(tok=>{
+    line.replace(/(^|\s)#.*$/,'').split(/[\s,;|]+/).filter(Boolean).forEach(tok=>{
       let v=refang(tok).replace(/^["'<(\[]+|["'>),.\]]+$/g,'');
       const t=trTypeOf(v);
       if(!t){rejected.push(tok);return;}
@@ -2665,15 +2681,23 @@ async function trRun(){
     TR.results=p.results;TR.filter=null;trRender();
     toast(p.results.length+' parsed, not enriched (offline)');return;
   }
-  const btn=$('#tr-go');btn.disabled=true;btn.textContent='Enriching...';
+  const btn=$('#tr-go'),prog=$('#tr-prog');btn.disabled=true;btn.textContent='Starting...';prog.textContent='';
   try{
-    const r=await fetch('/api/enrich',{method:'POST',headers:{'Content-Type':'application/json','X-Intelscope-Token':TR.token},
-      body:JSON.stringify({iocs:text.split(/\r?\n/)})});
-    const j=await r.json();
-    if(!r.ok)throw new Error(j.error||r.status);
+    const {id}=await liveApi('/api/enrich/start',{iocs:text.split(/\r?\n/)});
+    let st;
+    for(;;){
+      st=await liveApi('/api/enrich/status',{id});
+      if(st.state!=='running')break;
+      btn.textContent=st.total?('Checking '+st.done+' of '+st.total+'...'):'Checking...';
+      prog.textContent=st.total?('Lookup '+st.done+' of '+st.total+'. Free API tiers are rate limited (VirusTotal allows 4 a minute), so a list of ten can take a few minutes.'):'';
+      await new Promise(r=>setTimeout(r,600));
+    }
+    if(st.state==='error')throw new Error(st.error);
+    const j=st.result;
     TR.results=j.results;TR.filter=null;trRender();
-    toast(j.count+' enriched'+(j.rejected.length?', '+j.rejected.length+' skipped':''));
-  }catch(e){toast('Engine error: '+e.message);}
+    prog.textContent=j.rejected.length?('Skipped, not an indicator: '+j.rejected.slice(0,8).join(', ')+(j.rejected.length>8?' ...':'')):'';
+    toast(j.count+' checked'+(j.rejected.length?', '+j.rejected.length+' skipped':''));
+  }catch(e){toast('Engine error: '+e.message);prog.textContent='';}
   finally{btn.disabled=false;btn.textContent='Run triage';}
 }
 function trShown(){
@@ -2767,7 +2791,7 @@ function tlpSelect(cls,val){return `<select class="t ${cls}">${TK.tlp.map(x=>`<o
 function tkMode(){
   const el=$('#tk-mode');
   const off=!TR.live;
-  ['tk-add','tk-export','tk-copy'].forEach(id=>{$('#'+id).disabled=off;});
+  ['tk-add','tk-export','tk-copy','tk-import','ts-add'].forEach(id=>{$('#'+id).disabled=off;});
   el.innerHTML=off
     ?'<b>Needs the server</b> The tracker is stored by IntelScope on this computer. Run <code>intelscope serve</code> and open the page it prints. Without it you can still use <code>intelscope track</code> on the command line.'
     :(TR.demo?'<b>Demo</b> Rows live in memory and are gone when the server stops. Nothing is written to disk.'
@@ -2802,19 +2826,24 @@ function tkRender(){
       <td style="white-space:nowrap"><button class="btn sm" data-act="edit">Edit</button> <button class="btn sm" data-act="del">${TK.armed===e.id?'Sure?':'Delete'}</button></td></tr>`;
   }).join('')||`<tr><td colspan="7" class="mut">${TK.entries.length?'No row matches.':'Nothing tracked yet. Add indicators above, or press Track on a triage result.'}</td></tr>`;
 }
+async function tkImport(markdown){
+  try{
+    const j=await liveApi('/api/tracker/import',{markdown});
+    toast(j.added+' added, '+j.updated+' updated'+(j.errors.length?', '+j.errors.length+' skipped':''));
+    $('#tk-msg').textContent=j.errors.length?('Skipped: '+j.errors.slice(0,4).join('; ')+(j.errors.length>4?' ...':'')):'';
+    await tkLoad();
+  }catch(e){toast(e.message);$('#tk-msg').textContent=e.message;}
+}
 async function tkAdd(){
   const text=$('#tk-in').value;
   if(!text.trim())return toast('Paste indicators first');
-  const p=trParse(text);
-  if(!p.results.length)return toast('No valid indicators found');
-  const items=p.results.map(r=>{
-    const known=TR.results.find(x=>x.ioc===r.ioc&&Object.keys(x.sources||{}).length);
-    return known?{ioc:r.ioc,verdict:known.verdict,score:known.score}:{ioc:r.ioc};
-  });
+  if(/^\s*\|.*\b(ioc|indicator)\b/im.test(text)){await tkImport(text);$('#tk-in').value='';return;}  // a pasted Markdown table
+  const known={};
+  TR.results.forEach(r=>{if(Object.keys(r.sources||{}).length)known[r.ioc]={verdict:r.verdict,score:r.score};});
   const btn=$('#tk-add');btn.disabled=true;
   try{
-    const j=await liveApi('/api/tracker/add',{items,tlp:$('#tk-tlp').value,context:$('#tk-context').value,source:$('#tk-source').value,date:$('#tk-date').value});
-    toast(j.added+' added, '+j.updated+' updated'+(p.rejected.length?', '+p.rejected.length+' skipped':''));
+    const j=await liveApi('/api/tracker/add',{text,known,tlp:$('#tk-tlp').value,context:$('#tk-context').value,source:$('#tk-source').value,date:$('#tk-date').value});
+    toast(j.added+' added, '+j.updated+' updated'+(j.rejected.length?', '+j.rejected.length+' skipped':''));
     $('#tk-in').value='';await tkLoad();
   }catch(e){toast(e.message);}
   btn.disabled=!TR.live;
@@ -2841,9 +2870,26 @@ function tkWire(){
   $('#tk-copy').addEventListener('click',()=>tkExport(true));
   $('#tk-search').addEventListener('input',tkRender);
   $('#tk-filter').addEventListener('change',tkRender);
-  $('#tr-track').addEventListener('click',()=>{
-    const rows=trShown();if(!rows.length)return toast('Nothing to track');
-    trackSend(rows.filter(r=>!r.allowlisted).map(r=>r.ioc));
+  $('#ts-tlp').innerHTML=TK.tlp.map(x=>`<option${x==='AMBER'?' selected':''}>${esc(x)}</option>`).join('');
+  $('#ts-date').value=new Date().toISOString().slice(0,10);
+  $('#ts-open').addEventListener('click',()=>go('tracker'));
+  $('#ts-add').addEventListener('click',async()=>{
+    let rows=trShown();
+    if($('#ts-scope').value==='bad')rows=rows.filter(r=>r.verdict==='malicious'||r.verdict==='suspicious');
+    if(!rows.length)return toast($('#ts-scope').value==='bad'?'No malicious or suspicious results shown':'Nothing to add');
+    const btn=$('#ts-add');btn.disabled=true;
+    try{
+      const j=await liveApi('/api/tracker/add',{items:rows.map(r=>({ioc:r.ioc,verdict:r.verdict,score:r.score})),
+        tlp:$('#ts-tlp').value,context:$('#ts-context').value,source:$('#ts-source').value,date:$('#ts-date').value});
+      toast(j.added+' added, '+j.updated+' updated in the IOC list');
+      tkLoad();
+    }catch(e){toast(e.message);}
+    btn.disabled=!TR.live;
+  });
+  $('#tk-import').addEventListener('click',()=>$('#tk-file').click());
+  $('#tk-file').addEventListener('change',async e=>{
+    const f=e.target.files[0];e.target.value='';if(!f)return;
+    await tkImport(await f.text());
   });
   $('#tk-table').addEventListener('click',async ev=>{
     const b=ev.target.closest('[data-act]');if(!b)return;

@@ -240,3 +240,18 @@ def test_tracker_file_is_plain_json(tmp_path):
     t.add("1.2.3.4", source="x")
     doc = json.loads((tmp_path / "t.json").read_text(encoding="utf-8"))
     assert doc["entries"][0]["ioc"] == "1.2.3.4" and doc["next_id"] == 2
+
+
+def test_cli_track_import_round_trip(tmp_path):
+    a, b = str(tmp_path / "a.json"), str(tmp_path / "b.json")
+    assert main(["track", "--db", a, "add", "198.51.100[.]23", "evil[.]example", "--tlp", "RED",
+                 "--source", "Report 12", "--context", "phish", "--date", "2026-11-24"]) == 0
+    md = tmp_path / "iocs.md"
+    assert main(["track", "--db", a, "export", "-o", str(md)]) == 0
+    assert main(["track", "--db", b, "import", str(md)]) == 0
+    def rows(path):  # the export is newest first, so compare the content, not the order
+        return sorted((e.ioc, e.tlp, e.source, e.date, e.context) for e in Tracker(path).entries())
+
+    assert rows(b) == rows(a) and len(rows(a)) == 2
+    (tmp_path / "bad.md").write_text("nothing here")
+    assert main(["track", "--db", b, "import", str(tmp_path / "bad.md")]) == 2
