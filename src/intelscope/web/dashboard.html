@@ -299,6 +299,23 @@ ul.ev .cn{color:var(--mineral)}
 .src.ready{color:var(--text)}
 .src.ready::before{background:var(--benzol)}
 .src.nokey::before{background:var(--isabella)}
+/* tracker and keys */
+.tlp{display:inline-block;font:700 10px var(--mono);letter-spacing:.08em;padding:2px 7px;border-radius:3px;background:#000;border:1px solid currentColor;white-space:nowrap}
+.tlp[data-t="CLEAR"]{color:#fff}.tlp[data-t="GREEN"]{color:#33ff00}.tlp[data-t="AMBER"]{color:#ffc000}
+.tlp[data-t="AMBER+STRICT"]{color:#ffc000;border-style:double;border-width:3px}.tlp[data-t="RED"]{color:#ff2b2b}
+.tkform{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.tkform label,.kf label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.tkform .wide{grid-column:1/-1}
+.tkbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0 8px}
+.tkbar input.t{max-width:280px}.tkbar select.t{width:auto}
+#tk-table td{vertical-align:top}
+#tk-table .ctx{max-width:340px;overflow-wrap:anywhere}
+#tk-table td input.t,#tk-table td select.t{padding:4px 6px;font-size:11px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+.kf{margin-bottom:10px}
+.kf .hint{font-size:10.5px;color:var(--muted);margin-top:3px}
+.kmsg{min-height:16px;font-size:11px;margin-top:8px;color:var(--muted)}
+.kmsg.ok{color:var(--benzol)}.kmsg.bad{color:var(--isabella)}
 code{font-family:var(--mono);color:var(--ivory)}
 .stripe{display:flex;height:4px}
 .stripe i{flex:1}
@@ -328,32 +345,39 @@ code{font-family:var(--mono);color:var(--ivory)}
       <button data-go="map"><span class="idx">01</span>Domain map</button>
       <button data-go="pivot"><span class="idx">02</span>Pivot engine</button>
       <button data-go="triage"><span class="idx">03</span>IOC triage</button>
+      <button data-go="tracker"><span class="idx">04</span>IOC tracker</button>
     </nav>
   </div>
   <div class="navgroup"><div class="gl">Collect</div>
     <nav class="nav" data-nav>
-      <button data-go="search"><span class="idx">04</span>Search &amp; dorks</button>
-      <button data-go="social"><span class="idx">05</span>Usernames</button>
-      <button data-go="email"><span class="idx">06</span>Email &amp; identity</button>
-      <button data-go="image"><span class="idx">07</span>Images</button>
-      <button data-go="geo"><span class="idx">08</span>Geo</button>
-      <button data-go="network"><span class="idx">09</span>Network</button>
-      <button data-go="dark"><span class="idx">10</span>Darkweb</button>
+      <button data-go="search"><span class="idx">05</span>Search &amp; dorks</button>
+      <button data-go="social"><span class="idx">06</span>Usernames</button>
+      <button data-go="email"><span class="idx">07</span>Email &amp; identity</button>
+      <button data-go="image"><span class="idx">08</span>Images</button>
+      <button data-go="geo"><span class="idx">09</span>Geo</button>
+      <button data-go="network"><span class="idx">10</span>Network</button>
+      <button data-go="dark"><span class="idx">11</span>Darkweb</button>
     </nav>
   </div>
   <div class="navgroup"><div class="gl">Case work</div>
     <nav class="nav" data-nav>
-      <button data-go="note"><span class="idx">11</span>Ransom note triage</button>
-      <button data-go="lab"><span class="idx">12</span>Artifact lab</button>
-      <button data-go="crypto"><span class="idx">13</span>Crypto trail</button>
-      <button data-go="case"><span class="idx">14</span>Case file</button>
+      <button data-go="note"><span class="idx">12</span>Ransom note triage</button>
+      <button data-go="lab"><span class="idx">13</span>Artifact lab</button>
+      <button data-go="crypto"><span class="idx">14</span>Crypto trail</button>
+      <button data-go="case"><span class="idx">15</span>Case file</button>
     </nav>
   </div>
   <div class="navgroup"><div class="gl">Reference</div>
     <nav class="nav" data-nav>
-      <button data-go="play"><span class="idx">15</span>Playbooks</button>
-      <button data-go="lib"><span class="idx">16</span>Full library</button>
-      <button data-go="opsec"><span class="idx">17</span>OPSEC &amp; legal</button>
+      <button data-go="play"><span class="idx">16</span>Playbooks</button>
+      <button data-go="lib"><span class="idx">17</span>Full library</button>
+      <button data-go="opsec"><span class="idx">18</span>OPSEC &amp; legal</button>
+    </nav>
+  </div>
+
+  <div class="navgroup"><div class="gl">Setup</div>
+    <nav class="nav" data-nav>
+      <button data-go="keys"><span class="idx">19</span>API keys</button>
     </nav>
   </div>
 
@@ -409,7 +433,7 @@ code{font-family:var(--mono);color:var(--ivory)}
   <!-- 03 TRIAGE -->
   <section class="view" id="v-triage">
     <div class="vhead"><span class="kicker">03</span><h2>IOC triage</h2></div>
-    <p class="vsub">Paste indicators from a report or an alert, defanged is fine. Each one is checked against up to six threat-intel sources and gets one score and a verdict, with the evidence behind it, so you know what to look at first.</p>
+    <p class="vsub">Paste indicators from a report or an alert, defanged is fine. Each one is checked against up to ten threat-intel sources and gets one score and a verdict, with the evidence behind it, so you know what to look at first.</p>
     <div class="banner" id="tr-mode"></div>
     <div class="grid g2">
       <div class="card">
@@ -426,7 +450,7 @@ code{font-family:var(--mono);color:var(--ivory)}
       </div>
       <div class="card">
         <h3><span class="dot"></span>Sources</h3>
-        <p class="note">Keys live in the <code>.env</code> next to the server, never in this page. Run sends the indicators to every ready source, so keep victim-specific artifacts out of it (see OPSEC).</p>
+        <p class="note">Keys are kept by the server on this computer, never in this page: add them under <a href="#keys" data-jump="keys" style="color:var(--iris)">API keys</a>. Run sends the indicators to every ready source, so keep victim-specific artifacts out of it (see OPSEC).</p>
         <div id="tr-sources" class="srclist"></div>
       </div>
     </div>
@@ -445,13 +469,64 @@ code{font-family:var(--mono);color:var(--ivory)}
       <button class="btn" id="tr-csv">Export CSV</button>
       <button class="btn" id="tr-stix">Export STIX 2.1</button>
       <button class="btn" id="tr-defang">Copy malicious, defanged</button>
+      <button class="btn p" id="tr-track">Track shown...</button>
     </div>
     <p class="mut" style="font-size:11px;margin-top:10px">Verdicts are decision support, not ground truth. Verify before blocking. STIX export contains malicious and suspicious indicators only.</p>
   </section>
 
-  <!-- 04 SEARCH -->
+  <!-- 04 TRACKER -->
+  <section class="view" id="v-tracker">
+    <div class="vhead"><span class="kicker">04</span><h2>IOC tracker</h2></div>
+    <p class="vsub">Keep the indicators you are following, with the label they must be handled under, why they matter, where you got them and when. One row per indicator per source. Export the lot as a Markdown table for notes, tickets or a handover.</p>
+    <div class="banner" id="tk-mode"></div>
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="dot"></span>Add indicators</h3>
+        <p class="note">IPs, domains, URLs and hashes, defanged is fine. The fields below apply to every indicator you add in one go. Adding the same indicator from the same source again updates its row.</p>
+        <textarea class="t" id="tk-in" style="min-height:96px" spellcheck="false" placeholder="198.51.100[.]23&#10;evil-login[.]example"></textarea>
+        <div class="tkform">
+          <div><label for="tk-tlp">TLP</label><select class="t" id="tk-tlp"><option>CLEAR</option><option>GREEN</option><option>AMBER</option><option>AMBER+STRICT</option><option>RED</option></select></div>
+          <div><label for="tk-date">Date</label><input class="t" type="date" id="tk-date"></div>
+          <div class="wide"><label for="tk-source">Source</label><input class="t" id="tk-source" maxlength="200" placeholder="Report, feed, person or case it came from" autocomplete="off"></div>
+          <div class="wide"><label for="tk-context">Context</label><input class="t" id="tk-context" maxlength="2000" placeholder="Why it matters: campaign, what you saw, ticket" autocomplete="off"></div>
+        </div>
+        <div class="row"><button class="btn p" id="tk-add">Add to tracker</button><button class="btn" id="tk-clearin">Clear</button></div>
+      </div>
+      <div class="card">
+        <h3><span class="dot"></span>Export</h3>
+        <p class="note">The Markdown file carries the highest TLP of its rows at the top: treat the whole file at that label. To share something wider, export only the rows up to a lower label.</p>
+        <div class="tkform">
+          <div><label for="tk-max">Rows to include</label><select class="t" id="tk-max"><option value="">All rows</option><option>CLEAR</option><option>GREEN</option><option>AMBER</option><option>AMBER+STRICT</option><option>RED</option></select></div>
+          <div><label for="tk-defang">Indicators</label><select class="t" id="tk-defang"><option value="1">Defanged (safe to paste)</option><option value="0">Live (do not click)</option></select></div>
+        </div>
+        <div class="row"><button class="btn p" id="tk-export">Download Markdown</button><button class="btn" id="tk-copy">Copy Markdown</button></div>
+        <p class="note" style="margin-top:12px" id="tk-path"></p>
+      </div>
+    </div>
+    <div class="tkbar">
+      <input class="t" id="tk-search" placeholder="Search indicator, source or context" autocomplete="off">
+      <select class="t" id="tk-filter" aria-label="Filter by TLP"><option value="">All TLP</option><option>CLEAR</option><option>GREEN</option><option>AMBER</option><option>AMBER+STRICT</option><option>RED</option></select>
+      <span class="mut" id="tk-count"></span>
+    </div>
+    <div class="card" style="overflow-x:auto">
+      <table class="tb" id="tk-table">
+        <thead><tr><th>Indicator</th><th>Type</th><th>TLP</th><th>Source</th><th>Date</th><th>Context</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 19 API KEYS -->
+  <section class="view" id="v-keys">
+    <div class="vhead"><span class="kicker">19</span><h2>API keys</h2></div>
+    <p class="vsub">Give IntelScope the keys for the sources you use. A source without a key is skipped. Pick where a key lives: this session only, or saved on this computer. A key is never sent back to this page once you have entered it.</p>
+    <div class="banner" id="ks-mode"></div>
+    <div class="kgrid" id="ks-list"></div>
+  </section>
+
+  <!-- 05 SEARCH -->
   <section class="view" id="v-search">
-    <div class="vhead"><span class="kicker">04</span><h2>Search &amp; dorks</h2></div>
+    <div class="vhead"><span class="kicker">05</span><h2>Search &amp; dorks</h2></div>
     <p class="vsub">Ransomware crews leak the same victim data across forums, Telegram mirrors and paste sites. Broad engines miss them, so query several and archive everything you find.</p>
     <div class="grid g2">
       <div class="card">
@@ -486,7 +561,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 04 SOCIAL -->
   <section class="view" id="v-social">
-    <div class="vhead"><span class="kicker">05</span><h2>Usernames &amp; social</h2></div>
+    <div class="vhead"><span class="kicker">06</span><h2>Usernames &amp; social</h2></div>
     <p class="vsub">Actor handles reused between a forum, a Telegram channel and an old gaming profile are still the most common attribution bridge. Generate variants, then sweep them.</p>
     <div class="grid g2">
       <div class="card">
@@ -509,7 +584,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 05 EMAIL -->
   <section class="view" id="v-email">
-    <div class="vhead"><span class="kicker">06</span><h2>Email &amp; identity</h2></div>
+    <div class="vhead"><span class="kicker">07</span><h2>Email &amp; identity</h2></div>
     <p class="vsub">Ransom notes still carry mail contacts on Proton, Onionmail, Tutanota and disposable domains. The address itself, its Gravatar hash and its breach history are three separate pivots.</p>
     <div class="grid g2">
       <div class="card">
@@ -535,7 +610,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 06 IMAGE -->
   <section class="view" id="v-image">
-    <div class="vhead"><span class="kicker">07</span><h2>Images</h2></div>
+    <div class="vhead"><span class="kicker">08</span><h2>Images</h2></div>
     <p class="vsub">Leak-site proof screenshots and actor avatars carry metadata, artefacts and reusable hashes. Everything below runs locally, so evidence images never leave your machine.</p>
     <div class="banner"><b>Handling</b> Work on copies. Hash the original first and record it in the case file so you can prove the image you analysed is the image you received.</div>
     <div class="grid g2">
@@ -565,7 +640,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 07 GEO -->
   <section class="view" id="v-geo">
-    <div class="vhead"><span class="kicker">08</span><h2>Geo</h2></div>
+    <div class="vhead"><span class="kicker">09</span><h2>Geo</h2></div>
     <p class="vsub">Geolocation matters twice in these cases: pinning exfiltration or hosting infrastructure, and placing an actor from photo, timezone or language traces.</p>
     <div class="grid g2">
       <div class="card">
@@ -593,7 +668,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 08 NETWORK -->
   <section class="view" id="v-network">
-    <div class="vhead"><span class="kicker">09</span><h2>Network</h2></div>
+    <div class="vhead"><span class="kicker">10</span><h2>Network</h2></div>
     <p class="vsub">Domain and IP work on exfiltration servers, C2, phishing infrastructure and clearnet mirrors of leak portals. Prefer passive sources first, active probing second, and only when the case allows it.</p>
     <div class="grid g2">
       <div class="card">
@@ -625,7 +700,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 09 DARKWEB -->
   <section class="view" id="v-dark">
-    <div class="vhead"><span class="kicker">10</span><h2>Darkweb</h2></div>
+    <div class="vhead"><span class="kicker">11</span><h2>Darkweb</h2></div>
     <p class="vsub">Leak portals, negotiation panels and forum profiles. Treat every onion as hostile infrastructure that logs you.</p>
     <div class="banner"><b>Before you click</b> Onion links open in a normal browser will fail, and clearnet mirrors of leak sites will log your address. Use a dedicated Tor Browser in an isolated VM, and never authenticate to a negotiation portal with a real victim key unless the incident lead has authorised it. Loading a victim chat can reset a countdown timer.</div>
     <div class="grid g2">
@@ -649,7 +724,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 10 NOTE -->
   <section class="view" id="v-note">
-    <div class="vhead"><span class="kicker">11</span><h2>Ransom note triage</h2></div>
+    <div class="vhead"><span class="kicker">12</span><h2>Ransom note triage</h2></div>
     <p class="vsub">Paste the note, the negotiation transcript or the drop text. The parser extracts every contact channel and scores the wording and filenames against known family conventions.</p>
     <div class="grid g2">
       <div class="card">
@@ -684,7 +759,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 11 LAB -->
   <section class="view" id="v-lab">
-    <div class="vhead"><span class="kicker">12</span><h2>Artifact lab</h2></div>
+    <div class="vhead"><span class="kicker">13</span><h2>Artifact lab</h2></div>
     <p class="vsub">Local validators and converters. Use these before any external lookup so you do not query third parties with a malformed or misread identifier.</p>
     <div class="grid g2">
       <div class="card">
@@ -732,7 +807,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 12 CRYPTO -->
   <section class="view" id="v-crypto">
-    <div class="vhead"><span class="kicker">13</span><h2>Crypto trail</h2></div>
+    <div class="vhead"><span class="kicker">14</span><h2>Crypto trail</h2></div>
     <p class="vsub">Ransom addresses are one of the few artefacts that persist across victims. Validate the address offline, then trace it on chain and check whether it is already reported.</p>
     <div class="grid g2">
       <div class="card">
@@ -754,7 +829,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 13 CASE -->
   <section class="view" id="v-case">
-    <div class="vhead"><span class="kicker">14</span><h2>Case file</h2></div>
+    <div class="vhead"><span class="kicker">15</span><h2>Case file</h2></div>
     <p class="vsub">An in-memory working log for this session. Nothing is written to disk automatically, so export before you close the tab.</p>
     <div class="banner"><b>Session only</b> This log lives in the page. Refreshing clears it. Use Export JSON to save, and Import to reload a previous session.</div>
     <div class="grid g2">
@@ -790,7 +865,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 14 PLAYBOOKS -->
   <section class="view" id="v-play">
-    <div class="vhead"><span class="kicker">15</span><h2>Playbooks</h2></div>
+    <div class="vhead"><span class="kicker">16</span><h2>Playbooks</h2></div>
     <p class="vsub">Ordered sequences for the cases that land on a cybercrime desk. Order matters: passive before active, local before third party.</p>
     <div class="sw" id="pb-switch"></div>
     <div class="grid g2" id="pb-body"></div>
@@ -798,7 +873,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 15 LIBRARY -->
   <section class="view" id="v-lib">
-    <div class="vhead"><span class="kicker">16</span><h2>Full library</h2></div>
+    <div class="vhead"><span class="kicker">17</span><h2>Full library</h2></div>
     <p class="vsub">Every resource in this console, filterable. Drawn from the OSINT Framework, awesome-osint, OSINT BIBLE, OSINT-comprehensive and awesome-threat-intelligence, then trimmed to what holds up on cybercrime work.</p>
     <div class="abrow" style="margin-bottom:10px">
       <input class="q" id="lib-q" placeholder="Filter by name, tag or description">
@@ -815,7 +890,7 @@ code{font-family:var(--mono);color:var(--ivory)}
 
   <!-- 16 OPSEC -->
   <section class="view" id="v-opsec">
-    <div class="vhead"><span class="kicker">17</span><h2>OPSEC &amp; legal</h2></div>
+    <div class="vhead"><span class="kicker">18</span><h2>OPSEC &amp; legal</h2></div>
     <p class="vsub">The parts of this work that get analysts in trouble.</p>
     <div class="grid g2" id="opsec-body"></div>
   </section>
@@ -1419,6 +1494,8 @@ function go(id){
   $$('[data-nav] button').forEach(b=>b.classList.toggle('on',b.dataset.go===id));
   window.scrollTo({top:0,behavior:'instant'});
   location.hash=id;
+  if(id==='tracker'&&typeof tkLoad==='function'&&TR.live)tkLoad();
+  if(id==='keys'&&typeof ksLoad==='function'&&TR.live)ksLoad();
 }
 $$('[data-nav] button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 
@@ -2517,7 +2594,7 @@ const VRANK={benign:0,unknown:1,low:2,suspicious:3,malicious:4};
 /* One triforce instead of three stacked triangles: fixed width, so it can never overflow a pill or a button. */
 const TRIFORCE='<svg class="tf" viewBox="0 0 16 16" role="img" aria-label="malicious"><path d="M8 1l3.5 7h-7zM4.5 8L8 15H1zM11.5 8L15 15H8z"/></svg>';
 const VGLYPH={malicious:TRIFORCE,suspicious:'▲▲',low:'▲',unknown:'?',benign:'✓'};
-const PROVIDER_LABELS={virustotal:'VirusTotal',abuseipdb:'AbuseIPDB',urlhaus:'URLhaus',greynoise:'GreyNoise',shodan:'Shodan InternetDB',asn:'ASN blocklist'};
+const PROVIDER_LABELS={virustotal:'VirusTotal',abuseipdb:'AbuseIPDB',urlhaus:'URLhaus',greynoise:'GreyNoise',shodan:'Shodan InternetDB',censys:'Censys',urlscan:'urlscan.io',intel471:'Intel 471',opencti:'OpenCTI',asn:'ASN blocklist'};
 const TR={live:false,demo:false,token:'',providers:[],results:[],filter:null,version:'',demoIocs:[]};
 const TR_DEMO=/*DEMO*/[{"ioc":"198.51.100.23","type":"ipv4","original":"198.51.100[.]23","verdict":"malicious","score":100,"allowlisted":false,"reasons":["abuseipdb: 100% abuse confidence, 1,284 reports (90d) · ExampleHost / NL","virustotal: 7/94 engines malicious, 2 suspicious","asn: AS64500 EXAMPLE-BULLETPROOF is on Spamhaus ASN-DROP","greynoise: classified malicious (mass scanning)"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":84,"benign":false,"summary":"7/94 engines malicious, 2 suspicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":100,"benign":false,"summary":"100% abuse confidence, 1,284 reports (90d) · ExampleHost / NL","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":70,"benign":false,"summary":"classified malicious (mass scanning)","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":true,"score":null,"benign":false,"summary":"ports 22, 3389 · tags: self-signed","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":75,"benign":false,"summary":"AS64500 EXAMPLE-BULLETPROOF is on Spamhaus ASN-DROP","data":{},"error":null,"cached":false}}},{"ioc":"http://update-check.cdn-delivery.test/payload/inv_2291.exe","type":"url","original":"hxxp://update-check[.]cdn-delivery[.]test/payload/inv_2291.exe","verdict":"malicious","score":100,"allowlisted":false,"reasons":["virustotal: 18/96 engines malicious · trojan.agenttesla","urlhaus: malware_download URL, online · AgentTesla, exe"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":100,"benign":false,"summary":"18/96 engines malicious · trojan.agenttesla","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":true,"score":95,"benign":false,"summary":"malware_download URL, online · AgentTesla, exe","data":{},"error":null,"cached":false}}},{"ioc":"44d88612fea8a8f36de82e1278abb02f","type":"md5","original":"44d88612fea8a8f36de82e1278abb02f","verdict":"malicious","score":100,"allowlisted":false,"reasons":["virustotal: 61/72 engines malicious · eicar/test-file"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":100,"benign":false,"summary":"61/72 engines malicious · eicar/test-file","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"secure-login-micros0ft.test","type":"domain","original":"secure-login-micros0ft[.]test","verdict":"suspicious","score":48,"allowlisted":false,"reasons":["virustotal: 4/94 engines malicious"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":48,"benign":false,"summary":"4/94 engines malicious","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"192.0.2.10","type":"ipv4","original":"192.0.2.10","verdict":"low","score":31,"allowlisted":false,"reasons":["abuseipdb: 34% abuse confidence, 41 reports (90d)","greynoise: internet background noise","virustotal: 1/94 engines malicious"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":12,"benign":false,"summary":"1/94 engines malicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":34,"benign":false,"summary":"34% abuse confidence, 41 reports (90d)","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":20,"benign":false,"summary":"internet background noise","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":true,"score":null,"benign":false,"summary":"ports 80, 443, 8080 · 3 CVEs","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":null,"benign":false,"summary":"AS64502 EXAMPLE-HOSTING · 192.0.2.0/24 · not blocklisted","data":{},"error":null,"cached":false}}},{"ioc":"intranet-portal.example","type":"domain","original":"intranet-portal.example","verdict":"unknown","score":0,"allowlisted":false,"reasons":["no source has a record of this indicator"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"203.0.113.77","type":"ipv4","original":"203.0.113.77","verdict":"benign","score":0,"allowlisted":false,"reasons":["greynoise: known business service (RIOT): Example Search Crawler"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":0,"benign":false,"summary":"0/94 engines malicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":0,"benign":false,"summary":"0% abuse confidence, 0 reports (90d)","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":0,"benign":true,"summary":"known business service (RIOT): Example Search Crawler","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":null,"benign":false,"summary":"AS64501 EXAMPLE-SEARCH · 203.0.113.0/24 · not blocklisted","data":{},"error":null,"cached":false}}},{"ioc":"8.8.8.8","type":"ipv4","original":"8.8.8.8","verdict":"benign","score":0,"allowlisted":true,"reasons":["allowlisted: allowlisted IP"],"sources":{}}]/*END*/;
 
@@ -2557,13 +2634,13 @@ function trParse(text){
 function trLabel(n){return PROVIDER_LABELS[n]||(TR.providers.find(p=>p.name===n)||{}).label||n;}
 
 async function trProbe(){
-  if(!/^https?:$/.test(location.protocol)){trMode();return;}
+  if(!/^https?:$/.test(location.protocol)){trMode();tkLoad();ksLoad();return;}
   try{
     const r=await fetch('/api/health',{cache:'no-store'});
     const j=await r.json();
     if(j.tool==='intelscope'){TR.live=true;TR.demo=!!j.demo;TR.token=j.token;TR.providers=j.providers||[];TR.version=j.version||'';TR.demoIocs=j.demo_iocs||[];}
   }catch(e){TR.live=false;}
-  trMode();
+  trMode();tkLoad();ksLoad();
 }
 function trMode(){
   const el=$('#tr-mode'),src=$('#tr-sources');
@@ -2625,11 +2702,12 @@ function trRender(){
       <td style="color:var(--paper)">${esc(r.ioc)}${r.original&&r.original!==r.ioc?`<div class="mut" style="font-size:10.5px">submitted as ${esc(r.original)}</div>`:''}</td>
       <td class="mut" style="text-transform:uppercase;letter-spacing:.1em;font-size:10px">${esc(r.type)}</td>
       <td><ul class="ev">${ev.join('')}</ul></td>
-      <td><button class="btn sm" data-pv="${i}" title="Send to the artifact bar and pivot">Pivot</button></td></tr>`;
+      <td style="white-space:nowrap"><button class="btn sm" data-pv="${i}" title="Send to the artifact bar and pivot">Pivot</button> <button class="btn sm" data-tk="${i}" title="Add to the IOC tracker">Track</button></td></tr>`;
   }).join('')||'<tr><td colspan="6" class="mut">Nothing to show yet. Paste indicators above, or load the demo.</td></tr>';
   $$('[data-pv]',$('#tr-table')).forEach(b=>b.addEventListener('click',()=>{
     $('#q').value=rows[+b.dataset.pv].ioc;classify();pivot();
   }));
+  $$('[data-tk]',$('#tr-table')).forEach(b=>b.addEventListener('click',()=>trackSend([rows[+b.dataset.tk].ioc])));
 }
 function trSend(values){
   $('#tr-in').value=values.join('\n');go('triage');
@@ -2673,6 +2751,172 @@ function trCsv(){
   TR.results.forEach(r=>rows.push([r.ioc,r.type,r.verdict,r.score,r.allowlisted,(r.reasons||[]).join(' | '),
     ...provs.map(n=>{const s=(r.sources||{})[n];return s?(s.ok?s.summary:'error: '+s.error):'';})]));
   return rows.map(r=>r.map(csvCell).join(',')).join('\n')+'\n';
+}
+/* ---- IOC tracker ---- */
+const TK={entries:[],tlp:['CLEAR','GREEN','AMBER','AMBER+STRICT','RED'],path:'',editing:null,armed:null};
+async function liveApi(path,body){
+  const opt=body===undefined?{headers:{'X-Intelscope-Token':TR.token},cache:'no-store'}
+    :{method:'POST',headers:{'Content-Type':'application/json','X-Intelscope-Token':TR.token},body:JSON.stringify(body)};
+  const r=await fetch(path,opt);let j={};
+  try{j=await r.json();}catch(e){}
+  if(!r.ok)throw new Error(j.error||('HTTP '+r.status));
+  return j;
+}
+function tlpBadge(t){return `<span class="tlp" data-t="${esc(t)}">TLP:${esc(t)}</span>`;}
+function tlpSelect(cls,val){return `<select class="t ${cls}">${TK.tlp.map(x=>`<option${x===val?' selected':''}>${esc(x)}</option>`).join('')}</select>`;}
+function tkMode(){
+  const el=$('#tk-mode');
+  const off=!TR.live;
+  ['tk-add','tk-export','tk-copy'].forEach(id=>{$('#'+id).disabled=off;});
+  el.innerHTML=off
+    ?'<b>Needs the server</b> The tracker is stored by IntelScope on this computer. Run <code>intelscope serve</code> and open the page it prints. Without it you can still use <code>intelscope track</code> on the command line.'
+    :(TR.demo?'<b>Demo</b> Rows live in memory and are gone when the server stops. Nothing is written to disk.'
+      :'<b>Local file</b> Rows are saved on this computer, so they are still here next time. The command line (<code>intelscope track</code>) reads and writes the same file.');
+  $('#tk-path').textContent=TR.live&&TK.path?('Stored in '+TK.path):'';
+}
+async function tkLoad(){
+  tkMode();
+  if(!TR.live){TK.entries=[];tkRender();return;}
+  try{const j=await liveApi('/api/tracker');TK.entries=j.entries;TK.path=j.path;if(j.tlp_levels)TK.tlp=j.tlp_levels;}
+  catch(e){toast('Tracker: '+e.message);}
+  tkMode();tkRender();
+}
+function tkShown(){
+  const q=$('#tk-search').value.trim().toLowerCase(),f=$('#tk-filter').value;
+  return TK.entries.filter(e=>(!f||e.tlp===f)&&(!q||(e.ioc+' '+e.source+' '+e.context).toLowerCase().includes(q)))
+    .sort((a,b)=>(b.date.localeCompare(a.date))||(b.id-a.id));
+}
+function tkRender(){
+  const rows=tkShown();
+  $('#tk-count').textContent=TK.entries.length?(rows.length===TK.entries.length?TK.entries.length+' rows':rows.length+' of '+TK.entries.length+' rows'):'';
+  $('#tk-table').querySelector('tbody').innerHTML=rows.map(e=>{
+    if(TK.editing===e.id)return `<tr data-id="${e.id}"><td style="color:var(--paper)">${esc(e.ioc)}</td><td class="mut">${esc(e.type)}</td>
+      <td>${tlpSelect('ed-tlp',e.tlp)}</td><td><input class="t ed-source" maxlength="200" value="${esc(e.source)}"></td>
+      <td><input class="t ed-date" type="date" value="${esc(e.date)}"></td><td><input class="t ed-context" maxlength="2000" value="${esc(e.context)}"></td>
+      <td style="white-space:nowrap"><button class="btn sm p" data-act="save">Save</button> <button class="btn sm" data-act="cancel">Cancel</button></td></tr>`;
+    const verdict=e.verdict?`<div class="mut" style="font-size:10.5px">triage: ${esc(e.verdict)}${e.score!=null?' ('+(+e.score)+')':''}</div>`:'';
+    return `<tr data-id="${e.id}"><td style="color:var(--paper)">${esc(e.ioc)}${verdict}</td>
+      <td class="mut" style="text-transform:uppercase;letter-spacing:.1em;font-size:10px;white-space:nowrap">${esc(e.type)}</td><td>${tlpBadge(e.tlp)}</td>
+      <td>${esc(e.source)||'<span class="mut">-</span>'}</td><td style="white-space:nowrap">${esc(e.date)}</td>
+      <td class="ctx">${esc(e.context)||'<span class="mut">-</span>'}</td>
+      <td style="white-space:nowrap"><button class="btn sm" data-act="edit">Edit</button> <button class="btn sm" data-act="del">${TK.armed===e.id?'Sure?':'Delete'}</button></td></tr>`;
+  }).join('')||`<tr><td colspan="7" class="mut">${TK.entries.length?'No row matches.':'Nothing tracked yet. Add indicators above, or press Track on a triage result.'}</td></tr>`;
+}
+async function tkAdd(){
+  const text=$('#tk-in').value;
+  if(!text.trim())return toast('Paste indicators first');
+  const p=trParse(text);
+  if(!p.results.length)return toast('No valid indicators found');
+  const items=p.results.map(r=>{
+    const known=TR.results.find(x=>x.ioc===r.ioc&&Object.keys(x.sources||{}).length);
+    return known?{ioc:r.ioc,verdict:known.verdict,score:known.score}:{ioc:r.ioc};
+  });
+  const btn=$('#tk-add');btn.disabled=true;
+  try{
+    const j=await liveApi('/api/tracker/add',{items,tlp:$('#tk-tlp').value,context:$('#tk-context').value,source:$('#tk-source').value,date:$('#tk-date').value});
+    toast(j.added+' added, '+j.updated+' updated'+(p.rejected.length?', '+p.rejected.length+' skipped':''));
+    $('#tk-in').value='';await tkLoad();
+  }catch(e){toast(e.message);}
+  btn.disabled=!TR.live;
+}
+async function tkExport(copyOnly){
+  try{
+    const j=await liveApi('/api/tracker/export',{max_tlp:$('#tk-max').value,defang:$('#tk-defang').value==='1'});
+    if(!j.rows)return toast('No rows to export');
+    if(copyOnly)copy(j.markdown,j.rows+' rows copied as Markdown');
+    else{dl(j.filename,j.markdown,'text/markdown');toast(j.rows+' rows exported');}
+  }catch(e){toast(e.message);}
+}
+function trackSend(values){
+  $('#tk-in').value=values.join('\n');go('tracker');
+  if(!TR.live)toast('Start intelscope serve to use the tracker');
+  else toast(values.length+' ready: set TLP, source and context, then Add to tracker');
+}
+function tkWire(){
+  document.addEventListener('click',ev=>{const a=ev.target.closest('[data-jump]');if(a){ev.preventDefault();go(a.dataset.jump);}});
+  $('#tk-date').value=new Date().toISOString().slice(0,10);
+  $('#tk-add').addEventListener('click',tkAdd);
+  $('#tk-clearin').addEventListener('click',()=>{$('#tk-in').value='';});
+  $('#tk-export').addEventListener('click',()=>tkExport(false));
+  $('#tk-copy').addEventListener('click',()=>tkExport(true));
+  $('#tk-search').addEventListener('input',tkRender);
+  $('#tk-filter').addEventListener('change',tkRender);
+  $('#tr-track').addEventListener('click',()=>{
+    const rows=trShown();if(!rows.length)return toast('Nothing to track');
+    trackSend(rows.filter(r=>!r.allowlisted).map(r=>r.ioc));
+  });
+  $('#tk-table').addEventListener('click',async ev=>{
+    const b=ev.target.closest('[data-act]');if(!b)return;
+    const tr=b.closest('tr'),id=+tr.dataset.id;
+    if(b.dataset.act==='edit'){TK.editing=id;TK.armed=null;tkRender();}
+    else if(b.dataset.act==='cancel'){TK.editing=null;tkRender();}
+    else if(b.dataset.act==='save'){
+      try{
+        await liveApi('/api/tracker/update',{id,fields:{tlp:$('.ed-tlp',tr).value,source:$('.ed-source',tr).value,date:$('.ed-date',tr).value,context:$('.ed-context',tr).value}});
+        TK.editing=null;await tkLoad();toast('Saved');
+      }catch(e){toast(e.message);}
+    }else if(b.dataset.act==='del'){
+      if(TK.armed!==id){TK.armed=id;tkRender();setTimeout(()=>{if(TK.armed===id){TK.armed=null;tkRender();}},3000);return;}
+      try{await liveApi('/api/tracker/delete',{ids:[id]});TK.armed=null;await tkLoad();toast('Deleted');}catch(e){toast(e.message);}
+    }
+  });
+}
+
+/* ---- API keys ---- */
+const KS={providers:[],path:'',demo:false};
+const KS_ORIGIN={session:'this session',saved:'saved file',environment:'environment / .env'};
+async function ksLoad(){
+  const el=$('#ks-mode');
+  if(!TR.live){
+    KS.providers=[];
+    el.innerHTML='<b>Needs the server</b> Keys are kept by IntelScope on this computer, never in this page. Run <code>intelscope serve</code> and open the page it prints.';
+    ksRender();return;
+  }
+  try{const j=await liveApi('/api/settings');KS.providers=j.providers;KS.path=j.path;KS.demo=j.demo;}
+  catch(e){toast('Keys: '+e.message);}
+  el.innerHTML=KS.demo?'<b>Demo</b> Keys are not stored in demo mode.'
+    :'<b>Where keys live</b> <i>Use this session</i> keeps a key in the server\'s memory until it stops. <i>Save on this computer</i> writes it to <code>'+esc(KS.path)+'</code> as plain text, readable by anyone who can read your files. Keys in a <code>.env</code> file or the environment also work; a saved or session key wins.';
+  ksRender();
+}
+function ksRender(){
+  $('#ks-list').innerHTML=KS.providers.map(p=>`<div class="card" data-p="${esc(p.name)}">
+    <h3><span class="dot"></span>${esc(p.label)} <span class="src ${p.configured?'ready':'nokey'}">${p.configured?'ready':'no key'}</span></h3>
+    <p class="note">${esc(p.note||'')}${p.note?' ':''}Looks up: ${esc(p.types.join(', '))}.</p>
+    ${p.fields.map(f=>`<div class="kf"><label for="ks-${esc(p.name)}-${esc(f.name)}">${esc(f.label)}${f.required?'':' (optional)'}</label>
+      <input class="t" id="ks-${esc(p.name)}-${esc(f.name)}" data-f="${esc(f.name)}" data-secret="${f.secret?1:0}" type="${f.secret?'password':'text'}" autocomplete="off" spellcheck="false"
+        value="${f.secret?'':esc(f.value||'')}" placeholder="${f.set&&f.secret?esc(f.preview+'  set from '+(KS_ORIGIN[f.origin]||'')+', type to replace'):esc(f.hint||'')}"${KS.demo?' disabled':''}>
+      ${f.set&&!f.secret?`<div class="hint">set from ${esc(KS_ORIGIN[f.origin]||'')}</div>`:''}</div>`).join('')}
+    <div class="row"><button class="btn p" data-act="session"${KS.demo?' disabled':''}>Use this session</button><button class="btn" data-act="save"${KS.demo?' disabled':''}>Save on this computer</button>
+      <button class="btn" data-act="test"${KS.demo?' disabled':''}>Test</button><button class="btn" data-act="clear"${KS.demo?' disabled':''}>Clear</button></div>
+    <div class="kmsg" aria-live="polite"></div></div>`).join('')||'<p class="mut">No sources to show.</p>';
+}
+function ksWire(){
+  $('#ks-list').addEventListener('click',async ev=>{
+    const b=ev.target.closest('[data-act]');if(!b)return;
+    const card=b.closest('[data-p]'),name=card.dataset.p,msg=$('.kmsg',card),act=b.dataset.act;
+    const say=(t,cls)=>{msg.textContent=t;msg.className='kmsg'+(cls?' '+cls:'');};
+    b.disabled=true;
+    try{
+      if(act==='test'){
+        say('Checking with a lookup of 8.8.8.8 ...');
+        const j=await liveApi('/api/settings/test',{provider:name});
+        say((j.ok?'Works: ':'Failed: ')+j.message,j.ok?'ok':'bad');
+      }else{
+        const values={};
+        if(act==='clear')$$('[data-f]',card).forEach(i=>{values[i.dataset.f]='';});
+        else $$('[data-f]',card).forEach(i=>{const v=i.value.trim();if(v||i.dataset.secret==='0')values[i.dataset.f]=v;});
+        if(!Object.values(values).some(v=>v!==''||act==='clear'))throw new Error('Type a key first');
+        const j=await liveApi('/api/settings',{provider:name,values,persist:act==='save'});
+        KS.providers=j.providers;ksRender();trProbe();
+        const c2=$(`[data-p="${name}"] .kmsg`);
+        const p=j.providers.find(x=>x.name===name);
+        const still=act==='clear'&&p&&p.fields.some(f=>f.set);
+        c2.textContent=act==='clear'?(still?'Cleared here. A key is still set in your environment or .env.':'Cleared.'):(act==='save'?'Saved on this computer.':'Kept for this session only.');
+        c2.className='kmsg ok';
+      }
+    }catch(e){say(e.message,'bad');}
+    b.disabled=false;
+  });
 }
 function trWire(){
   $('#tr-go').addEventListener('click',trRun);
@@ -2724,7 +2968,7 @@ function trWire(){
 }
 
 function init(){
-  trWire();trProbe();trRender();
+  trWire();tkWire();ksWire();trProbe();trRender();
   $('#dk-recipe').innerHTML=DORKS.map((d,i)=>`<option value="${i}">${esc(d.n)}</option>`).join('');
   $('#dk-term').addEventListener('input',dorkSync);
   $('#dk-recipe').addEventListener('change',dorkSync);

@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-import os
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Any, ClassVar
 
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from intelscope import __version__
+from intelscope import __version__, settings
 from intelscope.models import IOC, IOCType, ProviderResult
 from intelscope.ratelimit import RateLimiter
 
@@ -39,6 +39,19 @@ def describe_http_error(response: Any) -> str:
     return f"HTTP {status}" if status else "HTTP error"
 
 
+@dataclass(frozen=True)
+class Field:
+    """One credential a source needs: shown in the dashboard and by `intelscope keys`."""
+
+    name: str
+    env: str
+    label: str
+    secret: bool = True
+    required: bool = True
+    kind: str = "secret"  # "secret" | "text" | "url"
+    hint: str = ""
+
+
 def compact(data: dict[str, Any]) -> dict[str, Any]:
     """Drop empty values so exports stay readable."""
     return {k: v for k, v in data.items() if v not in (None, "", [], {})}
@@ -53,20 +66,47 @@ class Provider(ABC):
     rate_limit: ClassVar[tuple[int, float]] = (60, 60.0)
     weight: ClassVar[float] = 1.0
     timeout: ClassVar[float] = 20.0
+    fields: ClassVar[tuple[Field, ...]] = ()
+    """Credentials this source takes. Left empty, a single API key from `env_key` is assumed."""
+    settable: ClassVar[bool] = True
+    """False for sources whose env variable is not a credential (e.g. a file path)."""
+    note: ClassVar[str] = ""
+    """One line shown next to the key fields (where to get a key, quirks)."""
 
-    def __init__(self, api_key: str | None = None, session: Any = None) -> None:
+    def __init__(self, api_key: str | None = None, session: Any = None,
+                 extra: dict[str, str] | None = None) -> None:
         self.api_key = api_key or None
+        self.extra: dict[str, str] = {k: v for k, v in (extra or {}).items() if v}
         self.session = session if session is not None else build_session()
         self.limiter = RateLimiter(*self.rate_limit)
 
     @classmethod
-    def from_env(cls, session: Any = None) -> Provider:
-        key = os.environ.get(cls.env_key) if cls.env_key else None
-        return cls(key, session)
+    def credential_fields(cls) -> tuple[Field, ...]:
+        if cls.fields:
+            return cls.fields
+        if cls.env_key and cls.settable:
+            return (Field("api_key", cls.env_key, "API key", True, cls.key_required),)
+        return ()
+
+    @classmethod
+    def from_env(cls, session: Any = None, *layers: dict[str, dict[str, str]] | None) -> Provider:
+        """Build from credentials: given layers (session keys), the credentials file, then the environment."""
+        stored = settings.load_stored()
+        creds = settings.resolve(cls.name, cls.credential_fields(), *layers, stored)
+        key = creds.pop("api_key", None)
+        return cls(key, session, creds)
 
     @property
     def configured(self) -> bool:
-        return bool(self.api_key) or not self.key_required
+        if not self.key_required:
+            return True
+        for f in self.credential_fields():
+            if not f.required:
+                continue
+            have = self.api_key if f.name == "api_key" else self.extra.get(f.name)
+            if not have:
+                return False
+        return True
 
     def supports_ioc(self, ioc: IOC) -> bool:
         return ioc.type in self.supports

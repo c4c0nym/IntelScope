@@ -65,6 +65,7 @@ class ASNBlocklist(Provider):
     label = "ASN blocklist"
     env_key = "INTELSCOPE_ASN_BLOCKLIST"  # optional: path to your own ASN list
     key_required = False
+    settable = False  # the variable is a file path, not a credential
     supports = frozenset({IOCType.IPV4, IOCType.IPV6})
     rate_limit = (60, 60.0)
     weight = 0.8

@@ -72,6 +72,32 @@ CANNED: dict[str, dict[str, dict[str, Any]]] = {
         "198.51.100.23": {"score": None, "summary": "ports 22, 3389 · tags: self-signed"},
         "192.0.2.10": {"score": None, "summary": "ports 80, 443, 8080 · 3 CVEs"},
     },
+    "censys": {
+        "198.51.100.23": {
+            "score": 60,
+            "summary": "threat label c2 · ports 22, 3389, 8443 · ssh, rdp, http · AS64500 EXAMPLE-BULLETPROOF",  # noqa: E501
+        },
+        "192.0.2.10": {
+            "score": None,
+            "summary": "ports 80, 443, 8080 · http, https · AS64502 EXAMPLE-HOSTING",
+        },
+    },
+    "urlscan": {
+        _URL: {"score": 75, "summary": "4 public scans · latest 2026-11-20 · verdict: malicious"},
+        "secure-login-micros0ft.test": {
+            "score": 55,
+            "summary": "9 public scans · latest 2026-11-22 · impersonates Microsoft",
+        },
+        "192.0.2.10": {"score": None, "summary": "2 public scans · latest 2026-10-02"},
+    },
+    "intel471": {
+        "198.51.100.23": {"score": 90, "summary": "2 Intel 471 indicators · ExampleLoader · c2"},
+        _URL: {"score": 65, "summary": "1 Intel 471 indicator · AgentTesla · malware"},
+    },
+    "opencti": {
+        "198.51.100.23": {"score": 80, "summary": "known observable · score 80 · labels: c2, tlp-amber"},
+        "secure-login-micros0ft.test": {"score": None, "summary": "known observable · labels: phishing"},
+    },
 }
 
 

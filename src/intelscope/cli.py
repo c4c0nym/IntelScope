@@ -12,9 +12,10 @@ from rich.console import Console
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
-from intelscope import __version__
+from intelscope import __version__, settings
 from intelscope.allowlist import load_allowlist
 from intelscope.cache import Cache, default_cache_path
+from intelscope.cli_tools import add_meta_args, keys_main, track_main
 from intelscope.demo import DEMO_IOCS, build_demo_providers
 from intelscope.detect import parse_iocs
 from intelscope.enrich import Enricher, triage_order
@@ -23,6 +24,7 @@ from intelscope.models import Verdict
 from intelscope.palette import THEME
 from intelscope.providers import REGISTRY, build_providers, resolve_names
 from intelscope.render import render_table
+from intelscope.tracker import Tracker, normalize_date, normalize_tlp
 
 EPILOG = """\
 examples:
@@ -32,6 +34,10 @@ examples:
   intelscope -f iocs.txt --providers vt,abuseipdb --fail-on malicious
   intelscope --demo                      # offline sample run, no API keys needed
   intelscope serve --open                # the dashboard, with live enrichment
+  intelscope -f iocs.txt --track --tlp AMBER --source "CERT report 12" --context "phishing wave"
+  intelscope track add 198.51.100[.]23 --tlp GREEN --source "feed X" --context "C2 seen in logs"
+  intelscope track export -o iocs.md     # Markdown table: IOC, type, TLP, source, date, context
+  intelscope keys set censys             # enter an API key (asked for, never put in a command)
 """
 
 
@@ -48,7 +54,7 @@ def build_parser() -> argparse.ArgumentParser:
                    help="file with indicators, one or more per line (repeatable)")
     p.add_argument("-o", "--output", metavar="PATH",
                    help="write results to a file; format inferred from extension "
-                   "(.json, .csv, .html, .stix.json)")
+                   "(.json, .csv, .html, .md, .stix.json)")
     p.add_argument("--format", choices=FORMATS, help="output format (default: table)")
     p.add_argument("-p", "--providers", metavar="LIST",
                    help=f"comma-separated providers (default: all configured): {', '.join(REGISTRY)}")
@@ -67,6 +73,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("-w", "--workers", type=int, default=8, help="concurrent lookups (default: 8)")
     p.add_argument("--demo", action="store_true",
                    help="run offline against canned sample data (no keys, no network)")
+    p.add_argument("--track", action="store_true",
+                   help="also add every checked indicator to the IOC tracker (see 'intelscope track')")
+    add_meta_args(p)
     p.add_argument("-q", "--quiet", action="store_true", help="suppress progress and warnings")
     p.add_argument("--version", action="version", version=f"intelscope {__version__}")
     return p
@@ -94,16 +103,20 @@ def _list_providers(console: Console) -> None:
         table.add_column(col)
     for name, cls in REGISTRY.items():
         provider = cls.from_env()
-        if cls.env_key is None:
+        fields = cls.credential_fields()
+        if not fields and cls.env_key is None:
             key, status = "not needed", "[score.benign]ready[/]"
-        elif not cls.key_required and not cls.env_key.endswith("API_KEY"):
+        elif not fields:
             key = f"not needed (own list: {cls.env_key})"
             status = "[score.benign]ready[/]"
-        elif provider.configured:
-            key = cls.env_key
-            status = "[score.benign]ready[/]" if provider.api_key else "[info]ready (no key)[/]"
         else:
-            key, status = cls.env_key, "[muted]missing key[/]"
+            key = ", ".join(f.env for f in fields if f.required) or ", ".join(f.env for f in fields)
+            if not provider.configured:
+                status = "[muted]missing key[/]"
+            elif provider.api_key or provider.extra:
+                status = "[score.benign]ready[/]"
+            else:
+                status = "[info]ready (no key)[/]"
         types = ", ".join(sorted(t.value for t in cls.supports))
         table.add_row(name, cls.label, types, key, status)
     console.print(table)
@@ -150,6 +163,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
     if raw and raw[0] == "serve":
         return _serve_main(raw[1:])
+    if raw and raw[0] == "keys":
+        return keys_main(raw[1:])
+    if raw and raw[0] == "track":
+        return track_main(raw[1:])
     args = build_parser().parse_args(raw)
     err = Console(theme=THEME, stderr=True)
     out = Console(theme=THEME)
@@ -160,12 +177,15 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     fmt = args.format or infer_format(args.output) or "table"
     if args.output and fmt == "table":
-        err.print("[error]error:[/] choose --format json, csv, stix or html when using --output")
+        err.print("[error]error:[/] choose --format json, csv, stix, html or md when using --output")
         return 2
 
     try:
         lines = _read_input(args)
         names = resolve_names(args.providers)
+        if args.track:  # fail before spending any API quota
+            normalize_tlp(args.tlp)
+            normalize_date(args.date)
         if args.asn_blocklist and not Path(args.asn_blocklist).is_file():
             raise ValueError(f"ASN blocklist not found: {args.asn_blocklist}")
         allowlist = (
@@ -193,7 +213,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     active = [p for p in providers if p.configured]
     skipped = [p for p in providers if not p.configured]
     if skipped and not args.quiet:
-        hints = ", ".join(f"{p.label} (set {p.env_key})" for p in skipped)
+        hints = ", ".join(f"{p.label} (intelscope keys set {p.name})" for p in skipped)
         err.print(f"[muted]not configured, skipping: {hints}[/]")
     if not active:
         err.print("[error]error:[/] no providers available. Add API keys to .env "
@@ -232,6 +252,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             cache.save()
 
     results = triage_order(results)
+    if args.track:
+        try:
+            tracker = Tracker(settings.tracker_path())
+            normalize_tlp(args.tlp)
+            normalize_date(args.date)
+            for item in results:
+                tracker.add(item.ioc.value, tlp=args.tlp, context=args.context, source=args.source,
+                            when=args.date, verdict=item.verdict.value, score=item.score)
+            if not args.quiet:
+                err.print(f"[accent]tracked[/] {len(results)} indicator(s) [muted]({tracker.path})[/]")
+        except (ValueError, OSError) as exc:
+            err.print(f"[error]error:[/] could not track: {exc}")
+            return 2
     shown = results
     if args.min_verdict:
         floor = Verdict(args.min_verdict).rank

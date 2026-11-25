@@ -27,7 +27,7 @@ from intelscope.palette import (
 )
 from intelscope.providers import LABELS
 
-FORMATS = ("table", "json", "csv", "stix", "html")
+FORMATS = ("table", "json", "csv", "stix", "html", "md")
 
 # Malicious is shown as a triforce in HTML: one fixed-size icon, so it cannot overflow the pill.
 TRIFORCE_SVG = (
@@ -59,7 +59,8 @@ def infer_format(path: str | None) -> str | None:
     lower = path.lower()
     if lower.endswith((".stix.json", ".stix")):
         return "stix"
-    for ext, fmt in ((".json", "json"), (".csv", "csv"), (".html", "html"), (".htm", "html")):
+    for ext, fmt in ((".json", "json"), (".csv", "csv"), (".html", "html"), (".htm", "html"),
+                     (".md", "md"), (".markdown", "md")):
         if lower.endswith(ext):
             return fmt
     return None
@@ -336,7 +337,39 @@ def to_html(items: Sequence[EnrichedIOC]) -> str:
     )
 
 
+# --------------------------------------------------------------------------- Markdown
+
+def _md_cell(text: str) -> str:
+    text = " ".join(str(text).split()).replace("\\", "\\\\").replace("|", "\\|")
+    return text.replace("<", "&lt;").replace(">", "&gt;") or "-"
+
+
+def to_markdown(items: Sequence[EnrichedIOC]) -> str:
+    """A triage table for notes and tickets. Indicators are defanged so nothing becomes a live link."""
+    from intelscope.tracker import defang
+
+    lines = [
+        "# IntelScope triage",
+        "",
+        f"> {len(items)} indicator{'s' if len(items) != 1 else ''}, "
+        f"{_now().strftime('%Y-%m-%d')}, IntelScope {__version__}. Indicators are defanged.",
+        "",
+        "| Verdict | Score | Indicator | Type | Evidence |",
+        "|---|---|---|---|---|",
+    ]
+    for item in items:
+        evidence = "; ".join(f"{LABELS.get(r.provider, r.provider)}: {r.summary}"
+                             for r in item.results if r.ok and r.found and r.summary)
+        if item.allowlisted or not evidence:
+            evidence = "; ".join(item.reasons)
+        value = "`" + defang(item.ioc.value).replace("`", "%60") + "`"
+        lines.append(f"| {item.verdict.value} | {item.score} | {value} | {item.ioc.type.value} | {_md_cell(evidence)} |")
+    return "\n".join(lines) + "\n"
+
+
 def render(fmt: str, items: Sequence[EnrichedIOC]) -> str:
+    if fmt == "md":
+        return to_markdown(items)
     if fmt == "json":
         return to_json(items)
     if fmt == "csv":

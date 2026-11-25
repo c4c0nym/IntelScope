@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "intelscope"
-version = "0.2.0"
+version = "0.3.0"
 description = "Enrich, score and triage indicators of compromise against multiple threat intelligence sources."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -41,6 +41,7 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/intelscope/export.py" = ["E501"]  # inline HTML template
+"tests/*" = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
