@@ -60,7 +60,7 @@ def test_settings_list_every_source_with_fields_and_no_secret_values(live_server
     status, doc = call(base, token, "/api/settings")
     assert status == 200
     names = {p["name"] for p in doc["providers"]}
-    assert {"censys", "urlscan", "intel471", "opencti", "abuseipdb", "greynoise", "virustotal"} <= names
+    assert {"censys", "urlscan", "opencti", "abuseipdb", "greynoise", "virustotal"} <= names
     assert "asn" not in names and "shodan" not in names  # nothing to enter
     octi = next(p for p in doc["providers"] if p["name"] == "opencti")
     assert [f["name"] for f in octi["fields"]] == ["url", "api_key"] and not octi["configured"]

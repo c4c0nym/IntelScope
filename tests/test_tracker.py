@@ -231,7 +231,7 @@ def test_cli_keys_set_refuses_without_a_terminal():
 def test_cli_list_providers_shows_new_sources(capsys):
     assert main(["--list-providers"]) == 0
     out = capsys.readouterr().out
-    for label in ("Censys", "urlscan.io", "Intel 471", "OpenCTI", "AbuseIPDB", "GreyNoise"):
+    for label in ("Censys", "urlscan.io", "OpenCTI", "AbuseIPDB", "GreyNoise"):
         assert label in out
 
 

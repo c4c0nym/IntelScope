@@ -9,7 +9,6 @@ from intelscope.providers.asn import ASNBlocklist
 from intelscope.providers.base import Field, Provider
 from intelscope.providers.censys import Censys
 from intelscope.providers.greynoise import GreyNoise
-from intelscope.providers.intel471 import Intel471
 from intelscope.providers.opencti import OpenCTI
 from intelscope.providers.pdns import PassiveDNS
 from intelscope.providers.rdap import RDAP
@@ -22,7 +21,7 @@ from intelscope.providers.virustotal import VirusTotal
 REGISTRY: dict[str, type[Provider]] = {
     cls.name: cls
     for cls in (VirusTotal, AbuseIPDB, URLhaus, ThreatFox, GreyNoise, ShodanInternetDB, Censys,
-                URLscan, Intel471, OpenCTI, RDAP, PassiveDNS, ASNBlocklist)
+                URLscan, OpenCTI, RDAP, PassiveDNS, ASNBlocklist)
 }
 
 ALIASES = {
@@ -31,7 +30,6 @@ ALIASES = {
     "gn": "greynoise",
     "internetdb": "shodan",
     "asndrop": "asn",
-    "i471": "intel471",
     "octi": "opencti",
     "urlscan.io": "urlscan",
     "tf": "threatfox",

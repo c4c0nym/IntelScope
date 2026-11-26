@@ -93,8 +93,8 @@ def _fast_provider_limits(monkeypatch: pytest.MonkeyPatch) -> None:
 @pytest.fixture(autouse=True)
 def _isolate_env(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
     for var in ("VT_API_KEY", "ABUSEIPDB_API_KEY", "ABUSECH_AUTH_KEY", "GREYNOISE_API_KEY",
-                "CENSYS_API_KEY", "CENSYS_ORG_ID", "URLSCAN_API_KEY", "INTEL471_CLIENT_SECRET",
-                "INTEL471_CLIENT_ID", "INTEL471_URL", "PDNS_API_KEY", "OPENCTI_URL", "OPENCTI_TOKEN", "INTELSCOPE_TRACKER"):
+                "CENSYS_API_KEY", "CENSYS_ORG_ID", "URLSCAN_API_KEY",
+                "PDNS_API_KEY", "OPENCTI_URL", "OPENCTI_TOKEN", "INTELSCOPE_TRACKER"):
         monkeypatch.delenv(var, raising=False)
     monkeypatch.setenv("INTELSCOPE_HOME", str(tmp_path / "home"))  # credentials and tracker, never the real ones
     monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache"))

@@ -6,7 +6,7 @@
   <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-099197?style=flat-square">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-00978d?style=flat-square">
   <img alt="STIX 2.1" src="https://img.shields.io/badge/export-STIX%202.1-c5a56e?style=flat-square">
-  <img alt="Sources" src="https://img.shields.io/badge/sources-13-b5b1d8?style=flat-square">
+  <img alt="Sources" src="https://img.shields.io/badge/sources-12-b5b1d8?style=flat-square">
 </p>
 
 **IntelScope** is an OSINT desk and an IOC triage engine in one tool. The desk is a
@@ -95,8 +95,8 @@ go next: a SIEM, a TIP, a ticket or a stakeholder.
 
 ## Features
 
-- **Thirteen sources, one verdict.** VirusTotal, AbuseIPDB, abuse.ch URLhaus and ThreatFox, GreyNoise, Shodan
-  InternetDB, Censys, urlscan.io, Intel 471, your own OpenCTI, **RDAP** (domain age and registrar)
+- **Twelve sources, one verdict.** VirusTotal, AbuseIPDB, abuse.ch URLhaus and ThreatFox, GreyNoise, Shodan
+  InternetDB, Censys, urlscan.io, your own OpenCTI, **RDAP** (domain age and registrar)
   and **passive DNS** are queried concurrently, and every IP's network is checked against an
   **ASN blocklist**. Each source gets the indicator types it supports.
 - **An IOC tracker.** Keep what you follow as IOC, TLP, context, source and date, and export it
@@ -150,7 +150,6 @@ intelscope --list-providers          # check what's configured
 | [Shodan InternetDB](https://internetdb.shodan.io/) | none needed | free | IPv4 |
 | [Censys](https://platform.censys.io/) | `CENSYS_API_KEY` (token, or `API_ID:API_SECRET`), `CENSYS_ORG_ID` *(optional)* | small monthly quota | IPv4, IPv6 |
 | [urlscan.io](https://urlscan.io/user/signup) | `URLSCAN_API_KEY` *(optional)* | works without a key; a key adds the verdict | IPv4, IPv6, domain, URL, SHA-256 |
-| [Intel 471 Verity471](https://intel471.com/) *(not yet run live)* | `INTEL471_CLIENT_ID`, `INTEL471_CLIENT_SECRET`, `INTEL471_URL` *(optional)* | commercial | IPv4, domain, URL, hashes |
 | [OpenCTI](https://filigran.io/platforms/opencti/) *(untested)* | `OPENCTI_URL`, `OPENCTI_TOKEN` | your own platform | all types |
 | RDAP (WHOIS): registration date and registrar, through [rdap.org](https://about.rdap.org/) | none needed | free | domain |
 | [Passive DNS](https://docs.mnemonic.no/service-integration-guides/passivedns/docs/public/01-public_api.html) from mnemonic | `PDNS_API_KEY` *(optional)* | 10/min, 1,000/day, public data only | domain, IPv4, IPv6 |
@@ -158,15 +157,7 @@ intelscope --list-providers          # check what's configured
 
 Sources without a key are skipped with a notice, so you can start with just one.
 
-**Intel 471** uses the Verity471 API (`api.intel471.cloud`): create an application in the Intel 471
-Developer Portal, enable the Indicators API for it, and use its client ID and secret. The request
-and response shapes follow Intel 471's official `verity471` SDK. Verity's search is free text, so
-IntelScope keeps only exact matches, and revoked or expired indicators are shown but do not raise
-the score. The older Titan API still works: set `INTEL471_URL` to a base URL on `intel471.com`, with
-your account e-mail as the client ID and the Titan key as the secret.
-
-Neither Intel 471 nor OpenCTI has been run against a live tenant or platform, because that needs
-paid credentials: use **Test** on the API keys view first. OpenCTI was written from the public
+OpenCTI has not been run against a live platform: use **Test** on the API keys view first. OpenCTI was written from the public
 GraphQL schema.
 Censys accepts a Platform personal access token, or the older `API_ID:API_SECRET` pair.
 
@@ -393,7 +384,7 @@ CI runs lint and tests on Python 3.10–3.12 for every push.
 
 Roughly in this order:
 
-1. **Prove Intel 471 and OpenCTI live.** Both are written from the vendors' documentation and need a real tenant to confirm.
+1. **Prove OpenCTI live.** It is written from the public GraphQL schema and needs a real platform to confirm.
 2. **More sources.** MalwareBazaar for malware-sample context and crt.sh certificate transparency to pivot from a phishing domain to its sibling names.
 3. **Share the tracker.** Export as STIX 2.1 with TLP markings, push to MISP and OpenCTI, and import from CSV, STIX and MISP.
 4. **Re-check on a schedule.** Re-run tracked indicators automatically and show when a verdict changes.

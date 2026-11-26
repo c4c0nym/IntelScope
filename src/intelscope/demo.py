@@ -100,10 +100,6 @@ CANNED: dict[str, dict[str, dict[str, Any]]] = {
         },
         "192.0.2.10": {"score": None, "summary": "2 public scans · latest 2026-10-02"},
     },
-    "intel471": {
-        "198.51.100.23": {"score": 90, "summary": "2 Intel 471 indicators · ExampleLoader · c2"},
-        _URL: {"score": 65, "summary": "1 Intel 471 indicator · AgentTesla · malware"},
-    },
     "rdap": {
         "secure-login-micros0ft.test": {
             "score": 70,
