@@ -293,6 +293,22 @@ ul.ev li{margin:1px 0}
 ul.ev b{color:var(--ivory);font-weight:600}
 ul.ev .err{color:var(--muted);font-style:italic}
 ul.ev .cn{color:var(--mineral)}
+details.evx>summary{cursor:pointer;list-style:none;display:block}
+details.evx>summary::-webkit-details-marker{display:none}
+details.evx>summary::after{content:'details \25B8';margin-left:6px;color:var(--mineral);font-size:10px;opacity:.85}
+details.evx[open]>summary::after{content:'hide \25BE'}
+details.evx>summary:hover::after{color:var(--ivory);opacity:1}
+dl.evd{display:grid;grid-template-columns:minmax(80px,max-content) minmax(0,1fr);gap:2px 12px;margin:4px 0 8px;padding:6px 10px;
+  border-left:2px solid var(--line);background:rgba(0,0,0,.18);font-size:11px;line-height:1.45}
+dl.evd dt{color:var(--muted)}
+dl.evd dd{margin:0;color:var(--paper);overflow-wrap:anywhere;min-width:0}
+ul.evl{margin:0;padding-left:14px;list-style:disc}
+ul.evl li{margin:1px 0}
+.evtg{display:block;margin-top:4px;background:none;border:0;padding:0;color:var(--mineral);font:inherit;font-size:10.5px;cursor:pointer;text-align:left}
+.evtg:hover{color:var(--ivory)}
+tr.evrow>td{background:rgba(0,0,0,.18);padding:8px 12px 10px}
+.evhead{display:flex;gap:10px;align-items:center;justify-content:space-between;font-size:10.5px;margin-bottom:6px;flex-wrap:wrap}
+.tkbar #tk-evall{margin-left:auto}
 .srclist{display:flex;flex-wrap:wrap;gap:6px}
 .src{font-size:10.5px;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted);display:inline-flex;gap:6px;align-items:center}
 .src::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--mineral)}
@@ -384,7 +400,7 @@ code{font-family:var(--mono);color:var(--ivory)}
   </div>
 
   <div class="railfoot">
-    Pivots, validators and parsers run in your browser.<br>Indicators leave this page only through an external link, or when you press Run in IOC triage and your local IntelScope server queries its sources.
+    One HTML file, nothing to install. Pivots, validators and parsers run in your browser.<br>Indicators leave this page only through a link you click, or when you press Run in IOC triage and this page asks the sources you enabled.
   </div>
 </aside>
 
@@ -407,6 +423,10 @@ code{font-family:var(--mono);color:var(--ivory)}
     <p class="vsub">Every branch is a pivot direction. Click a node to jump to its tools. The map exists so you can see what you have <em>not</em> checked yet, which is where most attribution gaps hide.</p>
     <div class="mapwrap"><svg class="mm" id="mm" viewBox="0 0 1180 760" preserveAspectRatio="xMidYMid meet"></svg></div>
     <div class="grid g3" style="margin-top:14px">
+      <div class="card" style="grid-column:1/-1">
+        <h3><span class="dot"></span>How this page works</h3>
+        <p class="note prose" style="color:var(--muted);font-size:12px;margin:0">Everything is in this one file: open it in Chrome, Edge or Firefox, no install and no server. Paste anything in the bar above and press <b>Pivot</b> for lookups, including the ones hidden inside it (the username in an email, the host in a URL, the parent of a subdomain). For live threat-intel checks, open <a href="#keys" data-jump="keys">API keys</a>, add a key or two, then use <a href="#triage" data-jump="triage">IOC triage</a>. Keys, the IOC tracker and the case file are kept in this browser only.</p>
+      </div>
       <div class="card">
         <h3><span class="dot"></span>Start here</h3>
         <p class="note">Typical entry artifacts in a ransomware or data-theft case.</p>
@@ -418,7 +438,7 @@ code{font-family:var(--mono);color:var(--ivory)}
       </div>
       <div class="card">
         <h3><span class="dot"></span>Offline tools in this page</h3>
-        <p class="note">No network calls, safe for artifacts you cannot share with third parties. Only IOC triage talks to a server, and only your own.</p>
+        <p class="note">No network calls, safe for artifacts you cannot share with third parties. Only IOC triage sends indicators out, and only to the sources you turned on.</p>
         <div id="offlinelist" style="font-size:11.5px;color:var(--muted)"></div>
       </div>
     </div>
@@ -435,7 +455,7 @@ code{font-family:var(--mono);color:var(--ivory)}
   <!-- 03 TRIAGE -->
   <section class="view" id="v-triage">
     <div class="vhead"><span class="kicker">03</span><h2>IOC triage</h2></div>
-    <p class="vsub">Paste indicators from a report or an alert, defanged is fine. Each one is checked against up to thirteen threat-intel sources and gets one score and a verdict, with the evidence behind it, so you know what to look at first.</p>
+    <p class="vsub">Paste indicators from a report or an alert, defanged is fine. Each one is checked against up to twelve threat-intel sources and gets one score and a verdict, with the evidence behind it, so you know what to look at first.</p>
     <div class="banner" id="tr-mode"></div>
     <div class="grid g2">
       <div class="card">
@@ -445,7 +465,7 @@ code{font-family:var(--mono);color:var(--ivory)}
         <div class="row">
           <button class="btn p" id="tr-go">Run triage</button>
           <button class="btn" id="tr-demo">Load demo</button>
-          <button class="btn" id="tr-import">Import CLI JSON</button>
+          <button class="btn" id="tr-import">Import JSON</button>
           <button class="btn" id="tr-clear">Clear</button>
         </div>
         <input type="file" id="tr-file" accept="application/json,.json" style="display:none">
@@ -453,7 +473,7 @@ code{font-family:var(--mono);color:var(--ivory)}
       </div>
       <div class="card">
         <h3><span class="dot"></span>Sources</h3>
-        <p class="note">Keys are kept by the server on this computer, never in this page: add them under <a href="#keys" data-jump="keys" style="color:var(--iris)">API keys</a>. Run sends the indicators to every ready source, so keep victim-specific artifacts out of it (see OPSEC).</p>
+        <p class="note">Add keys and switch sources on or off under <a href="#keys" data-jump="keys" style="color:var(--iris)">API keys</a>. Shodan InternetDB, RDAP, passive DNS, urlscan, GreyNoise and the ASN check need no key. Run sends the indicators to every ready source, so keep victim-specific artifacts out of it (see OPSEC).</p>
         <div id="tr-sources" class="srclist"></div>
       </div>
     </div>
@@ -461,6 +481,7 @@ code{font-family:var(--mono);color:var(--ivory)}
     <div class="vbar" id="tr-filter" role="group" aria-label="Filter by verdict"></div>
 
     <div class="card" style="overflow-x:auto">
+      <div class="row" style="margin:0 0 8px;justify-content:flex-end"><button class="btn sm" id="tr-evall" title="Show or hide the details behind every evidence line">Expand all details</button></div>
       <table class="tb" id="tr-table">
         <thead><tr><th>Verdict</th><th>Score</th><th>Indicator</th><th>Type</th><th>Evidence</th><th></th></tr></thead>
         <tbody></tbody>
@@ -468,7 +489,7 @@ code{font-family:var(--mono);color:var(--ivory)}
     </div>
     <div class="card" id="tr-save" style="margin-top:12px">
       <h3><span class="dot"></span>Add to IOC list</h3>
-      <p class="note">Saves the results shown above, with the label and details you set here. The same indicator from the same source updates its row instead of adding a second one.</p>
+      <p class="note">Saves the results shown above, with the label and details you set here, and copies the evidence from every source into the row. The same indicator from the same source updates its row instead of adding a second one.</p>
       <div class="tkform">
         <div><label for="ts-tlp">TLP</label><select class="t" id="ts-tlp"></select></div>
         <div><label for="ts-conf">Confidence</label><select class="t" id="ts-conf"><option>low</option><option selected>medium</option><option>high</option></select></div>
@@ -515,10 +536,11 @@ code{font-family:var(--mono);color:var(--ivory)}
         <div class="tkform">
           <div><label for="tk-max">Rows to include</label><select class="t" id="tk-max"><option value="">All rows</option><option>CLEAR</option><option>GREEN</option><option>AMBER</option><option>AMBER+STRICT</option><option>RED</option></select></div>
           <div><label for="tk-defang">Indicators</label><select class="t" id="tk-defang"><option value="1">Defanged (safe to paste)</option><option value="0">Live (do not click)</option></select></div>
+          <div><label for="tk-ev">Evidence</label><select class="t" id="tk-ev"><option value="1">Include (listed under the table)</option><option value="0">Leave out</option></select></div>
         </div>
         <div class="row"><button class="btn p" id="tk-export">Download Markdown</button><button class="btn" id="tk-copy">Copy Markdown</button><button class="btn" id="tk-import">Import Markdown...</button></div>
         <input type="file" id="tk-file" accept=".md,.markdown,.txt,text/markdown,text/plain" style="display:none">
-        <p class="note" style="margin-top:10px">Import reads a table with an <b>IOC</b> column (and any of TLP, Source, Date, Context), such as an earlier export. You can also paste the table into the box on the left. Rows already there are updated, not duplicated.</p>
+        <p class="note" style="margin-top:10px">Import reads a table with an <b>IOC</b> column (and any of TLP, Source, Date, Context), such as an earlier export. You can also paste the table into the box on the left. Rows already there are updated, not duplicated. An <b>Evidence</b> section under the table, as this tool exports it, is read back into the rows too.</p>
         <p class="note" id="tk-msg" aria-live="polite"></p>
         <p class="note" style="margin-top:12px" id="tk-path"></p>
       </div>
@@ -527,6 +549,7 @@ code{font-family:var(--mono);color:var(--ivory)}
       <input class="t" id="tk-search" placeholder="Search indicator, source or context" autocomplete="off">
       <select class="t" id="tk-filter" aria-label="Filter by TLP"><option value="">All TLP</option><option>CLEAR</option><option>GREEN</option><option>AMBER</option><option>AMBER+STRICT</option><option>RED</option></select>
       <span class="mut" id="tk-count"></span>
+      <button class="btn sm" id="tk-evall" title="Show or hide the evidence of every row shown">Expand all evidence</button>
     </div>
     <div class="card" style="overflow-x:auto">
       <table class="tb" id="tk-table">
@@ -539,7 +562,7 @@ code{font-family:var(--mono);color:var(--ivory)}
   <!-- 19 API KEYS -->
   <section class="view" id="v-keys">
     <div class="vhead"><span class="kicker">19</span><h2>API keys</h2></div>
-    <p class="vsub">Give IntelScope the keys for the sources you use. A source without a key is skipped. Pick where a key lives: this session only, or saved on this computer. A key is never sent back to this page once you have entered it.</p>
+    <p class="vsub">Give IntelScope the keys for the sources you use. A source without a key is skipped, and any source can be switched off. Keys stay in this browser and are sent only to their own source. Settings for the relay, allowlist, ASN lists and cache are at the top.</p>
     <div class="banner" id="ks-mode"></div>
     <div class="kgrid" id="ks-list"></div>
   </section>
@@ -850,8 +873,8 @@ code{font-family:var(--mono);color:var(--ivory)}
   <!-- 13 CASE -->
   <section class="view" id="v-case">
     <div class="vhead"><span class="kicker">15</span><h2>Case file</h2></div>
-    <p class="vsub">An in-memory working log for this session. Nothing is written to disk automatically, so export before you close the tab.</p>
-    <div class="banner"><b>Session only</b> This log lives in the page. Refreshing clears it. Use Export JSON to save, and Import to reload a previous session.</div>
+    <p class="vsub">A working log for the case. It is kept in this browser, so it survives a refresh, but export it before you hand over or switch computers.</p>
+    <div class="banner"><b>Kept in this browser</b> The log is stored in this browser's local storage on this computer and nowhere else. Clearing site data, or a private window, loses it. Use Export JSON to save, and Import to reload or merge an earlier log. Wipe log removes it from this browser.</div>
     <div class="grid g2">
       <div class="card">
         <h3><span class="dot"></span>Add entry</h3>
@@ -973,6 +996,28 @@ const R = [
 {n:"Facebook search",u:"https://www.facebook.com/search/top?q={q}",d:"Requires an account. Use a research profile.",g:"social",t:["username","name"],b:["care"]},
 {n:"SoundCloud",u:"https://soundcloud.com/{q}",d:"Long-lived handles, rarely cleaned up.",g:"social",t:["username"]},
 {n:"Flickr",u:"https://www.flickr.com/people/{q}",d:"Photo metadata is often intact here.",g:"social",t:["username"]},
+{n:"Gravatar profile",u:"https://gravatar.com/{q}",d:"Public profile by handle. Often lists other accounts and a real name.",g:"social",t:["username"]},
+{n:"Telegram user",u:"https://t.me/{q}",d:"Resolves a personal account or channel by handle. Opens a preview page, not a chat.",g:"social",t:["username"]},
+{n:"Threads",u:"https://www.threads.net/@{q}",d:"Meta's text platform, tied to the Instagram handle.",g:"social",t:["username"]},
+{n:"Medium",u:"https://medium.com/@{q}",d:"Long-form posts, sometimes write-ups by the actor or a researcher persona.",g:"social",t:["username"]},
+{n:"Hacker News",u:"https://news.ycombinator.com/user?id={q}",d:"Comment history and an about field that people forget about.",g:"social",t:["username"]},
+{n:"Dev.to",u:"https://dev.to/{q}",d:"Developer blog profile.",g:"social",t:["username"]},
+{n:"Codeberg",u:"https://codeberg.org/{q}",d:"Gitea-based GitHub alternative, popular with people leaving GitHub.",g:"social",t:["username"]},
+{n:"Bitbucket",u:"https://bitbucket.org/{q}/",d:"Atlassian code hosting, older workspaces often still public.",g:"social",t:["username"]},
+{n:"npm",u:"https://www.npmjs.com/~{q}",d:"Published packages. Malicious package authors reuse handles.",g:"social",t:["username"]},
+{n:"PyPI",u:"https://pypi.org/user/{q}/",d:"Published Python packages, same supply-chain angle as npm.",g:"social",t:["username"]},
+{n:"Docker Hub",u:"https://hub.docker.com/u/{q}",d:"Public images, sometimes with miner or tooling payloads.",g:"social",t:["username"]},
+{n:"Replit",u:"https://replit.com/@{q}",d:"Public code playgrounds, frequent home for phishing kits and tests.",g:"social",t:["username"]},
+{n:"Linktree",u:"https://linktr.ee/{q}",d:"Link hub that lists the other accounts of a persona.",g:"social",t:["username"]},
+{n:"About.me",u:"https://about.me/{q}",d:"Personal landing page with linked accounts.",g:"social",t:["username"]},
+{n:"Pinterest",u:"https://www.pinterest.com/{q}/",d:"Boards and saved images.",g:"social",t:["username"]},
+{n:"Tumblr",u:"https://{q}.tumblr.com/",d:"Old blogs that predate operational hygiene.",g:"social",t:["username"]},
+{n:"Snapchat",u:"https://www.snapchat.com/add/{q}",d:"Public profile and Bitmoji, if the user enabled it.",g:"social",t:["username"]},
+{n:"Patreon",u:"https://www.patreon.com/{q}",d:"Creator pages, payment-linked identity.",g:"social",t:["username"]},
+{n:"Kick",u:"https://kick.com/{q}",d:"Streaming platform with a lax moderation reputation.",g:"social",t:["username"]},
+{n:"Chess.com",u:"https://www.chess.com/member/{q}",d:"Country flag and join date on a long-lived handle.",g:"social",t:["username"]},
+{n:"Lichess",u:"https://lichess.org/@/{q}",d:"Open chess platform profile.",g:"social",t:["username"]},
+{n:"TryHackMe",u:"https://tryhackme.com/p/{q}",d:"Training platform profile. Some actors learned here under the same name.",g:"social",t:["username"]},
 {n:"Sherlock",u:"https://github.com/sherlock-project/sherlock",d:"The reference CLI username hunter. Run it locally for bulk work.",g:"social",t:["username"],b:["tool"]},
 {n:"Maigret",u:"https://github.com/soxoj/maigret",d:"Sherlock successor with 3000+ sites and profile parsing.",g:"social",t:["username"],b:["tool"]},
 {n:"Blackbird",u:"https://github.com/p1ngul1n0/blackbird",d:"Username and email search with a usable report output.",g:"social",t:["username","email"],b:["tool"]},
@@ -994,6 +1039,7 @@ const R = [
 {n:"EmailRep",u:"https://emailrep.io/{q}",d:"Reputation, first seen date and profile presence.",g:"email",t:["email"]},
 {n:"Skymem",u:"http://www.skymem.info/srch?q={q}",d:"Crawled corporate address book. Good for mapping org mailbox patterns.",g:"email",t:["email","domain"]},
 {n:"Email Format",u:"https://www.email-format.com/d/{q}/",d:"Known address patterns for a company domain.",g:"email",t:["domain"]},
+{n:"Hunter domain search",u:"https://hunter.io/search/{q}",d:"Addresses Hunter has seen at a domain, and the pattern it uses.",g:"email",t:["domain"],b:["key"]},
 {n:"Hudson Rock free tools",u:"https://www.hudsonrock.com/free-tools",d:"Checks whether an email or domain appears in infostealer logs. Directly relevant to how most intrusions start.",g:"email",t:["email","domain"]},
 {n:"DeHashed",u:"https://dehashed.com/search?query={q}",d:"Credential and breach corpus search across many field types.",g:"email",t:["email","username","domain","name","phone"],b:["paid"]},
 {n:"LeakCheck",u:"https://leakcheck.io/",d:"Breach lookup by email, username or domain.",g:"email",t:["email","username","domain"],b:["paid"]},
@@ -1078,6 +1124,11 @@ const R = [
 {n:"SANS ISC",u:"https://isc.sans.edu/ipinfo.html?ip={q}",d:"Attack telemetry against honeypot sensors.",g:"network",t:["ip"]},
 {n:"ExoneraTor",u:"https://metrics.torproject.org/exonerator.html?ip={q}",d:"Was this IP a Tor relay on a given date. Settles the question quickly.",g:"network",t:["ip"]},
 {n:"Tor Relay Search",u:"https://metrics.torproject.org/rs.html",d:"Relay and bridge metadata, including contact fields operators leave behind.",g:"network",t:["ip"]},
+{n:"Hurricane Electric prefix",u:"https://bgp.he.net/net/{q}",d:"Who announces the block, its parent allocation and DNS inside it.",g:"network",t:["cidr"],raw:true},
+{n:"Shodan net search",u:"https://www.shodan.io/search?query=net%3A{q}",d:"Every indexed service in the block. Shared operators show up as matching banners.",g:"network",t:["cidr"],b:["key"]},
+{n:"Censys network search",u:"https://search.censys.io/search?resource=hosts&q=ip%3A%22{q}%22",d:"Hosts in the block with certificates and software.",g:"network",t:["cidr"],b:["key"]},
+{n:"RIPEstat prefix",u:"https://stat.ripe.net/app/launchpad/{q}",d:"Routing history and allocation for the whole block.",g:"network",t:["cidr"]},
+{n:"IPinfo ranges",u:"https://ipinfo.io/{q}",d:"Owner, ASN and hosting flags for the network.",g:"network",t:["cidr"],raw:true},
 {n:"Amass",u:"https://github.com/owasp-amass/amass",d:"In-depth attack surface mapping. Use passive mode unless active is authorised.",g:"network",t:["domain"],b:["tool","care"]},
 {n:"theHarvester",u:"https://github.com/laramies/theHarvester",d:"Emails, subdomains and hosts from public sources.",g:"network",t:["domain"],b:["tool"]},
 {n:"SpiderFoot",u:"https://github.com/smicallef/spiderfoot",d:"Automates 200+ modules across all entity types. The closest thing to this page as a server.",g:"network",t:["domain","ip","email","username"],b:["tool"]},
@@ -1273,6 +1324,7 @@ const OPSEC = [
  ["Record as you go","Timestamp, source URL, capture hash, and the reasoning for each conclusion. If the case turns into a prosecution, undocumented findings are worth nothing."],
  ["Attribution discipline","Distinguish family, affiliate and individual. A note says which locker was used. It does not say who ran it. State confidence explicitly and say what would change your mind."],
  ["Handle victim data lawfully","Leaked personal data you download for verification is still personal data. Minimise what you keep, store it where your policy says, and log the access."],
+ ["Keys in a browser","API keys saved by this page sit in the browser profile as plain text. Use a research browser profile, not your daily one, and prefer This tab only on shared machines. Never paste keys into a public CORS proxy: run your own relay or check that source by hand."],
  ["Mind the mirror sites","Clearnet mirrors of leak sites are convenient but are run by third parties who log requests and can serve altered content. Corroborate before you report a victim listing as fact."]
 ];
 /* ==========================================================================
@@ -1435,6 +1487,9 @@ function detect(raw){
   if(!q)return out;
   const add=(t,note)=>out.push({t,note});
   const bare=q.replace(/^tox:/i,'').replace(/\s+/g,'');
+  /* @handle and a bare t.me/handle are usernames, not free text */
+  if(/^@[a-z0-9_.-]{2,32}$/i.test(q)){add('username','@handle');return out;}
+  if(/^(?:www\.)?t\.me\/(?:s\/)?[a-z0-9_]{3,}\/?$/i.test(q)){add('username','Telegram handle');return out;}
   if(RX.tox.test(bare))add('tox','76 hex characters');
   if(RX.session.test(bare))add('session','66 hex starting 05');
   if(RX.onion3.test(q))add('onion','56 character v3 address');
@@ -1470,7 +1525,7 @@ const TYPETAGS={
 
 function buildUrl(r,q){
   if(!r.u.includes('{q}'))return r.u;
-  return r.u.replace('{q}',encodeURIComponent(q));
+  return r.u.replace('{q}',r.raw?encodeURI(q):encodeURIComponent(q));
 }
 function badgeHtml(b){
   if(!b)return '';
@@ -1514,8 +1569,9 @@ function go(id){
   $$('[data-nav] button').forEach(b=>b.classList.toggle('on',b.dataset.go===id));
   window.scrollTo({top:0,behavior:'instant'});
   location.hash=id;
-  if(id==='tracker'&&typeof tkLoad==='function'&&TR.live)tkLoad();
-  if(id==='keys'&&typeof ksLoad==='function'&&TR.live)ksLoad();
+  if(id==='tracker'&&typeof tkLoad==='function')tkLoad();
+  if(id==='keys'&&typeof ksLoad==='function')ksLoad();
+  if(id==='triage'&&typeof trSourcesRender==='function')trSourcesRender();
 }
 $$('[data-nav] button').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 
@@ -1620,8 +1676,12 @@ function xmrDecode(s){
 
 /* ==================== ARTIFACT BAR ==================== */
 let CURRENT={q:'',types:[]};
+function barValue(){
+  const raw=$('#q').value.trim();
+  return /\[\.\]|\(\.\)|\[dot\]|\[@\]|^h(?:xx|\*\*)ps?(?:\[?:)/i.test(raw)?tiRefang(raw).replace(/\[@\]/g,'@'):raw;
+}
 function classify(){
-  const q=$('#q').value.trim();
+  const q=barValue();
   const types=detect(q);
   CURRENT={q,types:types.map(t=>t.t)};
   const tags=$('#qtags');
@@ -1631,15 +1691,15 @@ function classify(){
     +`<span class="hint">${q.length} chars</span>`;
 }
 async function pivot(){
-  const q=$('#q').value.trim();
-  if(!q){toast('Paste an artifact first');return;}
+  if(!$('#q').value.trim()){toast('Paste an artifact first');return;}
   classify();
+  const q=CURRENT.q;
   go('pivot');
   const types=CURRENT.types;
   const val=$('#pivotvalidate');val.innerHTML='';
   /* inline offline validation for the types that support it */
   const checks=[];
-  if(types.includes('tox'))checks.push(toxReport(q.replace(/^tox:/i,'').replace(/\s+/g,'')));
+  if(types.includes('tox'))checks.push(toxReport(pivotValue(q,'tox')));
   if(types.includes('onion'))checks.push(await onionReport(q));
   if(types.includes('btc')||types.includes('eth')||types.includes('xmr'))checks.push(await cryptoReport(q));
   if(types.includes('hash'))checks.push(hashReport(q));
@@ -1649,22 +1709,24 @@ async function pivot(){
     val.innerHTML=`<div class="card" style="margin-bottom:14px"><h3><span class="dot"></span>Local checks</h3>
       <div class="out" style="max-height:none">${checks.join('<hr style="border:0;border-top:1px solid #a2b0ad2e;margin:10px 0">')}</div></div>`;
   }
-  const tags=[];types.forEach(t=>(TYPETAGS[t]||[]).forEach(x=>{if(!tags.includes(x))tags.push(x)}));
   const out=$('#pivotout');out.innerHTML='';
-  const head=document.createElement('div');
-  head.innerHTML=`<div class="card"><h3><span class="dot"></span>Working artifact</h3>
-    <dl class="kv"><dt>Value</dt><dd style="color:var(--paper)">${esc(q)}</dd>
-    <dt>Classified as</dt><dd>${types.map(t=>esc(TYPELABEL[t]||t)).join(', ')}</dd>
-    <dt>Matching resources</dt><dd>${byTags(tags).length}</dd></dl></div>`;
-  out.appendChild(head);
-  const groups=Object.keys(GROUPNAMES);
-  let total=0;
-  groups.forEach(g=>{
-    const list=R.filter(r=>r.g===g&&r.t.some(t=>tags.includes(t)));
-    total+=list.length;
-    renderGroup(out,list,q,GROUPNAMES[g]);
+  const head=document.createElement('div');out.appendChild(head);
+  const kinds=[...new Set(types.map(kindOf))];
+  let links=0;const derived=[];
+  kinds.forEach(k=>{
+    const v=pivotValue(q,types.find(t=>kindOf(t)===k)||k);
+    const sec=document.createElement('div');
+    if(kinds.length>1)sec.innerHTML=`<div class="grouphead" style="margin-top:26px;color:var(--paper)">As ${esc(KIND[k].label)}<span class="c">${esc(v)}</span></div>`;
+    out.appendChild(sec);
+    const r=buildAll(sec,k,v);links+=r.links;derived.push(...r.derived);
   });
-  if(!total)out.innerHTML+='<p class="mut">No resource accepts that entity type. Try the full library.</p>';
+  head.innerHTML=`<div class="card"><h3><span class="dot"></span>Working artifact</h3>
+    <dl class="kv"><dt>Value</dt><dd style="color:var(--paper)">${esc(q)}${q!==$('#q').value.trim()?' <span class="mut">(refanged from the bar)</span>':''}</dd>
+    <dt>Classified as</dt><dd>${types.map(t=>esc(TYPELABEL[t]||t)).join(', ')}</dd>
+    <dt>Links built</dt><dd>${links}</dd>
+    <dt>Derived pivots</dt><dd>${derived.length?derived.map(d=>`<span class="chip" data-repivot="${esc(d.value)}" title="${esc(d.title)}">${esc(d.title)}: ${esc(d.value.length>40?d.value.slice(0,40)+'…':d.value)}</span>`).join(''):'<span class="mut">none for this type</span>'}</dd></dl>
+    ${derived.length?'<p class="note" style="margin-top:8px">Each derived value gets its own link set further down the page.</p>':''}</div>`;
+  if(!links)out.innerHTML+='<p class="mut">No resource accepts that entity type. Try the full library.</p>';
 }
 $('#q').addEventListener('input',classify);
 $('#q').addEventListener('keydown',e=>{if(e.key==='Enter')pivot();});
@@ -1863,16 +1925,20 @@ function variants(u){
   return [...set].filter(Boolean);
 }
 $('#un-variants').addEventListener('click',()=>{
-  const u=$('#un-name').value.trim();if(!u)return toast('Enter a username');
+  const u=pivotValue($('#un-name').value,'username');if(!u)return toast('Enter a username');
   const v=variants(u);
-  $('#un-var').innerHTML=`<b>${v.length} variants.</b> Sweep the plausible ones, do not brute force every string.\n\n`+v.map(esc).join('  ');
+  $('#un-var').innerHTML=`<b>${v.length} variants.</b> Click one to build its links. Sweep the plausible ones, do not brute force every string.\n\n`+
+    v.map(x=>`<span class="chip" data-unvar="${esc(x)}">${esc(x)}</span>`).join('');
 });
-$('#un-go').addEventListener('click',()=>{
-  const u=$('#un-name').value.trim();if(!u)return toast('Enter a username');
+$('#un-var').addEventListener('click',e=>{const c=e.target.closest('[data-unvar]');if(!c)return;$('#un-name').value=c.dataset.unvar;unBuild();});
+function unBuild(){
+  const u=pivotValue($('#un-name').value,'username');if(!u)return toast('Enter a username');
   const el=$('#un-out');el.innerHTML='';
-  renderGroup(el,R.filter(r=>r.g==='social'&&r.t.includes('username')),u,'Direct profile checks for '+u);
-  renderGroup(el,R.filter(r=>r.g==='search'&&r.t.includes('username')),'"'+u+'"','Search engines');
-});
+  const r=buildAll(el,'username',u,{variants:false});
+  toast(r.links+' links built for '+u);
+}
+$('#un-go').addEventListener('click',unBuild);
+$('#un-name').addEventListener('keydown',e=>{if(e.key==='Enter')unBuild();});
 
 /* ==================== 05 EMAIL ==================== */
 $('#em-go').addEventListener('click',()=>{
@@ -1881,11 +1947,13 @@ $('#em-go').addEventListener('click',()=>{
 });
 $('#em-links').addEventListener('click',()=>{
   const e=$('#em-addr').value.trim();if(!e)return toast('Enter an address');
+  if(!RX.email.test(e))return toast('That does not look like an email address');
   const el=$('#em-links-out');el.innerHTML='';
-  renderGroup(el,R.filter(r=>r.t.includes('email')),e,'Email lookups for '+e);
-  const local=e.split('@')[0];
-  renderGroup(el,R.filter(r=>r.g==='social'&&r.t.includes('username')).slice(0,12),local,'Handle sweep on the local part "'+local+'"');
+  const r=buildAll(el,'email',e);
+  toast(r.links+' links built, '+r.derived.length+' derived pivots');
 });
+$('#em-addr').addEventListener('keydown',ev=>{if(ev.key==='Enter')$('#em-go').click();});
+
 $('#pm-go').addEventListener('click',()=>{
   const f=$('#pm-first').value.trim().toLowerCase(),l=$('#pm-last').value.trim().toLowerCase(),d=$('#pm-dom').value.trim().toLowerCase();
   if(!f||!l||!d)return toast('First, last and domain are all needed');
@@ -2519,7 +2587,9 @@ async function addCase(value,type,note,defer){
   const sha=await sha256hex(value);
   CASE.push({ts:new Date().toISOString(),type:type||'text',value,note:note||'',sha,ref:$('#cs-ref').value.trim()});
   if(!defer){renderCase();toast('Logged to case');}
+  else{clearTimeout(addCase.t);addCase.t=setTimeout(renderCase,30);}
 }
+function caseLoad(){const c=stGet('case',[]);CASE=Array.isArray(c)?c:[];const r=stGet('caseref','');if(r)$('#cs-ref').value=r;renderCase();}
 function renderCase(){
   const tb=$('#cs-table').querySelector('tbody');
   tb.innerHTML=CASE.map((c,i)=>`<tr>
@@ -2531,6 +2601,7 @@ function renderCase(){
     <td><button class="btn sm" data-del="${i}">remove</button></td></tr>`).join('')||
     '<tr><td colspan="6" class="mut">Empty. Log entries from the artifact bar, the extractor or the triage panel.</td></tr>';
   $$('[data-del]',tb).forEach(b=>b.addEventListener('click',()=>{CASE.splice(+b.dataset.del,1);renderCase();}));
+  stSet('case',CASE);stSet('caseref',$('#cs-ref').value.trim());
   const types={};CASE.forEach(c=>types[c.type]=(types[c.type]||0)+1);
   $('#cs-stats').innerHTML=`<dt>Entries</dt><dd>${CASE.length}</dd>
     <dt>Types</dt><dd>${Object.entries(types).map(([k,v])=>esc(k)+' '+v).join(', ')||'-'}</dd>
@@ -2608,105 +2679,912 @@ function renderLibChips(){
 }
 
 /* ==================== INIT ==================== */
-/* ==================== 03 IOC TRIAGE (intelscope) ==================== */
+const TR_DEMO=/*DEMO*/[{"ioc":"198.51.100.23","type":"ipv4","original":"198.51.100[.]23","verdict":"malicious","score":100,"allowlisted":false,"reasons":["abuseipdb: 100% abuse confidence, 1,284 reports (90d) · ExampleHost / NL","threatfox: 1 ThreatFox indicator · +1 URL on this host · listed on port 443 · ExampleStealer · botnet C2 · confidence 100%","virustotal: 7/94 engines malicious, 2 suspicious","asn: AS64500 EXAMPLE-BULLETPROOF is on Spamhaus ASN-DROP","greynoise: classified malicious (mass scanning)"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":84,"benign":false,"summary":"7/94 engines malicious, 2 suspicious","data":{"malicious":7,"suspicious":2,"harmless":60,"undetected":25,"flagged_by":["ExampleAV (malware)","DemoGuard","SampleShield (phishing)","TestScan"],"reputation":-41,"community_votes":"12 malicious, 0 harmless","asn":64500,"as_owner":"EXAMPLE-BULLETPROOF","country":"NL","network":"198.51.100.0/24","rir":"RIPE NCC","https_cert":"CN demo-panel.test, issued by Example CA, valid until 2027-01-31"},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":100,"benign":false,"summary":"100% abuse confidence, 1,284 reports (90d) · ExampleHost / NL","data":{"confidence":100,"reports":1284,"distinct_users":211,"categories":["SSH (802)","brute-force (790)","port scan (402)","hacking (96)"],"isp":"ExampleHost","usage_type":"Data Center/Web Hosting/Transit","country":"Netherlands (NL)","last_reported":"2026-11-25 22:14 UTC","tor":false,"public":true,"recent_reports":[{"date":"2026-11-25 22:14 UTC","categories":"SSH, brute-force","comment":"Demo: repeated SSH login attempts for root","from":"DE"},{"date":"2026-11-25 19:02 UTC","categories":"port scan","comment":"Demo: scan of 22, 2222, 3389","from":"US"}]},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":70,"benign":false,"summary":"classified malicious (mass scanning)","data":{"classification":"malicious","noise":true,"riot":false,"last_seen":"2026-11-25"},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":true,"score":null,"benign":false,"summary":"ports 22, 3389 · tags: self-signed","data":{"ports":[22,3389],"tags":["self-signed"],"hostnames":["demo-panel.test"]},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":75,"benign":false,"summary":"AS64500 EXAMPLE-BULLETPROOF is on Spamhaus ASN-DROP","data":{"asn":64500,"holder":"EXAMPLE-BULLETPROOF","prefix":"198.51.100.0/24","listed_on":["Spamhaus ASN-DROP"]},"error":null,"cached":false},"threatfox":{"provider":"threatfox","ok":true,"found":true,"score":100,"benign":false,"summary":"1 ThreatFox indicator · +1 URL on this host · listed on port 443 · ExampleStealer · botnet C2 · confidence 100%","error":null,"cached":false,"data":{"indicators":1,"related_urls":1,"matched":["198.51.100.23:443 (ip:port)"],"malware":["ExampleStealer"],"aliases":["DemoSteal"],"threat_types":["botnet C2"],"first_seen":"2026-10-02","last_seen":"2026-11-24","reporters":["demo_reporter"],"tags":["c2","ExampleStealer"],"samples":["0000000000000000000000000000000000000000000000000000000000000000"]}}}},{"ioc":"http://update-check.cdn-delivery.test/payload/inv_2291.exe","type":"url","original":"hxxp://update-check[.]cdn-delivery[.]test/payload/inv_2291.exe","verdict":"malicious","score":100,"allowlisted":false,"reasons":["virustotal: 18/96 engines malicious · trojan.agenttesla","urlhaus: malware_download URL, online · AgentTesla, exe"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":100,"benign":false,"summary":"18/96 engines malicious · trojan.agenttesla","data":{"malicious":18,"suspicious":0,"harmless":70,"undetected":8,"http_status":200,"categories":["malware"],"threat_names":["trojan.agenttesla"],"first_submitted":"2026-11-23","times_submitted":4},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":true,"score":95,"benign":false,"summary":"malware_download URL, online · AgentTesla, exe","data":{"status":"online","threat":"malware_download","tags":["AgentTesla","exe"],"host":"update-check.cdn-delivery.test","date_added":"2026-11-23","reporter":"demo_reporter","families":["AgentTesla"],"payloads":[{"file":"inv_2291.exe","type":"exe","family":"AgentTesla","sha256":"1111111111111111111111111111111111111111111111111111111111111111","first_seen":"2026-11-23"}]},"error":null,"cached":false}}},{"ioc":"44d88612fea8a8f36de82e1278abb02f","type":"md5","original":"44d88612fea8a8f36de82e1278abb02f","verdict":"malicious","score":100,"allowlisted":false,"reasons":["virustotal: 61/72 engines malicious · eicar/test-file"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":100,"benign":false,"summary":"61/72 engines malicious · eicar/test-file","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"secure-login-micros0ft.test","type":"domain","original":"secure-login-micros0ft[.]test","verdict":"suspicious","score":48,"allowlisted":false,"reasons":["virustotal: 4/94 engines malicious"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":48,"benign":false,"summary":"4/94 engines malicious","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"192.0.2.10","type":"ipv4","original":"192.0.2.10","verdict":"low","score":31,"allowlisted":false,"reasons":["abuseipdb: 34% abuse confidence, 41 reports (90d)","greynoise: internet background noise","virustotal: 1/94 engines malicious"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":12,"benign":false,"summary":"1/94 engines malicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":34,"benign":false,"summary":"34% abuse confidence, 41 reports (90d)","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":20,"benign":false,"summary":"internet background noise","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":true,"score":null,"benign":false,"summary":"ports 80, 443, 8080 · 3 CVEs","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":null,"benign":false,"summary":"AS64502 EXAMPLE-HOSTING · 192.0.2.0/24 · not blocklisted","data":{},"error":null,"cached":false}}},{"ioc":"intranet-portal.example","type":"domain","original":"intranet-portal.example","verdict":"unknown","score":0,"allowlisted":false,"reasons":["no source has a record of this indicator"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"203.0.113.77","type":"ipv4","original":"203.0.113.77","verdict":"benign","score":0,"allowlisted":false,"reasons":["greynoise: known business service (RIOT): Example Search Crawler"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":0,"benign":false,"summary":"0/94 engines malicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":0,"benign":false,"summary":"0% abuse confidence, 0 reports (90d)","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":0,"benign":true,"summary":"known business service (RIOT): Example Search Crawler","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":null,"benign":false,"summary":"AS64501 EXAMPLE-SEARCH · 203.0.113.0/24 · not blocklisted","data":{},"error":null,"cached":false}}},{"ioc":"8.8.8.8","type":"ipv4","original":"8.8.8.8","verdict":"benign","score":0,"allowlisted":true,"reasons":["allowlisted: allowlisted IP"],"sources":{}}]/*END*/;
+/* ==================== 03 IOC TRIAGE (browser engine) ====================
+   Everything the Python engine did, done by this page: refang and classify, allowlist,
+   per-source rate limits, a local cache, the lookups themselves (fetch, straight from the
+   browser, or through your own relay when a source blocks browsers), and the scoring.
+   ======================================================================== */
+const APP_VERSION='web 2.0';
 const VERDICTS=['malicious','suspicious','low','unknown','benign'];
 const VRANK={benign:0,unknown:1,low:2,suspicious:3,malicious:4};
 /* One triforce instead of three stacked triangles: fixed width, so it can never overflow a pill or a button. */
 const TRIFORCE='<svg class="tf" viewBox="0 0 16 16" role="img" aria-label="malicious"><path d="M8 1l3.5 7h-7zM4.5 8L8 15H1zM11.5 8L15 15H8z"/></svg>';
 const VGLYPH={malicious:TRIFORCE,suspicious:'▲▲',low:'▲',unknown:'?',benign:'✓'};
-const PROVIDER_LABELS={virustotal:'VirusTotal',abuseipdb:'AbuseIPDB',urlhaus:'URLhaus',threatfox:'ThreatFox',greynoise:'GreyNoise',shodan:'Shodan InternetDB',censys:'Censys',urlscan:'urlscan.io',intel471:'Intel 471',opencti:'OpenCTI',rdap:'RDAP / WHOIS',pdns:'Passive DNS',asn:'ASN blocklist'};
-const TR={live:false,demo:false,token:'',providers:[],results:[],filter:null,version:'',demoIocs:[]};
-const TR_DEMO=/*DEMO*/[{"ioc":"198.51.100.23","type":"ipv4","original":"198.51.100[.]23","verdict":"malicious","score":100,"allowlisted":false,"reasons":["abuseipdb: 100% abuse confidence, 1,284 reports (90d) · ExampleHost / NL","virustotal: 7/94 engines malicious, 2 suspicious","asn: AS64500 EXAMPLE-BULLETPROOF is on Spamhaus ASN-DROP","greynoise: classified malicious (mass scanning)"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":84,"benign":false,"summary":"7/94 engines malicious, 2 suspicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":100,"benign":false,"summary":"100% abuse confidence, 1,284 reports (90d) · ExampleHost / NL","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":70,"benign":false,"summary":"classified malicious (mass scanning)","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":true,"score":null,"benign":false,"summary":"ports 22, 3389 · tags: self-signed","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":75,"benign":false,"summary":"AS64500 EXAMPLE-BULLETPROOF is on Spamhaus ASN-DROP","data":{},"error":null,"cached":false}}},{"ioc":"http://update-check.cdn-delivery.test/payload/inv_2291.exe","type":"url","original":"hxxp://update-check[.]cdn-delivery[.]test/payload/inv_2291.exe","verdict":"malicious","score":100,"allowlisted":false,"reasons":["virustotal: 18/96 engines malicious · trojan.agenttesla","urlhaus: malware_download URL, online · AgentTesla, exe"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":100,"benign":false,"summary":"18/96 engines malicious · trojan.agenttesla","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":true,"score":95,"benign":false,"summary":"malware_download URL, online · AgentTesla, exe","data":{},"error":null,"cached":false}}},{"ioc":"44d88612fea8a8f36de82e1278abb02f","type":"md5","original":"44d88612fea8a8f36de82e1278abb02f","verdict":"malicious","score":100,"allowlisted":false,"reasons":["virustotal: 61/72 engines malicious · eicar/test-file"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":100,"benign":false,"summary":"61/72 engines malicious · eicar/test-file","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"secure-login-micros0ft.test","type":"domain","original":"secure-login-micros0ft[.]test","verdict":"suspicious","score":48,"allowlisted":false,"reasons":["virustotal: 4/94 engines malicious"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":48,"benign":false,"summary":"4/94 engines malicious","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"192.0.2.10","type":"ipv4","original":"192.0.2.10","verdict":"low","score":31,"allowlisted":false,"reasons":["abuseipdb: 34% abuse confidence, 41 reports (90d)","greynoise: internet background noise","virustotal: 1/94 engines malicious"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":12,"benign":false,"summary":"1/94 engines malicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":34,"benign":false,"summary":"34% abuse confidence, 41 reports (90d)","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":20,"benign":false,"summary":"internet background noise","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":true,"score":null,"benign":false,"summary":"ports 80, 443, 8080 · 3 CVEs","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":null,"benign":false,"summary":"AS64502 EXAMPLE-HOSTING · 192.0.2.0/24 · not blocklisted","data":{},"error":null,"cached":false}}},{"ioc":"intranet-portal.example","type":"domain","original":"intranet-portal.example","verdict":"unknown","score":0,"allowlisted":false,"reasons":["no source has a record of this indicator"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false}}},{"ioc":"203.0.113.77","type":"ipv4","original":"203.0.113.77","verdict":"benign","score":0,"allowlisted":false,"reasons":["greynoise: known business service (RIOT): Example Search Crawler"],"sources":{"virustotal":{"provider":"virustotal","ok":true,"found":true,"score":0,"benign":false,"summary":"0/94 engines malicious","data":{},"error":null,"cached":false},"abuseipdb":{"provider":"abuseipdb","ok":true,"found":true,"score":0,"benign":false,"summary":"0% abuse confidence, 0 reports (90d)","data":{},"error":null,"cached":false},"urlhaus":{"provider":"urlhaus","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"greynoise":{"provider":"greynoise","ok":true,"found":true,"score":0,"benign":true,"summary":"known business service (RIOT): Example Search Crawler","data":{},"error":null,"cached":false},"shodan":{"provider":"shodan","ok":true,"found":false,"score":null,"benign":false,"summary":"no record","data":{},"error":null,"cached":false},"asn":{"provider":"asn","ok":true,"found":true,"score":null,"benign":false,"summary":"AS64501 EXAMPLE-SEARCH · 203.0.113.0/24 · not blocklisted","data":{},"error":null,"cached":false}}},{"ioc":"8.8.8.8","type":"ipv4","original":"8.8.8.8","verdict":"benign","score":0,"allowlisted":true,"reasons":["allowlisted: allowlisted IP"],"sources":{}}]/*END*/;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-function trTypeOf(v){
-  if(/^https?:\/\/\S+$/i.test(v))return 'url';
-  if(RX.ipv4.test(v))return 'ipv4';
-  if(RX.ipv6.test(v)&&v.includes(':'))return 'ipv6';
-  if(RX.sha256.test(v))return 'sha256';
-  if(RX.sha1.test(v))return 'sha1';
-  if(RX.md5.test(v))return 'md5';
-  if(RX.domain.test(v)&&!v.endsWith('.onion'))return 'domain';
+/* ---------------- browser storage ---------------- */
+const STORE_PREFIX='intelscope.';
+function stGet(k,d,area){
+  try{const s=area==='session'?sessionStorage:localStorage;const v=s.getItem(STORE_PREFIX+k);return v==null?d:JSON.parse(v);}catch(e){return d;}
+}
+function stSet(k,v,area){
+  try{const s=area==='session'?sessionStorage:localStorage;s.setItem(STORE_PREFIX+k,JSON.stringify(v));return true;}catch(e){return false;}
+}
+function stDel(k,area){try{(area==='session'?sessionStorage:localStorage).removeItem(STORE_PREFIX+k);}catch(e){}}
+function stKeys(prefix){
+  const out=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(STORE_PREFIX+prefix))out.push(k);}}catch(e){}
+  return out;
+}
+const STORAGE_OK=(()=>{try{localStorage.setItem(STORE_PREFIX+'probe','1');localStorage.removeItem(STORE_PREFIX+'probe');return true;}catch(e){return false;}})();
+
+/* ---------------- settings ---------------- */
+const CFG=Object.assign({
+  relay:'',relayToken:'',relayMode:'fallback',   /* off | fallback | always */
+  cacheHours:24,useCache:true,
+  defaultAllowlist:true,skipReserved:true,allowlist:'',
+  asnCustom:'',useDrop:true,
+  timeoutSec:20
+},stGet('cfg',{}));
+function cfgSave(){stSet('cfg',CFG);}
+
+/* ---------------- IP helpers ---------------- */
+function parseIPv4(s){
+  const m=/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(s);if(!m)return null;
+  const o=m.slice(1).map(Number);if(o.some(x=>x>255))return null;
+  if(m.slice(1).some(x=>x.length>1&&x[0]==='0'))return null;   /* 010.1.1.1 is ambiguous, refuse it like Python does */
+  return o;
+}
+function v4int(o){return ((o[0]<<24)>>>0)+(o[1]<<16)+(o[2]<<8)+o[3];}
+function parseIPv6(s){
+  s=s.toLowerCase().replace(/^\[|\]$/g,'');
+  if(!/^[0-9a-f:.]+$/.test(s)||!s.includes(':'))return null;
+  const v4=s.match(/^(.*:)(\d+\.\d+\.\d+\.\d+)$/);
+  if(v4){const o=parseIPv4(v4[2]);if(!o)return null;s=v4[1]+((o[0]<<8)|o[1]).toString(16)+':'+((o[2]<<8)|o[3]).toString(16);}
+  if(s.includes('.'))return null;
+  const dbl=s.split('::');if(dbl.length>2)return null;
+  const part=x=>x===''?[]:x.split(':');
+  const head=part(dbl[0]),rest=dbl.length===2?part(dbl[1]):[];
+  if([...head,...rest].some(h=>!/^[0-9a-f]{1,4}$/.test(h)))return null;
+  let words;
+  if(dbl.length===2){
+    const fill=8-head.length-rest.length;if(fill<1)return null;
+    words=[...head,...new Array(fill).fill('0'),...rest];
+  }else{if(head.length!==8)return null;words=head;}
+  return words.map(h=>parseInt(h,16));
+}
+function v6str(w,zone){
+  if(w.slice(0,5).every(x=>x===0)&&w[5]===0xffff)return '::ffff:'+[w[6]>>8,w[6]&255,w[7]>>8,w[7]&255].join('.')+(zone||'');
+  let best=-1,len=0;
+  for(let i=0;i<8;){if(w[i]===0){let j=i;while(j<8&&w[j]===0)j++;if(j-i>len&&j-i>1){best=i;len=j-i;}i=j;}else i++;}
+  const h=w.map(x=>x.toString(16));
+  if(best<0)return h.join(':')+(zone||'');
+  return h.slice(0,best).join(':')+'::'+h.slice(best+len).join(':')+(zone||'');
+}
+function v6big(w){return w.reduce((a,x)=>(a<<16n)|BigInt(x),0n);}
+function inCidrV4(o,net,bits){const m=bits===0?0:(0xFFFFFFFF<<(32-bits))>>>0;return ((v4int(o)&m)>>>0)===((v4int(net)&m)>>>0);}
+const V4_RESERVED=[['0.0.0.0',8],['10.0.0.0',8],['100.64.0.0',10],['127.0.0.0',8],['169.254.0.0',16],['172.16.0.0',12],
+  ['192.0.0.0',24],['192.0.2.0',24],['192.88.99.0',24],['192.168.0.0',16],['198.18.0.0',15],['198.51.100.0',24],
+  ['203.0.113.0',24],['224.0.0.0',4],['240.0.0.0',4]].map(([a,b])=>[parseIPv4(a),b]);
+function v4global(o){return !V4_RESERVED.some(([n,b])=>inCidrV4(o,n,b));}
+const V6_RESERVED=[['::',128],['::1',128],['::ffff:0:0',96],['64:ff9b:1::',48],['100::',64],['2001::',23],['2001:db8::',32],
+  ['2002::',16],['fc00::',7],['fe80::',10],['ff00::',8]].map(([a,b])=>[v6big(parseIPv6(a)),b]);
+function v6global(w){
+  const x=v6big(w);
+  if(w[0]===0&&w[1]===0&&w[2]===0&&w[3]===0&&w[4]===0&&w[5]===0xffff)return v4global([w[6]>>8,w[6]&255,w[7]>>8,w[7]&255]);
+  return !V6_RESERVED.some(([n,b])=>{const sh=BigInt(128-b);return (x>>sh)===(n>>sh);});
+}
+
+/* ---------------- classify (port of detect.py) ---------------- */
+const NOT_TLDS=new Set(('exe dll sys msi bat cmd ps1 psm1 vbs vbe wsf jar lnk scr docx docm doc xls xlsx xlsm ppt pptx pdf rtf txt log tmp dat '+
+  'bin iso img 7z rar gz tgz png jpg jpeg gif bmp svg js json xml csv html htm php asp aspx jsp cfg ini yml yaml md css').split(' '));
+const DOMAIN_RE=/^(?=.{4,253}$)(?:[a-z0-9_](?:[a-z0-9_-]{0,61}[a-z0-9])?\.)+(?:[a-z]{2,63}|xn--[a-z0-9-]{1,59})$/;
+const SCHEME_RE=/^[a-z][a-z0-9+.-]*:\/\//i;
+const JUNK_TOKEN=/^(?:[\W_]+|\d{1,3}[.)])$/;
+const HASHLEN={32:'md5',40:'sha1',64:'sha256'};
+function tiRefang(v){
+  v=v.trim().replace(/^["'<>]+|["'<>]+$/g,'');
+  v=v.replace(/\[\s*\.\s*\]|\(\s*\.\s*\)|\{\s*\.\s*\}|\[dot\]|\(dot\)/gi,'.')
+     .replace(/\[\s*:\s*\]/g,':').replace(/\[\/\]/g,'/')
+     .replace(/^h(?:xx|\*\*)p(s?)(?=\[?:)/i,'http$1').replace(/^fxp(?=\[?:)/i,'ftp');
+  return v;
+}
+function tiTrim(v){if(SCHEME_RE.test(v))return v;return v.replace(/^[(\[{<"']+/,'').replace(/[)\]}>"',;!?]+$/,'');}
+function tiDropPort(v){
+  if((v.match(/:/g)||[]).length===1&&!SCHEME_RE.test(v)){const [h,p]=v.split(':');if(/^\d+$/.test(p)&&+p>0&&+p<65536)return h;}
+  return v;
+}
+function tiClassify(raw){
+  const original=String(raw).trim();
+  const value=tiDropPort(tiTrim(tiRefang(original)));
+  if(!value)return null;
+  if(SCHEME_RE.test(value)){
+    try{const u=new URL(value);if((u.protocol==='http:'||u.protocol==='https:')&&u.hostname)return {value,type:'url',original};}catch(e){}
+    return null;
+  }
+  const o=parseIPv4(value);if(o)return {value:o.join('.'),type:'ipv4',original};
+  const zm=value.replace(/^\[|\]$/g,'').match(/^([^%]+)(%[\w.-]+)?$/);
+  const w=zm&&parseIPv6(zm[1]);if(w)return {value:v6str(w,zm[2]),type:'ipv6',original};
+  if(HASHLEN[value.length]&&/^[0-9a-f]+$/i.test(value))return {value:value.toLowerCase(),type:HASHLEN[value.length],original};
+  const host=value.toLowerCase().replace(/\.$/,'');
+  if(DOMAIN_RE.test(host)&&!NOT_TLDS.has(host.split('.').pop()))return {value:host,type:'domain',original};
   return null;
 }
-function trPrivate(v){
-  const m=v.match(/^(\d+)\.(\d+)\.\d+\.\d+$/);if(!m)return false;
-  const a=+m[1],b=+m[2];
-  return a===10||a===127||a===0||(a===172&&b>=16&&b<=31)||(a===192&&b===168)||(a===169&&b===254)||(a===100&&b>=64&&b<=127)||a>=224;
-}
-/* Offline parse: defang-aware, same shape as the engine's output, but nothing is looked up. */
-function trParse(text){
-  const seen=new Set(),res=[],rejected=[];
-  text.split(/\r?\n/).forEach(line=>{
-    line.replace(/(^|\s)#.*$/,'').split(/[\s,;|]+/).filter(Boolean).forEach(tok=>{
-      let v=refang(tok).replace(/^["'<(\[]+|["'>),.\]]+$/g,'');
-      const t=trTypeOf(v);
-      if(!t){rejected.push(tok);return;}
-      if(t!=='url'&&t!=='ipv6')v=v.toLowerCase();
-      if(t==='url')v=v.replace(/^(https?:\/\/[^\/]+)/i,m=>m.toLowerCase());
-      if(seen.has(v))return;seen.add(v);
-      const priv=t==='ipv4'&&trPrivate(v);
-      res.push({ioc:v,type:t,original:tok,verdict:priv?'benign':'unknown',score:0,allowlisted:priv,
-        reasons:[priv?'private or reserved address, nothing to look up':'not enriched: start intelscope serve to query the sources'],sources:{}});
+function tiParse(text){
+  const seen=new Set(),iocs=[],rejected=[];
+  String(text).split(/\r?\n/).forEach(line=>{
+    line=line.split(/\s#/)[0].trim();
+    if(!line||line.startsWith('#'))return;
+    line.split(/[\s,;|]+/).forEach(tok=>{
+      if(!tok)return;
+      const i=tiClassify(tok);
+      if(!i){if(!JUNK_TOKEN.test(tok))rejected.push(tok);return;}
+      const k=i.type+'|'+i.value;if(seen.has(k))return;seen.add(k);iocs.push(i);
     });
   });
-  return {results:res,rejected};
+  return {iocs,rejected};
 }
-function trLabel(n){return PROVIDER_LABELS[n]||(TR.providers.find(p=>p.name===n)||{}).label||n;}
+const isIP=t=>t==='ipv4'||t==='ipv6';
+const isHash=t=>t==='md5'||t==='sha1'||t==='sha256';
+/* kept for the rest of the page */
+function trTypeOf(v){const i=tiClassify(v);return i?i.type:null;}
 
-async function trProbe(){
-  if(!/^https?:$/.test(location.protocol)){trMode();tkLoad();ksLoad();return;}
-  try{
-    const r=await fetch('/api/health',{cache:'no-store'});
-    const j=await r.json();
-    if(j.tool==='intelscope'){TR.live=true;TR.demo=!!j.demo;TR.token=j.token;TR.providers=j.providers||[];TR.version=j.version||'';TR.demoIocs=j.demo_iocs||[];}
-  }catch(e){TR.live=false;}
-  trMode();tkLoad();ksLoad();
+/* ---------------- allowlist (port of allowlist.py) ---------------- */
+const AL_IPS=['8.8.8.8','8.8.4.4','1.1.1.1','1.0.0.1','9.9.9.9','149.112.112.112','208.67.222.222','208.67.220.220'];
+const AL_DOMAINS=['google.com','gstatic.com','googleapis.com','microsoft.com','windowsupdate.com','office.com','live.com',
+  'apple.com','icloud.com','mozilla.org','cloudflare.com'];
+const USER_CONTENT_HOSTS=['storage.googleapis.com','drive.google.com','docs.google.com','sites.google.com','script.google.com',
+  'firebasestorage.googleapis.com','onedrive.live.com','1drv.ms','sharepoint.com','blob.core.windows.net','web.core.windows.net',
+  'azurewebsites.net','pages.dev','workers.dev'];
+const under=(d,p)=>d===p||d.endsWith('.'+p);
+function alBuild(){
+  const ips=new Set(CFG.defaultAllowlist?AL_IPS:[]),doms=new Set(CFG.defaultAllowlist?AL_DOMAINS:[]),nets=[];
+  String(CFG.allowlist||'').split(/\r?\n/).forEach(line=>{
+    const e=line.split('#')[0].trim().toLowerCase();if(!e)return;
+    if(e.includes('/')){
+      const [a,b]=e.split('/');const bits=+b;
+      const o=parseIPv4(a);if(o&&bits>=0&&bits<=32){nets.push({v:4,o,bits});return;}
+      const w=parseIPv6(a);if(w&&bits>=0&&bits<=128){nets.push({v:6,x:v6big(w),bits});return;}
+      return;
+    }
+    const o=parseIPv4(e);if(o){ips.add(o.join('.'));return;}
+    const w=parseIPv6(e);if(w){ips.add(v6str(w));return;}
+    doms.add(e.replace(/\.$/,''));
+  });
+  return {ips,doms,nets};
 }
-function trMode(){
-  const el=$('#tr-mode'),src=$('#tr-sources');
-  const names=Object.keys(PROVIDER_LABELS);
-  if(TR.live){
-    const ready=TR.providers.filter(p=>p.configured);
-    el.innerHTML=`<b>${TR.demo?'Demo engine':'Live engine'}</b> IntelScope ${esc(TR.version)} on this machine. `+
-      (TR.demo?'Answers are canned sample data, nothing leaves your computer.':`${ready.length} of ${TR.providers.length} sources ready.`);
-    src.innerHTML=TR.providers.map(p=>`<span class="src ${p.configured?'ready':'nokey'}" title="${esc(p.types.join(', '))}">${esc(p.label)}${p.configured?'':' &middot; no key'}</span>`).join('');
-  }else{
-    el.innerHTML='<b>Offline</b> This page can parse, defang-check, sort and export indicators, but it holds no API keys. '+
-      'Run <code>intelscope serve</code> for live lookups, or import the JSON from <code>intelscope -f iocs.txt --format json</code>.';
-    src.innerHTML=names.map(n=>`<span class="src">${esc(PROVIDER_LABELS[n])} &middot; needs the server</span>`).join('');
+function alMatch(ioc,al){
+  if(ioc.type==='ipv4'){
+    const o=parseIPv4(ioc.value);
+    if(CFG.skipReserved&&!v4global(o))return 'non-routable / reserved address';
+    if(al.ips.has(ioc.value))return 'allowlisted IP';
+    if(al.nets.some(n=>n.v===4&&inCidrV4(o,n.o,n.bits)))return 'allowlisted network';
+  }else if(ioc.type==='ipv6'){
+    const w=parseIPv6(ioc.value.split('%')[0]);
+    if(CFG.skipReserved&&!v6global(w))return 'non-routable / reserved address';
+    if(al.ips.has(ioc.value))return 'allowlisted IP';
+    const x=v6big(w);
+    if(al.nets.some(n=>{if(n.v!==6)return false;const sh=BigInt(128-n.bits);return (x>>sh)===(n.x>>sh);}))return 'allowlisted network';
+  }else if(ioc.type==='domain'){
+    if(USER_CONTENT_HOSTS.some(h=>under(ioc.value,h)))return null;
+    for(const d of al.doms)if(under(ioc.value,d))return 'allowlisted domain ('+d+')';
   }
+  return null;
+}
+
+/* ---------------- network ---------------- */
+class NetErr extends Error{constructor(m,kind){super(m);this.kind=kind||'net';}}
+const BLOCKED=new Set();      /* sources whose direct calls the browser refused, this session */
+const VIA_RELAY=new Set();    /* sources that answered through the relay */
+function relayOn(){return CFG.relayMode!=='off'&&/^https:\/\//i.test(CFG.relay||'');}
+async function http(src,url,opt){
+  opt=opt||{};
+  const once=async(viaRelay)=>{
+    const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),(CFG.timeoutSec||20)*1000);
+    let target=url;const headers=Object.assign({},opt.headers||{});
+    if(viaRelay){target=CFG.relay.replace(/\/+$/,'')+'/?url='+encodeURIComponent(url);if(CFG.relayToken)headers['X-Relay-Token']=CFG.relayToken;}
+    try{
+      return await fetch(target,{method:opt.method||'GET',headers,body:opt.body,signal:ctl.signal,cache:'no-store',
+        credentials:'omit',redirect:'follow',referrerPolicy:'no-referrer'});
+    }catch(e){
+      if(e.name==='AbortError')throw new NetErr('timed out after '+(CFG.timeoutSec||20)+' s','timeout');
+      throw new NetErr(viaRelay?'relay unreachable or refused the request':'blocked by the browser (the source does not allow web pages to call it), or offline','cors');
+    }finally{clearTimeout(t);}
+  };
+  const name=src&&src.name;
+  if(relayOn()&&(CFG.relayMode==='always'||BLOCKED.has(name))){const r=await once(true);VIA_RELAY.add(name);return r;}
+  try{const r=await once(false);if(name)BLOCKED.delete(name);return r;}
+  catch(e){
+    if(e.kind!=='cors')throw e;
+    if(name)BLOCKED.add(name);
+    if(relayOn()){const r=await once(true);VIA_RELAY.add(name);return r;}
+    throw e;
+  }
+}
+function httpError(r){
+  if(r.status===401||r.status===403)return 'authentication failed (check API key)';
+  if(r.status===429)return 'rate limited / quota exhausted';
+  return 'HTTP '+r.status;
+}
+async function jsonOf(r){const t=await r.text();try{return JSON.parse(t);}catch(e){throw new NetErr('unexpected response (not JSON)','parse');}}
+async function okJson(r){if(!r.ok)throw new NetErr(httpError(r),'http');return jsonOf(r);}
+function b64url(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function basic(u,p){return 'Basic '+btoa(unescape(encodeURIComponent(u+':'+p)));}
+function compact(d){const o={};Object.entries(d||{}).forEach(([k,v])=>{if(v!=null&&v!==''&&!(Array.isArray(v)&&!v.length)&&!(typeof v==='object'&&!Array.isArray(v)&&!Object.keys(v).length))o[k]=v;});return o;}
+const plural=(n,w)=>n+' '+w+(n===1?'':'s');
+const fmtN=n=>Number(n).toLocaleString('en-US');
+
+/* ---------------- rate limits ---------------- */
+class Limiter{
+  constructor(n,sec){this.n=n;this.ms=sec*1000;this.t=[];}
+  async wait(onWait){
+    for(;;){
+      const now=Date.now();this.t=this.t.filter(x=>now-x<this.ms);
+      if(this.t.length<this.n){this.t.push(now);return;}
+      const w=this.ms-(now-this.t[0])+30;if(onWait)onWait(w);
+      await sleep(Math.min(w,1000));
+      if(RUN.cancel)throw new NetErr('cancelled','cancel');
+    }
+  }
+}
+
+/* ---------------- sources ---------------- */
+const KEYF=(hint,required)=>[{name:'api_key',label:'API key',secret:true,required:required!==false,hint:hint||''}];
+const RES=(found,o)=>Object.assign({ok:true,found:found,score:null,benign:false,summary:'',data:{},error:null},o||{});
+const NOTFOUND=s=>RES(false,{summary:s||'no record'});
+const ERR=m=>({ok:false,found:false,score:null,benign:false,summary:m,data:{},error:m});
+/* ---- evidence helpers ---- */
+const cap=(s,n)=>{s=String(s==null?'':s).replace(/\s+/g,' ').trim();n=n||300;return s.length>n?s.slice(0,n-1)+'…':s;};
+const uniq=a=>[...new Set((a||[]).filter(x=>x!=null&&x!=='').map(x=>typeof x==='string'?x.trim():x).filter(x=>x!==''))];
+const more=(a,n)=>{a=a||[];return a.length>n?a.slice(0,n).concat(['(+'+(a.length-n)+' more)']):a;};
+function tparse(v){
+  if(v==null||v===''||v===0)return NaN;
+  if(typeof v==='number')return v>1e11?v:v*1000;
+  const s=String(v).trim().replace(/ UTC$/,'Z').replace(/^(\d{4}-\d\d-\d\d) (\d\d:\d\d(?::\d\d)?)/,'$1T$2');
+  return Date.parse(/T\d\d:\d\d(:\d\d)?(\.\d+)?$/.test(s)?s+'Z':s);
+}
+function day(v){const t=tparse(v);return isNaN(t)?null:new Date(t).toISOString().slice(0,10);}
+function when(v){const t=tparse(v);return isNaN(t)?null:new Date(t).toISOString().slice(0,16).replace('T',' ')+' UTC';}
+function certLine(c){
+  if(!c||typeof c!=='object')return null;
+  const s=(c.subject||{}).CN,is=(c.issuer||{}).O||(c.issuer||{}).CN,v=day((c.validity||{}).not_after);
+  return [s&&'CN '+s,is&&'issued by '+is,v&&'valid until '+v].filter(Boolean).join(', ')||null;
+}
+const ABUSE_CAT={1:'DNS compromise',2:'DNS poisoning',3:'fraud orders',4:'DDoS attack',5:'FTP brute-force',6:'ping of death',7:'phishing',
+  8:'fraud VoIP',9:'open proxy',10:'web spam',11:'email spam',12:'blog spam',13:'VPN IP',14:'port scan',15:'hacking',16:'SQL injection',
+  17:'spoofing',18:'brute-force',19:'bad web bot',20:'exploited host',21:'web app attack',22:'SSH',23:'IoT targeted'};
+const abuseBlk=o=>{const e=Object.entries(o||{}).filter(([,v])=>v&&v!=='not listed');return e.length?e.map(([k,v])=>k.replace(/_/g,' ')+': '+v):null;};
+const hostOf=v=>{try{return new URL(v).hostname.toLowerCase().replace(/^\[|\]$/g,'');}catch(e){return '';}};
+
+const SOURCES=[
+{name:'virustotal',label:'VirusTotal',types:['ipv4','ipv6','domain','url','md5','sha1','sha256'],weight:1.0,rate:[4,60],
+ fields:KEYF('From your VirusTotal profile, "API key"'),keyUrl:'https://www.virustotal.com/gui/my-apikey',
+ note:'Free tier: 4 lookups a minute, 500 a day.',browser:'blocked',
+ web:i=>i.type==='url'?'https://www.virustotal.com/gui/search/'+encodeURIComponent(encodeURIComponent(i.value))
+   :'https://www.virustotal.com/gui/'+(isIP(i.type)?'ip-address':i.type==='domain'?'domain':'file')+'/'+encodeURIComponent(i.value),
+ async lookup(i,k){
+   const coll={ipv4:'ip_addresses',ipv6:'ip_addresses',domain:'domains',url:'urls',md5:'files',sha1:'files',sha256:'files'}[i.type];
+   const id=i.type==='url'?b64url(i.value):i.value;
+   const r=await http(this,'https://www.virustotal.com/api/v3/'+coll+'/'+encodeURIComponent(id),{headers:{'x-apikey':k.api_key,'Accept':'application/json'}});
+   if(r.status===404)return NOTFOUND('not in VirusTotal');
+   const a=((await okJson(r)).data||{}).attributes||{};
+   const st=a.last_analysis_stats||{};
+   const mal=+st.malicious||0,sus=+st.suspicious||0,harm=+st.harmless||0,und=+st.undetected||0,eng=mal+sus+harm+und;
+   const flagged=Object.entries(a.last_analysis_results||{}).filter(([,v])=>v&&(v.category==='malicious'||v.category==='suspicious'))
+     .map(([e,v])=>(v.engine_name||e)+(v.result&&v.result!==v.category?' ('+cap(v.result,60)+')':''));
+   const votes=a.total_votes||{},ptc=a.popular_threat_classification||{};
+   const cats=uniq(Object.values(a.categories||{}).map(String));
+   const label=isHash(i.type)?(ptc.suggested_threat_label||null):null;
+   const fams=uniq((ptc.popular_threat_name||[]).map(x=>x&&x.value));
+   const data={malicious:mal,suspicious:sus,harmless:harm,undetected:und,flagged_by:more(flagged,15),reputation:a.reputation,
+     community_votes:(votes.malicious||votes.harmless)?(+votes.malicious||0)+' malicious, '+(+votes.harmless||0)+' harmless':null,
+     tags:more(a.tags||[],12),last_analysis:day(a.last_analysis_date)};
+   if(isHash(i.type)){
+     const si=a.signature_info||{};
+     Object.assign(data,{name:a.meaningful_name,other_names:more(uniq(a.names).filter(x=>x!==a.meaningful_name).map(x=>cap(x,80)),8),
+       file_type:a.type_description,size:a.size!=null?fmtN(a.size)+' bytes':null,magic:a.magic?cap(a.magic,120):null,threat_label:label,
+       threat_categories:uniq((ptc.popular_threat_category||[]).map(x=>x&&x.value)),families:fams,
+       first_submitted:day(a.first_submission_date),last_submitted:day(a.last_submission_date),times_submitted:a.times_submitted,
+       md5:a.md5,sha1:a.sha1,sha256:a.sha256,imphash:(a.pe_info||{}).imphash,
+       signature:si.verified?cap(si.verified+(si.signers?': '+si.signers:''),160):null,
+       yara_rules:more(uniq((a.crowdsourced_yara_results||[]).map(x=>x&&x.rule_name)),8),
+       sigma_rules:more(uniq((a.sigma_analysis_results||[]).map(x=>x&&x.rule_title)),8),
+       ids_alerts:(a.crowdsourced_ids_results||[]).length||null,
+       sandboxes:more(Object.values(a.sandbox_verdicts||{}).filter(v=>v&&typeof v==='object').map(v=>(v.sandbox_name||'sandbox')+': '+(v.category||'?')+
+         ((v.malware_names||[]).length?' ('+v.malware_names.slice(0,3).join(', ')+')':'')),6)});
+   }else if(isIP(i.type))Object.assign(data,{asn:a.asn,as_owner:a.as_owner,country:a.country,continent:a.continent,network:a.network,
+     rir:a.regional_internet_registry,https_cert:certLine(a.last_https_certificate),jarm:a.jarm});
+   else if(i.type==='domain')Object.assign(data,{registrar:a.registrar,created:day(a.creation_date),updated:day(a.last_update_date),categories:cats,
+     dns_records:more((a.last_dns_records||[]).filter(x=>x&&['A','AAAA','NS','MX','CNAME','TXT'].includes(x.type)).map(x=>x.type+' '+cap(x.value,100)),12),
+     popularity:more(Object.entries(a.popularity_ranks||{}).map(([n,v])=>n+' #'+(v&&v.rank)),5),https_cert:certLine(a.last_https_certificate),jarm:a.jarm});
+   else Object.assign(data,{final_url:a.last_final_url&&a.last_final_url!==i.value?cap(a.last_final_url,300):null,title:a.title?cap(a.title,160):null,
+     http_status:a.last_http_response_code,categories:cats,threat_names:uniq(a.threat_names),redirects:more((a.redirection_chain||[]).map(x=>cap(x,200)),5),
+     first_submitted:day(a.first_submission_date),last_submitted:day(a.last_submission_date),times_submitted:a.times_submitted});
+   data.report=this.web(i);
+   let s=mal+'/'+eng+' engines malicious';if(sus)s+=', '+sus+' suspicious';
+   if(label)s+=' · '+label;else if(fams.length)s+=' · '+fams.slice(0,2).join(', ');
+   if(i.type==='domain'&&cats.length&&!label)s+=' · '+cats.slice(0,2).join(', ');
+   return RES(true,{score:Math.min(100,mal*12+sus*4),summary:s,data});
+ }},
+{name:'abuseipdb',label:'AbuseIPDB',types:['ipv4','ipv6'],weight:0.9,rate:[30,60],
+ fields:KEYF('Account, API, "Create key"'),keyUrl:'https://www.abuseipdb.com/account/api',note:'Free tier: 1,000 checks a day.',browser:'blocked',
+ web:i=>'https://www.abuseipdb.com/check/'+encodeURIComponent(i.value),
+ async lookup(i,k){
+   const r=await http(this,'https://api.abuseipdb.com/api/v2/check?ipAddress='+encodeURIComponent(i.value)+'&maxAgeInDays=90&verbose',{headers:{'Key':k.api_key,'Accept':'application/json'}});
+   const d=(await okJson(r)).data||{};
+   const c=+d.abuseConfidenceScore||0,rep=+d.totalReports||0;
+   const reps=(Array.isArray(d.reports)?d.reports:[]).filter(x=>x&&typeof x==='object');
+   const cc={};reps.forEach(x=>(x.categories||[]).forEach(n=>cc[n]=(cc[n]||0)+1));
+   const top=Object.entries(cc).sort((a,b)=>b[1]-a[1]);
+   const recent=reps.slice().sort((a,b)=>String(b.reportedAt||'').localeCompare(String(a.reportedAt||''))).slice(0,4).map(x=>compact({
+     date:when(x.reportedAt),categories:(x.categories||[]).map(n=>ABUSE_CAT[n]||n).join(', '),comment:x.comment?cap(x.comment,160):null,from:x.reporterCountryCode}));
+   let s=c+'% abuse confidence, '+fmtN(rep)+' reports (90d)';
+   if(top.length)s+=' · '+top.slice(0,2).map(([n])=>ABUSE_CAT[n]||'category '+n).join(', ');
+   const ctx=[d.isp,d.countryCode].filter(Boolean).join(' / ');if(ctx)s+=' · '+ctx;
+   return RES(rep>0||!!d.isWhitelisted,{score:c,benign:!!d.isWhitelisted,summary:s,data:{confidence:c,reports:rep,distinct_users:d.numDistinctUsers,
+     categories:more(top.map(([n,x])=>(ABUSE_CAT[n]||'category '+n)+' ('+x+')'),8),isp:d.isp,usage_type:d.usageType,
+     country:d.countryName?d.countryName+(d.countryCode?' ('+d.countryCode+')':''):d.countryCode,domain:d.domain,hostnames:more(d.hostnames||[],8),
+     last_reported:when(d.lastReportedAt),tor:d.isTor,public:d.isPublic,allowlisted:d.isWhitelisted,recent_reports:recent,report:this.web(i)}});
+ }},
+{name:'urlhaus',label:'URLhaus',types:['ipv4','domain','url','md5','sha256'],weight:1.0,rate:[30,60],shares:'threatfox',
+ fields:KEYF('abuse.ch Auth-Key'),keyUrl:'https://auth.abuse.ch/',note:'The same free abuse.ch key as ThreatFox, so entering it once covers both.',browser:'unknown',
+ web:i=>'https://urlhaus.abuse.ch/browse.php?search='+encodeURIComponent(i.value),
+ async lookup(i,k){
+   let ep,form;
+   if(i.type==='url'){ep='url';form={url:i.value};}
+   else if(isHash(i.type)){ep='payload';form=i.type==='md5'?{md5_hash:i.value}:{sha256_hash:i.value};}
+   else{ep='host';form={host:i.value};}
+   const r=await http(this,'https://urlhaus-api.abuse.ch/v1/'+ep+'/',{method:'POST',headers:{'Auth-Key':k.api_key,'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(form).toString()});
+   const b=await okJson(r);
+   if(b.query_status==='no_results')return NOTFOUND('not in URLhaus');
+   if(b.query_status!=='ok')return NOTFOUND('URLhaus: '+b.query_status);
+   if(ep==='host'){
+     const urls=(b.urls||[]).filter(u=>u&&typeof u==='object');const n=+b.url_count||urls.length;if(!n)return NOTFOUND('not in URLhaus');
+     const online=urls.filter(u=>u.url_status==='online').length;
+     const tags=uniq(urls.flatMap(u=>u.tags||[])).sort();
+     const threats=uniq(urls.map(u=>u.threat));
+     const dates=urls.map(u=>u.date_added).filter(Boolean).sort();
+     let s=n+' malware URL'+(n!==1?'s':'')+' hosted ('+online+' online)';if(tags.length)s+=' · '+tags.slice(0,4).join(', ');
+     return RES(true,{score:online?90:65,summary:s,data:{url_count:n,online,threats,tags:more(tags,12),first_seen:day(b.firstseen),
+       latest_added:day(dates[dates.length-1]),blocklists:abuseBlk(b.blacklists),
+       recent_urls:urls.slice().sort((x,y)=>String(y.date_added||'').localeCompare(String(x.date_added||''))).slice(0,6).map(u=>compact({
+         url:cap(u.url,200),status:u.url_status,threat:u.threat,added:day(u.date_added),tags:(u.tags||[]).join(', ')})),
+       reference:b.urlhaus_reference}});
+   }
+   if(ep==='url'){
+     const st=b.url_status||'unknown',th=b.threat||'malware',tags=b.tags||[];
+     const pl=(b.payloads||[]).filter(p=>p&&typeof p==='object');
+     const fam=uniq(pl.map(p=>p.signature));
+     let s=th+' URL, '+st;if(fam.length)s+=' · '+fam.slice(0,2).join(', ');else if(tags.length)s+=' · '+tags.slice(0,4).join(', ');
+     return RES(true,{score:st==='online'?95:80,summary:s,data:{status:st,threat:th,tags,host:b.host,date_added:day(b.date_added),last_online:day(b.last_online),
+       reporter:b.reporter,blocklists:abuseBlk(b.blacklists),takedown:b.takedown_time_seconds?Math.round(b.takedown_time_seconds/3600)+' h after report':null,
+       families:fam,payloads:pl.slice(0,6).map(p=>compact({file:p.filename?cap(p.filename,80):null,type:p.file_type,family:p.signature,sha256:p.response_sha256,
+         first_seen:day(p.firstseen),virustotal:(p.virustotal||{}).result})),reference:b.urlhaus_reference}});
+   }
+   const urls=(b.urls||[]).filter(u=>u&&typeof u==='object');
+   return RES(true,{score:90,summary:'malware payload: '+(b.signature||'unknown family')+' ('+(b.file_type||'file')+')'+(b.url_count?' · '+plural(+b.url_count,'URL'):''),
+     data:{signature:b.signature,file_type:b.file_type,size:b.file_size?fmtN(b.file_size)+' bytes':null,first_seen:day(b.firstseen),last_seen:day(b.lastseen),
+       url_count:b.url_count,md5:b.md5_hash,sha256:b.sha256_hash,imphash:b.imphash,tlsh:b.tlsh,virustotal:(b.virustotal||{}).result,
+       urls:urls.slice(0,6).map(u=>compact({url:cap(u.url,200),status:u.url_status,file:u.filename?cap(u.filename,80):null,first_seen:day(u.firstseen)})),
+       bazaar:b.sha256_hash?'https://bazaar.abuse.ch/sample/'+b.sha256_hash+'/':null,reference:'https://urlhaus.abuse.ch/browse.php?search='+encodeURIComponent(i.value)}});
+ }},
+{name:'threatfox',label:'ThreatFox',types:['ipv4','domain','url','md5','sha256'],weight:0.95,rate:[30,60],shares:'urlhaus',
+ fields:KEYF('abuse.ch Auth-Key'),keyUrl:'https://auth.abuse.ch/',note:'The same free abuse.ch key as URLhaus, so entering it once covers both. The API only returns IOCs from the last six months; older ones are still on the website.',browser:'unknown',
+ web:i=>'https://threatfox.abuse.ch/browse.php?search=ioc%3A'+encodeURIComponent(i.value),
+ async lookup(i,k){
+   const api=async b=>okJson(await http(this,'https://threatfox-api.abuse.ch/api/v1/',{method:'POST',headers:{'Auth-Key':k.api_key,'Content-Type':'application/json'},body:JSON.stringify(b)}));
+   /* wildcard search, then match here: an IP is also stored as ip:port and inside URLs */
+   const d=await api(isHash(i.type)?{query:'search_hash',hash:i.value}:{query:'search_ioc',search_term:i.value,exact_match:false});
+   const st=String(d.query_status||'');
+   const MISS='not in ThreatFox\'s API, which only returns IOCs from the last 6 months: use open to check older entries';
+   if(st.startsWith('no_result'))return NOTFOUND(MISS);
+   if(st!=='ok')return ERR('ThreatFox: '+(st||'no status'));
+   const all=(Array.isArray(d.data)?d.data:[]).filter(x=>x&&typeof x==='object');
+   const w=i.value.toLowerCase().replace(/\/$/,'');
+   const direct=[],related=[];
+   all.forEach(x=>{
+     const f=String(x.ioc||'').trim().toLowerCase();
+     if(isHash(i.type)){direct.push(x);return;}
+     if(i.type==='ipv4'){if(f===w||f.replace(/:\d{1,5}$/,'')===w)direct.push(x);else if(hostOf(f)===w)related.push(x);return;}
+     if(i.type==='domain'){if(f===w||f.replace(/:\d{1,5}$/,'')===w)direct.push(x);
+       else{const h=SCHEME_RE.test(f)?hostOf(f):f.replace(/:\d{1,5}$/,'');if(h===w||h.endsWith('.'+w))related.push(x);}return;}
+     if(f.replace(/\/$/,'')===w)direct.push(x);
+   });
+   const hits=direct.length?direct:related;
+   if(!hits.length)return NOTFOUND(MISS);
+   const conf=x=>{const c=+x.confidence_level;return isNaN(c)?null:c;};
+   const cs=hits.map(conf).filter(x=>x!=null);
+   let score=cs.length?Math.max(...cs):75;
+   if(!direct.length)score=Math.round(score*0.85);   /* only URLs on this host: slightly less direct */
+   const both=direct.concat(related);
+   const TH={botnet_cc:'botnet C2',payload_delivery:'payload delivery',payload:'payload'};
+   const fam=uniq(both.map(x=>x.malware_printable||x.malware).map(String)).sort();
+   const thr=uniq(both.map(x=>x.threat_type).map(x=>TH[x]||x)).sort();
+   const pm=i.type==='ipv4'?String(i.original||'').match(/:(\d{1,5})\]?\s*$/):null,port=pm?pm[1]:null;
+   const ports=uniq(direct.map(x=>(String(x.ioc).match(/:(\d{1,5})$/)||[])[1]));
+   const top=hits.slice().sort((a,b)=>((conf(b)||0)-(conf(a)||0))||String(b.first_seen||'').localeCompare(String(a.first_seen||'')))[0];
+   let det=null;
+   if(top&&top.id){try{await LIMITS.get(this.name).wait();const dd=await api({query:'ioc',id:+top.id});
+     if(dd.query_status==='ok'&&dd.data)det=Array.isArray(dd.data)?dd.data[0]:dd.data;}catch(e){if(e.kind==='cancel')throw e;}}
+   const p=[];
+   if(isHash(i.type))p.push(plural(hits.length,'ThreatFox indicator')+' linked to this sample');
+   else if(direct.length){p.push(plural(direct.length,'ThreatFox indicator'));if(related.length)p.push('+'+plural(related.length,'URL')+' on this host');}
+   else p.push(plural(related.length,'ThreatFox URL')+' on this host');
+   if(port&&direct.length)p.push(ports.includes(port)?'listed on port '+port:ports.length?'listed on other ports ('+ports.slice(0,4).join(', ')+')':'listed without a port');
+   if(fam.length)p.push(fam.slice(0,3).join(', '));if(thr.length)p.push(thr.slice(0,2).join(', '));p.push('confidence '+Math.round(cs.length?Math.max(...cs):75)+'%');
+   const fs=both.map(x=>x.first_seen).filter(Boolean).sort(),ls=both.map(x=>x.last_seen).filter(Boolean).sort();
+   const samples=((det||{}).malware_samples||[]).filter(s=>s&&typeof s==='object');
+   return RES(true,{score,summary:p.join(' · '),data:{indicators:direct.length,related_urls:related.length||null,
+     matched:more(direct.map(x=>cap(x.ioc,200)+(x.ioc_type?' ('+x.ioc_type+')':'')),10),urls_on_host:more(related.map(x=>cap(x.ioc,200)),10),malware:fam,
+     aliases:more(uniq(both.flatMap(x=>String(x.malware_alias||'').split(',').map(s=>s.trim()))),10),
+     threat_types:thr,first_seen:day(fs[0]),last_seen:day(ls[ls.length-1]),reporters:more(uniq(both.map(x=>x.reporter)),6),
+     tags:more(uniq(both.flatMap(x=>x.tags||[])),12),references:more(uniq(both.map(x=>x.reference)).map(x=>cap(x,200)),5),
+     malpedia:uniq(both.map(x=>x.malware_malpedia))[0]||null,comment:det&&det.comment?cap(det.comment,300):null,
+     samples:more(samples.map(s=>s.sha256_hash||s.md5_hash).filter(Boolean),6),
+     ioc_page:top&&top.id?'https://threatfox.abuse.ch/ioc/'+top.id+'/':null}});
+ }},
+{name:'greynoise',label:'GreyNoise',types:['ipv4'],weight:0.7,rate:[10,60],keyOptional:true,
+ fields:KEYF('Optional: the community API works without one, at a lower quota',false),keyUrl:'https://viz.greynoise.io/signup',
+ note:'Separates targeted activity from internet background noise.',browser:'unknown',
+ web:i=>'https://viz.greynoise.io/ip/'+encodeURIComponent(i.value),
+ async lookup(i,k){
+   const h={'Accept':'application/json'};if(k.api_key)h.key=k.api_key;
+   const r=await http(this,'https://api.greynoise.io/v3/community/'+encodeURIComponent(i.value),{headers:h});
+   if(r.status===404)return NOTFOUND('not observed by GreyNoise');
+   const d=await okJson(r);
+   const cls=d.classification||'unknown',riot=!!d.riot,noise=!!d.noise,nm=d.name||'';
+   const data={classification:cls,noise,riot,name:nm,last_seen:day(d.last_seen),message:d.message&&d.message!=='Success'?cap(d.message,200):null,link:d.link};
+   if(riot||cls==='benign'){const l=riot?'known business service (RIOT)':'benign';return RES(true,{score:0,benign:true,summary:nm?l+': '+nm:l,data});}
+   if(cls==='malicious')return RES(true,{score:70,summary:'classified malicious (mass scanning)'+(d.last_seen?' · last seen '+day(d.last_seen):''),data});
+   if(noise)return RES(true,{score:20,summary:'internet background noise'+(d.last_seen?' · last seen '+day(d.last_seen):''),data});
+   return RES(true,{summary:'classification: '+cls,data});
+ }},
+{name:'shodan',label:'Shodan InternetDB',types:['ipv4'],weight:0.5,rate:[30,60],keyOptional:true,fields:[],
+ note:'Free and keyless: open ports, CVEs and tags.',browser:'likely',
+ web:i=>'https://www.shodan.io/host/'+encodeURIComponent(i.value),
+ async lookup(i){
+   const r=await http(this,'https://internetdb.shodan.io/'+encodeURIComponent(i.value));
+   if(r.status===404)return NOTFOUND('no services indexed');
+   const d=await okJson(r);
+   const ports=(d.ports||[]).slice().sort((a,b)=>a-b),vulns=(d.vulns||[]).slice().sort(),tags=(d.tags||[]).slice().sort();
+   const hostile=tags.filter(t=>['c2','compromised','malware','botnet'].includes(t));
+   const p=[];if(ports.length)p.push('ports '+ports.slice(0,6).join(', ')+(ports.length>6?'…':''));
+   if(vulns.length)p.push(plural(vulns.length,'CVE'));if(tags.length)p.push('tags: '+tags.join(', '));
+   if((d.hostnames||[]).length)p.push(d.hostnames[0]+(d.hostnames.length>1?' (+'+(d.hostnames.length-1)+')':''));
+   return RES(true,{score:hostile.length?60:null,summary:p.join(' · ')||'indexed, no open ports',
+     data:{ports,tags,vulns:more(vulns,15),hostnames:more(d.hostnames||[],10),cpes:more(d.cpes||[],10),report:'https://www.shodan.io/host/'+encodeURIComponent(i.value)}});
+ }},
+{name:'censys',label:'Censys',types:['ipv4','ipv6'],weight:0.6,rate:[10,60],
+ fields:[{name:'api_key',label:'Personal access token (or API_ID:API_SECRET)',secret:true,required:true,hint:'Platform token, or the legacy ID:secret pair'},
+   {name:'org',label:'Organization ID',secret:false,required:false,hint:'Only if your token needs one'}],
+ keyUrl:'https://platform.censys.io/',note:'Free accounts get a small monthly quota.',browser:'blocked',
+ web:i=>'https://search.censys.io/hosts/'+encodeURIComponent(i.value),
+ async lookup(i,k){
+   let r;
+   if(k.api_key.includes(':')){const [u,...s]=k.api_key.split(':');
+     r=await http(this,'https://search.censys.io/api/v2/hosts/'+encodeURIComponent(i.value),{headers:{'Authorization':basic(u,s.join(':')),'Accept':'application/json'}});}
+   else r=await http(this,'https://api.platform.censys.io/v3/global/asset/host/'+encodeURIComponent(i.value)+(k.org?'?organization_id='+encodeURIComponent(k.org):''),
+     {headers:{'Authorization':'Bearer '+k.api_key,'Accept':'application/vnd.censys.api.v3.host.v1+json'}});
+   if(r.status===404)return NOTFOUND('not in the Censys dataset');
+   const j=await okJson(r);const res=j.result||{};const host=res.resource||res;
+   const sv=(host.services||[]).filter(s=>s&&typeof s==='object');
+   const ports=[...new Set(sv.map(s=>s.port).filter(Number.isInteger))].sort((a,b)=>a-b);
+   const names=[...new Set(sv.map(s=>String(s.protocol||s.service_name||'').toLowerCase()).filter(Boolean))].sort();
+   const as=host.autonomous_system||{},loc=host.location||{},dns=host.dns||{};
+   const labels=[...new Set((host.labels||[]).map(x=>typeof x==='object'&&x?(x.value||x.name):x).filter(x=>typeof x==='string'&&x).map(x=>x.toLowerCase()))].sort();
+   const bad=labels.filter(l=>['c2','c2-server','command-and-control','malware','botnet','phishing','ransomware'].includes(l));
+   const swOf=s=>uniq((s.software||[]).filter(x=>x&&typeof x==='object').map(x=>[x.vendor,x.product,x.version].filter(Boolean).join(' ')));
+   const svLine=s=>(s.port||'?')+'/'+String(s.protocol||s.service_name||s.transport_protocol||'?').toUpperCase()+(swOf(s).length?' ('+swOf(s).slice(0,2).join(', ')+')':'');
+   const p=[];if(ports.length)p.push('ports '+ports.slice(0,12).join(', ')+(ports.length>12?' …':''));
+   if(names.length)p.push(names.slice(0,6).join(', '));if(labels.length)p.push('labels: '+labels.slice(0,6).join(', '));
+   const net=[as.asn?'AS'+as.asn:'',as.name||''].filter(Boolean).join(' ');if(net)p.push(net);
+   const s=p.join(' · ')||'host known, no services recorded';
+   const dn=uniq((dns.names||[]).concat(((dns.reverse_dns||{}).names)||[]));
+   return RES(!!(sv.length||labels.length||Object.keys(as).length),{score:bad.length?60:null,summary:bad.length?'threat label '+bad.join(', ')+' · '+s:s,
+     data:{ports,services:names,service_detail:more(sv.map(svLine),12),labels,asn:as.asn,as_name:as.name,country:loc.country,city:loc.city,
+       dns_names:more(dn,8),os:(host.operating_system||{}).product,last_updated:day(host.last_updated_at||res.last_updated_at),report:this.web(i)}});
+ }},
+{name:'urlscan',label:'urlscan.io',types:['ipv4','ipv6','domain','url','sha256'],weight:0.8,rate:[20,60],keyOptional:true,cacheByKey:true,
+ fields:KEYF('Optional: a key adds urlscan\'s verdict for the newest scan',false),keyUrl:'https://urlscan.io/user/signup',
+ note:'Search works without a key at a low rate. Scans are public, so a hit here was already visible to everyone.',browser:'unknown',
+ query(i){const q=v=>'"'+v.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"';
+   return i.type==='domain'?'page.domain:'+q(i.value):isIP(i.type)?'page.ip:'+q(i.value):i.type==='url'?'page.url:'+q(i.value.slice(0,500)):'hash:'+i.value;},
+ web(i){return 'https://urlscan.io/search/#'+encodeURIComponent(this.query(i));},
+ async lookup(i,k){
+   const h={'Accept':'application/json'};if(k.api_key)h['API-Key']=k.api_key;
+   const r=await http(this,'https://urlscan.io/api/v1/search/?q='+encodeURIComponent(this.query(i))+'&size=20',{headers:h});
+   const d=await okJson(r);const res=(d.results||[]).filter(x=>x&&typeof x==='object');
+   const total=+d.total||res.length;if(!res.length)return NOTFOUND('no public scans');
+   const nw=res[0],task=nw.task||{},page=nw.page||{},id=nw._id||task.uuid||'',dt=day(task.time);
+   let ov=(nw.verdicts||{}).overall||{};
+   if(!Object.keys(ov).length&&id&&k.api_key){try{const rr=await http(this,'https://urlscan.io/api/v1/result/'+id+'/',{headers:h});if(rr.ok)ov=((await rr.json()).verdicts||{}).overall||{};}catch(e){}}
+   const mal=!!ov.malicious,raw=ov.score;
+   const brands=(ov.brands||[]).map(b=>typeof b==='string'?b:(b&&b.name)||'').filter(Boolean);
+   const tags=(ov.tags||[]).filter(t=>typeof t==='string');
+   let score=null;if(mal)score=typeof raw==='number'?Math.max(75,raw):75;else if(typeof raw==='number'&&raw>0)score=raw;
+   const p=[fmtN(total)+' public scan'+(total!==1?'s':'')];if(dt)p.push('latest '+dt);if(mal)p.push('verdict: malicious');
+   if(brands.length)p.push('impersonates '+brands.slice(0,3).join(', '));if(tags.length)p.push('tags: '+tags.slice(0,4).join(', '));
+   if(page.title&&!brands.length)p.push('"'+cap(page.title,60)+'"');
+   const pg=x=>x.page||{};
+   return RES(true,{score,summary:p.join(' · '),data:{scans:total,latest_scan:when(task.time),verdict_score:typeof raw==='number'?raw:null,brands,tags,
+     title:page.title?cap(page.title,160):null,page_url:page.url&&page.url!==i.value?cap(page.url,200):null,page_ip:page.ip,page_country:page.country,
+     asn:page.asn?(page.asn+' '+(page.asnname||'')).trim():null,server:page.server,status:page.status,tls_issuer:page.tlsIssuer,tls_age_days:page.tlsAgeDays,
+     umbrella_rank:page.umbrellaRank,ips_seen:more(uniq(res.map(x=>pg(x).ip)),8),domains_seen:more(uniq(res.map(x=>pg(x).domain)),8),
+     countries:uniq(res.map(x=>pg(x).country)),
+     recent_scans:res.slice(0,5).map(x=>{const t=x.task||{},g=pg(x);return compact({date:when(t.time),url:cap(g.url||t.url,200),ip:g.ip,country:g.country,
+       server:g.server,report:x._id?'https://urlscan.io/result/'+x._id+'/':null});}),
+     screenshot:typeof nw.screenshot==='string'?nw.screenshot:null,report:id?'https://urlscan.io/result/'+id+'/':null}});
+ }},
+{name:'opencti',label:'OpenCTI',types:['ipv4','ipv6','domain','url','md5','sha1','sha256'],weight:0.7,rate:[60,60],
+ fields:[{name:'url',label:'Platform URL',secret:false,required:true,hint:'For example https://opencti.example.org'},
+   {name:'api_key',label:'API token',secret:true,required:true,hint:'Your profile page in OpenCTI'}],
+ note:'Your own platform. It must allow this page in its CORS settings (or use the relay). Not tested against a live platform.',browser:'own',
+ web:()=>'',
+ async lookup(i,k){
+   const F=['id entity_type observable_value x_opencti_score',' objectLabel { value }',' x_opencti_description created_at updated_at createdBy { name } objectMarking { definition }'];
+   const Q=lvl=>'query($s: String) { stixCyberObservables(search: $s, first: 10) { edges { node { '+F.slice(0,lvl+1).join('')+' } } } }';
+   const ask=async q=>okJson(await http(this,k.url.replace(/\/+$/,'')+'/graphql',{method:'POST',headers:{'Authorization':'Bearer '+k.api_key,'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({query:q,variables:{s:i.value}})}));
+   let d=await ask(Q(2));if(d.errors)d=await ask(Q(1));if(d.errors)d=await ask(Q(0));
+   if(d.errors)return ERR(String((d.errors[0]||{}).message||'GraphQL error').slice(0,80));
+   const edges=((d.data||{}).stixCyberObservables||{}).edges||[];
+   const nodes=edges.map(e=>e&&e.node).filter(n=>n&&String(n.observable_value||'').toLowerCase()===i.value.toLowerCase());
+   if(!nodes.length)return NOTFOUND('not in OpenCTI');
+   const n=nodes[0];const sc=typeof n.x_opencti_score==='number'?n.x_opencti_score:null;
+   const list=v=>Array.isArray(v)?v:v&&Array.isArray(v.edges)?v.edges.map(e=>e&&e.node):[];
+   const lab=list(n.objectLabel).filter(x=>x&&typeof x.value==='string').map(x=>x.value);
+   const mk=list(n.objectMarking).filter(x=>x&&typeof x.definition==='string').map(x=>x.definition);
+   const p=['known observable'];if(sc!=null)p.push('score '+Math.round(sc));if(lab.length)p.push('labels: '+lab.slice(0,5).join(', '));
+   return RES(true,{score:sc||null,summary:p.join(' · '),data:{entity_type:n.entity_type,opencti_score:sc,labels:lab,markings:mk,
+     author:(n.createdBy||{}).name,description:n.x_opencti_description?cap(n.x_opencti_description,300):null,created:day(n.created_at),updated:day(n.updated_at),
+     matches:nodes.length>1?nodes.length:null,link:k.url.replace(/\/+$/,'')+'/dashboard/id/'+n.id}});
+ }},
+{name:'rdap',label:'RDAP / WHOIS',types:['domain'],weight:0.6,rate:[20,60],keyOptional:true,fields:[],
+ note:'Domain registration age and registrar, through rdap.org. No key.',browser:'likely',
+ web:i=>'https://lookup.icann.org/en/lookup?name='+encodeURIComponent(i.value),
+ async lookup(i){
+   const labels=i.value.split('.');const cands=labels.slice(0,-1).map((_,x)=>labels.slice(x).join('.')).slice(0,4);
+   let doc=null,q='';
+   for(let n=0;n<cands.length;n++){
+     if(n)await LIMITS.get(this.name).wait();
+     const r=await http(this,'https://rdap.org/domain/'+encodeURIComponent(cands[n]),{headers:{'Accept':'application/rdap+json'}});
+     if(r.status===400||r.status===404)continue;
+     doc=await okJson(r);q=cands[n];break;
+   }
+   if(!doc||typeof doc!=='object')return NOTFOUND('no registration record (unregistered, or the registry has no RDAP)');
+   const ev=(...acts)=>{for(const e of doc.events||[]){if(e&&acts.includes(e.eventAction)){const t=Date.parse(e.eventDate||'');if(!isNaN(t))return new Date(t);}}return null;};
+   const reg=ev('registration'),exp=ev('expiration'),chg=ev('last changed','last update of RDAP database');
+   const ents=[];const walk=a=>(a||[]).forEach(e=>{if(e&&typeof e==='object'){ents.push(e);walk(e.entities);}});walk(doc.entities);
+   const vc=(en,key)=>{const c=en&&en.vcardArray;if(!Array.isArray(c)||!Array.isArray(c[1]))return '';
+     for(const p of c[1])if(Array.isArray(p)&&p[0]===key){const v=p[3];if(key==='adr'&&Array.isArray(v))return String(v[6]||'');return Array.isArray(v)?v.filter(Boolean).join(', '):typeof v==='string'?v:'';}return '';};
+   const role=r=>ents.filter(e=>(e.roles||[]).includes(r));
+   const rr=role('registrar')[0];const registrar=rr?vc(rr,'fn'):'';
+   const iana=rr?((rr.publicIds||[]).find(x=>x&&/iana/i.test(x.type||''))||{}).identifier:null;
+   const ab=role('abuse')[0],rg=role('registrant')[0];
+   const p=[];let score=null,days=null;
+   if(reg){days=Math.max(0,Math.floor((Date.now()-reg.getTime())/86400000));score=days<7?70:days<30?55:days<90?30:null;
+     p.push('registered '+reg.toISOString().slice(0,10)+' ('+(days===0?'today':plural(days,'day')+' ago')+')');}
+   else p.push('registration date not published');
+   if(registrar)p.push(registrar);if(q!==i.value)p.push('parent domain '+q);
+   const ns=[...new Set((doc.nameservers||[]).map(n=>String((n||{}).ldhName||'').toLowerCase()).filter(Boolean))].sort();
+   return RES(true,{score,summary:p.join(' · '),data:{domain:q,registered:reg?reg.toISOString().slice(0,10):null,age_days:days,expires:exp?exp.toISOString().slice(0,10):null,
+     last_changed:chg?chg.toISOString().slice(0,10):null,registrar,registrar_iana_id:iana,status:doc.status,nameservers:ns.slice(0,6),
+     dnssec:(doc.secureDNS||{}).delegationSigned,registrant:rg?(vc(rg,'org')||vc(rg,'fn')||null):null,registrant_country:rg?(vc(rg,'adr')||null):null,
+     abuse_email:ab?(vc(ab,'email')||null):null,abuse_phone:ab?(vc(ab,'tel')||null):null}});
+ }},
+{name:'pdns',label:'Passive DNS',types:['domain','ipv4','ipv6'],weight:0.5,rate:[10,60],keyOptional:true,
+ fields:[{name:'api_key',label:'Argus API key',secret:true,required:false,hint:'Optional: lifts the public limits (10 a minute, 1,000 a day)'}],
+ note:'mnemonic passive DNS. Free without a key; public data only. Context, never raises the score.',browser:'unknown',
+ web:i=>'https://passivedns.mnemonic.no/search?query='+encodeURIComponent(i.value),
+ async lookup(i,k){
+   const h={'Accept':'application/json'};if(k.api_key)h['Argus-API-Key']=k.api_key;
+   const r=await http(this,'https://api.mnemonic.no/pdns/v3/'+encodeURIComponent(i.value)+'?limit=200',{headers:h});
+   if(r.status===402)return ERR('rate limited (public API: 10 a minute, 1,000 a day)');
+   const d=await okJson(r);if((d.responseCode||200)!==200)return ERR('responseCode '+d.responseCode);
+   const rows=(d.data||[]).filter(x=>x&&typeof x==='object');if(!rows.length)return NOTFOUND('no passive DNS records');
+   const side=isIP(i.type)?'query':'answer';const seen=[];
+   rows.forEach(x=>{const v=String(x[side]||'').replace(/\.$/,'').toLowerCase();if(v&&v!==i.value&&!seen.includes(v))seen.push(v);});
+   const dt=v=>{if(typeof v!=='number'||v<=0)return '';return new Date(v>1e11?v:v*1000).toISOString().slice(0,10);};
+   const fs=rows.map(x=>x.firstSeenTimestamp).filter(x=>typeof x==='number'),ls=rows.map(x=>x.lastSeenTimestamp).filter(x=>typeof x==='number');
+   const first=fs.length?dt(Math.min(...fs)):'',last=ls.length?dt(Math.max(...ls)):'';
+   const total=+d.count||rows.length;
+   const rt={};rows.forEach(x=>{const t=String(x.rrtype||'?').toUpperCase();rt[t]=(rt[t]||0)+1;});
+   const p=[fmtN(total)+(total>=1000?'+':'')+' record'+(total!==1?'s':''),seen.length+(rows.length>=200?'+':'')+' distinct '+(isIP(i.type)?'domains':'addresses')];
+   if(first&&last)p.push(first+' to '+last);
+   if(seen.length)p.push('e.g. '+seen.slice(0,5).join(', ')+(seen.length>5?' (+'+(seen.length-5)+')':''));
+   return RES(true,{summary:p.join(' · '),data:{records:total,distinct:seen.length,first_seen:first||null,last_seen:last||null,
+     record_types:Object.entries(rt).sort((a,b)=>b[1]-a[1]).map(([t,n])=>t+' ('+n+')'),examples:more(seen,15),
+     latest_records:rows.slice().sort((a,b)=>(b.lastSeenTimestamp||0)-(a.lastSeenTimestamp||0)).slice(0,8).map(x=>compact({
+       type:x.rrtype,name:String(x.query||'').replace(/\.$/,''),value:cap(String(x.answer||'').replace(/\.$/,''),120),first:dt(x.firstSeenTimestamp)||null,last:dt(x.lastSeenTimestamp)||null,times:x.times}))}});
+ }},
+{name:'asn',label:'ASN blocklist',types:['ipv4','ipv6'],weight:0.8,rate:[60,60],keyOptional:true,fields:[],
+ note:'Origin ASN from RIPEstat, checked against Spamhaus ASN-DROP and your own list (Settings below).',browser:'likely',
+ web:i=>'https://stat.ripe.net/app/launchpad/'+encodeURIComponent(i.value),
+ async lookup(i){
+   const {drop,custom,note}=await asnLists();
+   const rs=async(call,res)=>((await okJson(await http(this,'https://stat.ripe.net/data/'+call+'/data.json?resource='+encodeURIComponent(res)+'&sourceapp=intelscope')))||{}).data||{};
+   const info=await rs('network-info',i.value);
+   const asns=(info.asns||[]).map(String).filter(a=>/^\d+$/.test(a)).map(Number);
+   if(!asns.length)return NOTFOUND('not announced on the internet (no origin ASN)');
+   const hits=[];asns.forEach(a=>{if(custom[a])hits.push([a,'your blocklist',custom[a]]);if(drop[a])hits.push([a,'Spamhaus ASN-DROP',drop[a].asname||'']);});
+   const asn=hits.length?hits[0][0]:asns[0];
+   let holder=(drop[asn]||{}).asname||'';
+   if(!holder){holder=ASN_HOLDER[asn];if(holder===undefined){try{holder=(await rs('as-overview','AS'+asn)).holder||'';}catch(e){holder='';}ASN_HOLDER[asn]=holder;}}
+   const data={asn,asns:asns.length>1?asns:null,holder,prefix:info.prefix||'',listed_on:[...new Set(hits.map(h=>h[1]))],note};
+   if(hits.length){const srcs=[...new Set(hits.map(h=>h[1]))].sort().join(' + ');const det=(hits.find(h=>h[1]==='your blocklist')||[])[2]||'';
+     return RES(true,{score:75,summary:'AS'+asn+' '+holder+' is on '+srcs+(det?' ('+det+')':''),data});}
+   const p=[('AS'+asn+' '+holder).trim()];if(info.prefix)p.push(info.prefix);p.push('not blocklisted');if(note)p.push(note);
+   return RES(false,{summary:p.join(' · '),data});
+ }}
+];
+const SRC=Object.fromEntries(SOURCES.map(s=>[s.name,s]));
+const LIMITS=new Map(SOURCES.map(s=>[s.name,new Limiter(s.rate[0],s.rate[1])]));
+const ASN_HOLDER={};
+
+/* ---- ASN lists ---- */
+let ASNCACHE=null;
+function parseDrop(text){
+  const out={};String(text||'').split(/\r?\n/).forEach(l=>{l=l.trim();if(!l)return;
+    try{const e=JSON.parse(l);if(e&&Number.isInteger(e.asn))out[e.asn]=e;}catch(x){
+      const m=l.match(/^AS?(\d{1,10})\b(?:\s*[;|,]\s*(\w\w))?(?:\s*[;|,]\s*(.*))?/i);if(m)out[+m[1]]={asn:+m[1],cc:m[2]||'',asname:(m[3]||'').trim()};}});
+  return out;
+}
+function parseCustomAsn(text){
+  const out={};String(text||'').split(/\r?\n/).forEach(l=>{const [e,...c]=l.split('#');const m=e.trim().match(/^(?:AS)?(\d{1,10})$/i);
+    if(m)out[+m[1]]=c.join('#').trim()||'on your blocklist';});
+  return out;
+}
+async function asnLists(){
+  if(ASNCACHE)return ASNCACHE;
+  const custom=parseCustomAsn(CFG.asnCustom);
+  let drop={},note=null;
+  if(CFG.useDrop){
+    const saved=stGet('asndrop',null);
+    if(saved&&Date.now()-saved.t<86400000)drop=parseDrop(saved.text);
+    else{
+      try{
+        const r=await http({name:'asn'},'https://www.spamhaus.org/drop/asndrop.json');
+        if(!r.ok)throw new Error('HTTP '+r.status);
+        const text=await r.text();drop=parseDrop(text);
+        if(!Object.keys(drop).length)throw new Error('empty list');
+        stSet('asndrop',{t:Date.now(),text,via:'download'});
+      }catch(e){
+        if(saved){drop=parseDrop(saved.text);note='using a saved ASN-DROP copy from '+new Date(saved.t).toISOString().slice(0,10);}
+        else note='Spamhaus ASN-DROP not loaded (download blocked; paste it under API keys)';
+      }
+    }
+  }
+  ASNCACHE={drop,custom,note};return ASNCACHE;
+}
+
+/* ---------------- keys ---------------- */
+function keysFor(name){
+  const s=stGet('keys.'+name,null,'session'),l=stGet('keys.'+name,null);
+  return Object.assign({},l||{},s||{});
+}
+function keyOrigin(name){if(stGet('keys.'+name,null,'session'))return 'session';if(stGet('keys.'+name,null))return 'browser';return '';}
+function credsFor(src){
+  const c=keysFor(src.name);
+  if(src.shares&&!c.api_key){const o=keysFor(src.shares);if(o.api_key)c.api_key=o.api_key;}
+  return c;
+}
+function srcEnabled(src){const o=stGet('src.'+src.name,null);return o?o.enabled!==false:true;}
+function srcConfigured(src){
+  const c=credsFor(src);
+  return src.fields.filter(f=>f.required).every(f=>c[f.name]&&String(c[f.name]).trim());
+}
+function srcReady(src){return srcEnabled(src)&&srcConfigured(src);}
+
+/* ---------------- cache ---------------- */
+const CACHE_PFX='c.v2.';
+function cacheName(src,c){return src.cacheByKey&&c.api_key?src.name+'+key':src.name;}
+function cacheGet(cn,ioc){
+  if(!CFG.useCache)return null;
+  const e=stGet(CACHE_PFX+cn+'|'+ioc.type+'|'+ioc.value,null);
+  if(!e)return null;
+  if(Date.now()-e.t>(+CFG.cacheHours||24)*3600000){stDel(CACHE_PFX+cn+'|'+ioc.type+'|'+ioc.value);return null;}
+  return Object.assign({},e.r,{cached:true});
+}
+function cachePut(cn,ioc,r){
+  if(!CFG.useCache||!r.ok)return;   /* failed lookups are never cached */
+  if(!stSet(CACHE_PFX+cn+'|'+ioc.type+'|'+ioc.value,{t:Date.now(),r})){cacheClear(true);}
+}
+function cacheClear(oldOnly){
+  const ks=stKeys('c.');
+  if(oldOnly){ks.slice(0,Math.ceil(ks.length/2)).forEach(k=>localStorage.removeItem(k));return;}
+  ks.forEach(k=>localStorage.removeItem(k));
+}
+
+/* ---------------- scoring (port of scoring.py) ---------------- */
+function assess(results,allowReason){
+  if(allowReason)return [0,'benign',['allowlisted: '+allowReason]];
+  const ok=results.filter(r=>r.ok);
+  if(!ok.length){const errs=results.filter(r=>r.error).map(r=>r.provider+': '+r.error);return [0,'unknown',errs.length?errs:['no source could be queried']];}
+  if(!ok.some(r=>r.found))return [0,'unknown',['no source has a record of this indicator']];
+  const sig=ok.filter(r=>r.score).map(r=>[r.score*((SRC[r.provider]||{}).weight||1),r]).sort((a,b)=>b[0]-a[0]);
+  let reasons=sig.map(([,r])=>r.provider+': '+r.summary);
+  const top=sig.length?sig[0][0]:0;
+  const corr=sig.filter(([w])=>w>=50).length;
+  let score=top+10*Math.max(0,corr-1);
+  const ben=ok.filter(r=>r.benign);
+  if(ben.length){
+    const br=ben.map(r=>r.provider+': '+r.summary);
+    if(top<50)return [0,'benign',br.concat(reasons)];
+    score-=20;reasons.push('conflict: '+ben.map(r=>r.provider).join(', ')+' report this as benign');
+  }
+  score=Math.round(Math.max(0,Math.min(100,score)));
+  if(!sig.length)reasons=['seen by sources, but none flag it as malicious'];
+  return [score,score>=70?'malicious':score>=40?'suspicious':'low',reasons];
+}
+
+/* ---- evidence details (shared by triage and the tracker) ---- */
+const EV_LBL={flagged_by:'flagged by',as_owner:'AS owner',as_name:'AS name',asn:'ASN',rir:'RIR',jarm:'JARM',https_cert:'HTTPS certificate',
+  ids_alerts:'IDS alerts',md5:'MD5',sha1:'SHA-1',sha256:'SHA-256',imphash:'imphash',tlsh:'TLSH',cpes:'CPEs',vulns:'CVEs',os:'OS',
+  dns_names:'DNS names',tls_issuer:'TLS issuer',tls_age_days:'TLS age (days)',isp:'ISP',ioc_page:'IOC page',page_ip:'page IP',page_url:'page URL',
+  dnssec:'DNSSEC',registrar_iana_id:'registrar IANA id',url_count:'URL count',ip:'IP',url:'URL',ips_seen:'IPs seen',opencti_score:'OpenCTI score'};
+function evLabel(k){return EV_LBL[k]||String(k).replace(/_/g,' ');}
+const SAFE_LINK_HOSTS=['abuse.ch','virustotal.com','urlscan.io','greynoise.io','shodan.io','censys.io','abuseipdb.com','malpedia.caad.fkie.fraunhofer.de',
+  'mnemonic.no','ripe.net','icann.org'];
+/* only the sources' own pages become links; indicator values, reporter URLs and the like stay plain text */
+function evSafeLink(v){
+  if(typeof v!=='string'||!/^https:\/\/[^\s]+$/i.test(v))return false;
+  try{
+    const h=new URL(v).hostname.toLowerCase();
+    if(SAFE_LINK_HOSTS.some(s=>h===s||h.endsWith('.'+s)))return true;
+    const oc=keysFor('opencti').url;if(oc&&new URL(oc).hostname.toLowerCase()===h)return true;
+  }catch(e){}
+  return false;
+}
+function evVal(v,k){
+  if(typeof v==='boolean')return v?'yes':'no';
+  if(typeof v==='number')return esc(Math.abs(v)>=10000&&!/asn|port|_id$|^id$|rank/i.test(k||'')?fmtN(v):String(v));
+  if(typeof v==='string')return evSafeLink(v)?`<a href="${esc(v)}" target="_blank" rel="noopener noreferrer" class="cn">${esc(v.replace(/^https:\/\/(www\.)?/,''))}</a>`:esc(v);
+  if(Array.isArray(v)){
+    if(v.some(x=>x&&typeof x==='object'))return '<ul class="evl">'+v.map(x=>'<li>'+(x&&typeof x==='object'?evObj(x):evVal(x))+'</li>').join('')+'</ul>';
+    return v.map(evVal).join(', ');
+  }
+  if(v&&typeof v==='object')return evObj(v);
+  return esc(String(v??''));
+}
+function evObj(o){return Object.entries(o).filter(([,x])=>x!=null&&x!=='').map(([k,x])=>(k?`<span class="mut">${esc(evLabel(k))}</span> `:'')+evVal(x,k)).join(' · ');}
+const evKeep=([,x])=>x!=null&&x!==''&&!(Array.isArray(x)&&!x.length)&&!(x&&typeof x==='object'&&!Array.isArray(x)&&!Object.keys(x).length);
+function evDetails(data){
+  const e=Object.entries(data||{}).filter(evKeep);
+  return e.length?'<dl class="evd">'+e.map(([k,x])=>`<dt>${esc(evLabel(k))}</dt><dd>${evVal(x,k)}</dd>`).join('')+'</dl>':'';
+}
+/* one evidence line: name, summary, open link, and the details behind a toggle */
+function evItem(n,s,io,key,openSet){
+  const src=SRC[n];let link='';
+  try{const u=src&&src.web?src.web.call(src,io):'';if(u)link=` <a href="${esc(u)}" target="_blank" rel="noopener noreferrer" class="cn">open</a>`;}catch(e){}
+  const head=s.ok?`<b>${esc(srcLabel(n))}</b> ${esc(s.summary||'')}${s.cached?' <span class="cn">(cached)</span>':''}${link}`
+    :`<b>${esc(srcLabel(n))}</b> <span class="err">${esc(s.error||'error')}</span>${link}`;
+  const det=s.ok?evDetails(s.data):'';
+  if(!det)return `<li>${head}</li>`;
+  return `<li><details class="evx" data-k="${esc(key)}"${openSet.has(key)?' open':''}><summary>${head}</summary>${det}</details></li>`;
+}
+function evWireToggle(root,openSet){
+  root.addEventListener('toggle',ev=>{const d=ev.target;if(!d.matches||!d.matches('details.evx'))return;
+    if(d.open)openSet.add(d.dataset.k);else openSet.delete(d.dataset.k);},true);
+}
+/* the evidence a triage result carries, in the form the tracker keeps */
+function evFromResult(r){
+  const s=Object.values(r.sources||{});
+  if(!s.length&&!r.allowlisted)return null;
+  return {checked:r.checked||nowZ(),verdict:r.verdict,score:r.score,reasons:(r.reasons||[]).slice(0,12),
+    sources:s.map(x=>({n:x.provider,ok:!!x.ok,found:!!x.found,summary:cap(x.summary||'',400),error:x.error||null,data:x.data||{}}))};
+}
+/* plain-text form, for the Markdown export */
+function evText(v){
+  if(typeof v==='boolean')return v?'yes':'no';
+  if(Array.isArray(v)){
+    if(v.some(x=>x&&typeof x==='object'))return v.map(x=>x&&typeof x==='object'?Object.entries(x).filter(evKeep).map(([k,y])=>(k?evLabel(k)+' ':'')+evText(y)).join(', '):String(x));
+    return v.map(x=>String(x)).join(', ');
+  }
+  if(v&&typeof v==='object')return Object.entries(v).filter(evKeep).map(([k,y])=>(k?evLabel(k)+' ':'')+evText(y)).join(', ');
+  return String(v??'');
+}
+/* read the Evidence section of an exported tracker file back into evidence objects, keyed by type|value */
+const EV_REV=Object.fromEntries(Object.entries(EV_LBL).map(([k,v])=>[v.toLowerCase(),k]));
+const evKey=l=>EV_REV[l.toLowerCase()]||l.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+const evRefang=s=>s.replace(/\[\s*\.\s*\]/g,'.').replace(/\bh(?:xx|\*\*)p(s?)(?=:\/\/)/gi,'http$1').replace(/\bfxp(?=:\/\/)/gi,'ftp');
+function tkParseEvidence(text){
+  const out={};let inEv=false,defanged=false,cur=null,src=null,key=null;
+  const un=s=>{s=String(s).replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();return defanged?evRefang(s):s;};
+  const val=s=>{s=un(s);if(/^-?\d{1,15}(\.\d+)?$/.test(s))return +s;if(s==='yes')return true;if(s==='no')return false;return s;};
+  String(text).split(/\r?\n/).forEach(raw=>{
+    const line=raw.replace(/\s+$/,'');let m;
+    if(/^##\s+evidence\s*$/i.test(line)){inEv=true;cur=null;return;}
+    if(!inEv)return;
+    if(/^#{1,2}\s/.test(line)){inEv=false;cur=null;return;}
+    if(!cur&&/\bdefanged\b/i.test(line)){defanged=true;return;}
+    if((m=line.match(/^###\s+`([^`]+)`/))){
+      const c=tiClassify(m[1].replace(/%60/g,'`'));src=null;key=null;
+      cur=c?{checked:null,verdict:'',score:null,reasons:[],sources:[]}:null;if(c)out[c.type+'|'+c.value]=cur;return;
+    }
+    if(!cur||!line.trim())return;
+    if((m=line.match(/^(?:Verdict\s+([a-z]+)(?:,\s*score\s+(-?\d+))?)?(?:,?\s*checked\s+(\d{4}-\d\d-\d\d[^.]*))?\.$/i))&&(m[1]||m[3])){
+      if(m[1])cur.verdict=m[1].toLowerCase();if(m[2]!=null)cur.score=+m[2];if(m[3])cur.checked=m[3].trim();return;
+    }
+    if((m=line.match(/^- \*\*(.+?)\*\*:\s?(.*)$/))){
+      const lbl=m[1].trim(),s=SOURCES.find(x=>x.label.toLowerCase()===lbl.toLowerCase()||x.name===lbl.toLowerCase());
+      const body=un(m[2]),err=/^error:/i.test(body);
+      src={n:s?s.name:lbl,ok:!err,found:false,summary:err?'':body,error:err?body.replace(/^error:\s*/i,''):null,data:{}};
+      cur.sources.push(src);key=null;return;
+    }
+    if((m=line.match(/^- (.+)$/))){cur.reasons.push(un(m[1]));src=null;key=null;return;}
+    if(src&&(m=line.match(/^ {2}- ([^:]+):\s?(.*)$/))){key=evKey(m[1].trim());src.data[key]=m[2].trim()===''?[]:val(m[2]);return;}
+    if(src&&key&&Array.isArray(src.data[key])&&(m=line.match(/^ {4}- (.*)$/))){src.data[key].push({'':un(m[1])});return;}
+  });
+  Object.values(out).forEach(ev=>ev.sources.forEach(s=>{s.found=s.ok&&Object.keys(s.data).length>0&&!/^(not |no )/i.test(s.summary);}));
+  return out;
+}
+function defangText(t){
+  return String(t).replace(/\b(?:https?|ftp):\/\/[^\s<>"'|]+/gi,m=>tkDefang(m))
+    .replace(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g,m=>m.replace(/\./g,'[.]'))
+    .replace(/\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}\b/gi,m=>m.replace(/\./g,'[.]'));
+}
+
+/* ---------------- running a triage ---------------- */
+const TR={results:[],filter:null,running:false,open:new Set()};
+const RUN={cancel:false};
+function srcLabel(n){return (SRC[n]||{}).label||n;}
+const trLabel=srcLabel;
+const srcIdx=n=>{const x=SOURCES.findIndex(s=>s.name===n);return x<0?99:x;};
+function plan(iocs){
+  const al=alBuild();
+  const checked=nowZ();
+  const rows=iocs.map(i=>({ioc:i,allow:alMatch(i,al),res:{},checked}));
+  const tasks=[];
+  const ready=SOURCES.filter(srcReady);
+  rows.forEach(row=>{if(row.allow)return;ready.forEach(s=>{if(s.types.includes(row.ioc.type))tasks.push({row,src:s});});});
+  return {rows,tasks,ready};
+}
+function rowOut(row){
+  const res=Object.values(row.res);
+  const [score,verdict,reasons]=assess(res,row.allow);
+  let rs=reasons;
+  if(!row.allow&&!res.length)rs=[SOURCES.some(srcReady)?'no ready source looks up this type':'no source is ready: add keys or enable sources under API keys'];
+  return {ioc:row.ioc.value,type:row.ioc.type,original:row.ioc.original,verdict:row.allow||res.length?verdict:'unknown',score,
+    allowlisted:!!row.allow,reasons:rs,checked:row.checked,
+    sources:Object.fromEntries(res.sort((x,y)=>srcIdx(x.provider)-srcIdx(y.provider)).map(r=>[r.provider,r]))};
+}
+async function runLookup(t){
+  const s=t.src,c=credsFor(s),cn=cacheName(s,c);
+  const hit=cacheGet(cn,t.row.ioc);if(hit)return hit;
+  await LIMITS.get(s.name).wait(w=>{RUN.waiting=s.label+' rate limit ('+s.rate[0]+' a minute), next in '+Math.ceil(w/1000)+' s';});
+  RUN.waiting='';
+  let r;
+  try{r=await s.lookup(t.row.ioc,c);}
+  catch(e){r=ERR(e instanceof NetErr?e.message:'unexpected response ('+(e.name||'error')+')');}
+  r=Object.assign({provider:s.name,cached:false},r,{data:compact(r.data)});
+  cachePut(cn,t.row.ioc,r);
+  return r;
 }
 async function trRun(){
-  const text=$('#tr-in').value;
-  if(!text.trim())return toast('Paste indicators first');
-  if(!TR.live){
-    const p=trParse(text);
-    if(!p.results.length)return toast('No valid indicators found');
-    TR.results=p.results;TR.filter=null;trRender();
-    toast(p.results.length+' parsed, not enriched (offline)');return;
+  if(TR.running){RUN.cancel=true;$('#tr-go').textContent='Stopping...';return;}
+  const text=$('#tr-in').value;if(!text.trim())return toast('Paste indicators first');
+  const {iocs,rejected}=tiParse(text);
+  if(!iocs.length)return toast('No valid indicators found');
+  const p=plan(iocs);
+  ASNCACHE=null;
+  TR.results=p.rows.map(rowOut);TR.filter=null;trRender();
+  const btn=$('#tr-go'),prog=$('#tr-prog');
+  if(!p.tasks.length){
+    prog.textContent=(rejected.length?'Skipped, not an indicator: '+rejected.slice(0,8).join(', ')+'. ':'')+(p.ready.length?'Nothing to look up after the allowlist.':'No source is ready. Open API keys to add a key, or turn on the keyless sources.');
+    return;
   }
-  const btn=$('#tr-go'),prog=$('#tr-prog');btn.disabled=true;btn.textContent='Starting...';prog.textContent='';
-  try{
-    const {id}=await liveApi('/api/enrich/start',{iocs:text.split(/\r?\n/)});
-    let st;
-    for(;;){
-      st=await liveApi('/api/enrich/status',{id});
-      if(st.state!=='running')break;
-      btn.textContent=st.total?('Checking '+st.done+' of '+st.total+'...'):'Checking...';
-      prog.textContent=st.total?('Lookup '+st.done+' of '+st.total+'. Free API tiers are rate limited (VirusTotal allows 4 a minute), so a list of ten can take a few minutes.'):'';
-      await new Promise(r=>setTimeout(r,600));
-    }
-    if(st.state==='error')throw new Error(st.error);
-    const j=st.result;
-    TR.results=j.results;TR.filter=null;trRender();
-    prog.textContent=j.rejected.length?('Skipped, not an indicator: '+j.rejected.slice(0,8).join(', ')+(j.rejected.length>8?' ...':'')):'';
-    toast(j.count+' checked'+(j.rejected.length?', '+j.rejected.length+' skipped':''));
-  }catch(e){toast('Engine error: '+e.message);prog.textContent='';}
-  finally{btn.disabled=false;btn.textContent='Run triage';}
+  TR.running=true;RUN.cancel=false;RUN.waiting='';btn.textContent='Stop';btn.classList.remove('p');
+  let done=0;const total=p.tasks.length;
+  const tick=()=>{prog.textContent='Lookup '+done+' of '+total+(RUN.waiting?' · waiting for '+RUN.waiting:'')+'. Free API tiers are rate limited, so long lists take a while.';};
+  const timer=setInterval(tick,500);tick();
+  let pending=false;const rerender=()=>{if(pending)return;pending=true;setTimeout(()=>{pending=false;TR.results=p.rows.map(rowOut);trRender();},250);};
+  const bySrc={};p.tasks.forEach(t=>(bySrc[t.src.name]=bySrc[t.src.name]||[]).push(t));
+  await Promise.all(Object.values(bySrc).map(async list=>{
+    /* two at a time per source, the limiter keeps the pace */
+    const q=list.slice();
+    const worker=async()=>{while(q.length&&!RUN.cancel){const t=q.shift();try{t.row.res[t.src.name]=await runLookup(t);}catch(e){if(e.kind!=='cancel')t.row.res[t.src.name]=Object.assign({provider:t.src.name},ERR(e.message));}done++;rerender();}};
+    await Promise.all([worker(),worker()]);
+  }));
+  clearInterval(timer);
+  TR.results=p.rows.map(rowOut);trRender();trSourcesRender();
+  TR.running=false;btn.textContent='Run triage';btn.classList.add('p');
+  const blocked=[...BLOCKED].filter(n=>!VIA_RELAY.has(n)).map(srcLabel);
+  prog.innerHTML=esc((RUN.cancel?'Stopped after '+done+' of '+total+' lookups. ':done+' lookups done. ')+
+    (rejected.length?'Skipped, not an indicator: '+rejected.slice(0,8).join(', ')+(rejected.length>8?' ...':'')+'. ':''))+
+    (blocked.length?'<span class="warn">'+esc(blocked.join(', '))+' refused to answer a web page.</span> Use the <i>open</i> links in the evidence, or set up a relay under <a href="#keys" data-jump="keys">API keys</a>.':'');
+  toast(iocs.length+' checked'+(rejected.length?', '+rejected.length+' skipped':''));
 }
 function trShown(){
-  return TR.results.filter(r=>!TR.filter||r.verdict===TR.filter)
-    .sort((a,b)=>(VRANK[b.verdict]-VRANK[a.verdict])||(b.score-a.score));
+  return TR.results.filter(r=>!TR.filter||r.verdict===TR.filter).sort((a,b)=>(VRANK[b.verdict]-VRANK[a.verdict])||(b.score-a.score));
 }
 function trRender(){
   const counts={};TR.results.forEach(r=>counts[r.verdict]=(counts[r.verdict]||0)+1);
@@ -2716,12 +3594,9 @@ function trRender(){
   $$('.vb',$('#tr-filter')).forEach(b=>b.addEventListener('click',()=>{TR.filter=b.dataset.v||null;trRender();}));
   const rows=trShown();
   $('#tr-table').querySelector('tbody').innerHTML=rows.map((r,i)=>{
-    const ev=[];
+    const ev=[];const io={type:r.type,value:r.ioc};
     if(r.allowlisted)ev.push(`<li><b>Allowlist</b> ${esc(r.reasons[0]||'known benign')}</li>`);
-    Object.entries(r.sources||{}).forEach(([n,s])=>{
-      ev.push(s.ok?`<li><b>${esc(trLabel(n))}</b> ${esc(s.summary||'')}${s.cached?' <span class="cn">(cached)</span>':''}</li>`
-        :`<li><b>${esc(trLabel(n))}</b> <span class="err">${esc(s.error||'error')}</span></li>`);
-    });
+    Object.entries(r.sources||{}).forEach(([n,s])=>ev.push(evItem(n,s,io,r.type+'|'+r.ioc+'|'+n,TR.open)));
     (r.reasons||[]).filter(x=>x.startsWith('conflict:')).forEach(x=>ev.push(`<li class="err">${esc(x)}</li>`));
     if(!ev.length)ev.push(`<li class="err">${esc((r.reasons||[])[0]||'no data')}</li>`);
     return `<tr class="v-${esc(r.verdict)}">
@@ -2732,16 +3607,30 @@ function trRender(){
       <td><ul class="ev">${ev.join('')}</ul></td>
       <td style="white-space:nowrap"><button class="btn sm" data-pv="${i}" title="Send to the artifact bar and pivot">Pivot</button> <button class="btn sm" data-tk="${i}" title="Add to the IOC tracker">Track</button></td></tr>`;
   }).join('')||'<tr><td colspan="6" class="mut">Nothing to show yet. Paste indicators above, or load the demo.</td></tr>';
-  $$('[data-pv]',$('#tr-table')).forEach(b=>b.addEventListener('click',()=>{
-    $('#q').value=rows[+b.dataset.pv].ioc;classify();pivot();
-  }));
+  $$('[data-pv]',$('#tr-table')).forEach(b=>b.addEventListener('click',()=>{$('#q').value=rows[+b.dataset.pv].ioc;classify();pivot();}));
   $$('[data-tk]',$('#tr-table')).forEach(b=>b.addEventListener('click',()=>trackSend([rows[+b.dataset.tk].ioc])));
+  const keys=trEvKeys(rows);$('#tr-evall').textContent=keys.length&&keys.every(k=>TR.open.has(k))?'Collapse all details':'Expand all details';
+  $('#tr-evall').disabled=!keys.length;
+}
+function trEvKeys(rows){const out=[];rows.forEach(r=>Object.entries(r.sources||{}).forEach(([n,s])=>{if(s.ok&&s.data&&Object.keys(s.data).length)out.push(r.type+'|'+r.ioc+'|'+n);}));return out;}
+function trSourcesRender(){
+  const ready=SOURCES.filter(srcReady);
+  $('#tr-mode').innerHTML=`<b>In-browser engine</b> This page queries the sources itself, straight from your browser. `+
+    `${ready.length} of ${SOURCES.length} sources ready. `+(relayOn()?'Relay: <code>'+esc(CFG.relay)+'</code> ('+esc(CFG.relayMode==='always'?'every call':'when a source blocks browsers')+'). ':'')+
+    `Keys live in this browser only (<a href="#keys" data-jump="keys">API keys</a>).`;
+  $('#tr-sources').innerHTML=SOURCES.map(s=>{
+    const en=srcEnabled(s),cf=srcConfigured(s);
+    const st=!en?'off':!cf?'no key':BLOCKED.has(s.name)&&!VIA_RELAY.has(s.name)?'blocked by browser':VIA_RELAY.has(s.name)?'via relay':'ready';
+    const cls=en&&cf&&!(BLOCKED.has(s.name)&&!VIA_RELAY.has(s.name))?'ready':'nokey';
+    return `<a class="src ${cls}" href="#keys" data-jump="keys" title="${esc(s.types.join(', '))}">${esc(s.label)}${st==='ready'?'':' &middot; '+esc(st)}</a>`;
+  }).join('');
 }
 function trSend(values){
   $('#tr-in').value=values.join('\n');go('triage');
-  if(TR.live&&!TR.demo)toast(values.length+' indicator(s) ready, press Run triage');
+  if(SOURCES.some(srcReady))toast(values.length+' indicator(s) ready, press Run triage');
   else trRun();
 }
+
 /* ---- exports ---- */
 const STIX_NS='6f1c3f6e-2b7a-4d43-9a49-0c8f3b8f1a52';
 async function uuid5(ns,name){
@@ -2756,6 +3645,11 @@ function stixPattern(r){
   return {ipv4:`[ipv4-addr:value = '${v}']`,ipv6:`[ipv6-addr:value = '${v}']`,domain:`[domain-name:value = '${v}']`,
     url:`[url:value = '${v}']`,md5:`[file:hashes.MD5 = '${v}']`,sha1:`[file:hashes.'SHA-1' = '${v}']`,sha256:`[file:hashes.'SHA-256' = '${v}']`}[r.type];
 }
+function uuid4(){
+  if(crypto.randomUUID)return crypto.randomUUID();
+  const b=crypto.getRandomValues(new Uint8Array(16));b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;const x=bytes2hex(b);
+  return `${x.slice(0,8)}-${x.slice(8,12)}-${x.slice(12,16)}-${x.slice(16,20)}-${x.slice(20)}`;
+}
 async function trStix(){
   const now=new Date().toISOString().replace(/(\.\d{3})\d*Z$/,'$1Z');
   const idn='identity--'+await uuid5(STIX_NS,'intelscope');
@@ -2767,7 +3661,7 @@ async function trStix(){
       indicator_types:[r.verdict==='malicious'?'malicious-activity':'anomalous-activity'],pattern:stixPattern(r),pattern_type:'stix',
       pattern_version:'2.1',valid_from:now,confidence:r.score,labels:[r.verdict]});
   }
-  return JSON.stringify({type:'bundle',id:'bundle--'+crypto.randomUUID(),objects:objs},null,2)+'\n';
+  return JSON.stringify({type:'bundle',id:'bundle--'+uuid4(),objects:objs},null,2)+'\n';
 }
 function csvCell(v){
   v=String(v??'');if(/^[=+\-@\t\r]/.test(v))v="'"+v;
@@ -2780,201 +3674,486 @@ function trCsv(){
     ...provs.map(n=>{const s=(r.sources||{})[n];return s?(s.ok?s.summary:'error: '+s.error):'';})]));
   return rows.map(r=>r.map(csvCell).join(',')).join('\n')+'\n';
 }
-/* ---- IOC tracker ---- */
-const TK={entries:[],tlp:['CLEAR','GREEN','AMBER','AMBER+STRICT','RED'],path:'',editing:null,armed:null};
-async function liveApi(path,body){
-  const opt=body===undefined?{headers:{'X-Intelscope-Token':TR.token},cache:'no-store'}
-    :{method:'POST',headers:{'Content-Type':'application/json','X-Intelscope-Token':TR.token},body:JSON.stringify(body)};
-  const r=await fetch(path,opt);let j={};
-  try{j=await r.json();}catch(e){}
-  if(!r.ok)throw new Error(j.error||('HTTP '+r.status));
-  return j;
+
+/* ==================== 04 IOC TRACKER (browser storage, port of tracker.py) ==================== */
+const TLP_LEVELS=['CLEAR','GREEN','AMBER','AMBER+STRICT','RED'];
+const TLP_RANK=Object.fromEntries(TLP_LEVELS.map((l,i)=>[l,i]));
+const TK={tlp:TLP_LEVELS,editing:null,armed:null,open:new Set(),evOpen:new Set(),get entries(){return tkDoc().entries;}};
+function tkDoc(){const d=stGet('tracker',null);return d&&Array.isArray(d.entries)?d:{next_id:1,entries:[]};}
+function tkSave(d){
+  if(stSet('tracker',d))return;
+  cacheClear();   /* cached source answers are disposable, tracked rows are not */
+  if(!stSet('tracker',d))throw new Error('browser storage is full or blocked: export, then remove evidence from old rows');
+}
+function normTlp(v){
+  let r=String(v||'').trim().toUpperCase().replace(/^TLP\s*[:\-]?\s*/,'');
+  if(!r)return 'AMBER';
+  r=({'WHITE':'CLEAR','AMBER-STRICT':'AMBER+STRICT','AMBER STRICT':'AMBER+STRICT','AMBERSTRICT':'AMBER+STRICT','AMBER_STRICT':'AMBER+STRICT'})[r]||r;
+  if(!(r in TLP_RANK))throw new Error("unknown TLP '"+v+"'");
+  return r;
+}
+function normConf(v){
+  let r=String(v||'').trim().toLowerCase().replace(/^confidence\s*[:\-]?\s*/,'');
+  r=({med:'medium',mid:'medium',moderate:'medium',lo:'low',hi:'high'})[r]||r;
+  if(r&&!['low','medium','high'].includes(r))throw new Error("unknown confidence '"+v+"'");
+  return r;
+}
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function normDate(v){
+  const r=String(v||'').trim();if(!r)return today();
+  const m=r.slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!m||isNaN(Date.parse(m[0])))throw new Error("date must look like 2026-11-25, got '"+v+"'");
+  return m[0];
+}
+function cleanText(v,limit,label){
+  const t=String(v||'').trim().replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g,'');
+  if(t.length>limit)throw new Error(label+' is longer than '+limit+' characters');return t;
+}
+const nowZ=()=>new Date().toISOString().replace(/\.\d{3}Z$/,'Z');
+function tkAddOne(doc,value,o){
+  const i=tiClassify(value);if(!i)throw new Error('not a recognised indicator: '+String(value).slice(0,80));
+  const tlp=normTlp(o.tlp),conf=normConf(o.confidence),ctx=cleanText(o.context,2000,'context'),src=cleanText(o.source,200,'source'),when=normDate(o.date);
+  const ex=doc.entries.find(e=>e.type===i.type&&e.ioc===i.value&&String(e.source||'').toLowerCase()===src.toLowerCase());
+  if(ex){
+    ex.tlp=tlp;if(conf)ex.confidence=conf;if(ctx)ex.context=ctx;if(o.date)ex.date=when;
+    if(o.verdict){ex.verdict=o.verdict;ex.score=o.score;}if(o.evidence)ex.evidence=o.evidence;ex.updated=nowZ();return false;
+  }
+  if(doc.entries.length>=50000)throw new Error('the tracker is full (50000 rows)');
+  const n=nowZ();
+  doc.entries.push({id:doc.next_id++,ioc:i.value,type:i.type,tlp,context:ctx,source:src,date:when,added:n,updated:n,
+    verdict:o.verdict||'',score:o.score==null?null:o.score,confidence:conf||'medium'});
+  if(o.evidence)doc.entries[doc.entries.length-1].evidence=o.evidence;
+  return true;
+}
+function tkAddMany(items,o){
+  const doc=tkDoc();let added=0,updated=0;const rejected=[];
+  items.forEach(it=>{
+    try{const c=tkAddOne(doc,it.ioc,Object.assign({},o,{verdict:it.verdict||'',score:it.score,evidence:it.evidence||null,tlp:it.tlp!==undefined?it.tlp:o.tlp,
+      context:it.context!==undefined?it.context:o.context,source:it.source!==undefined?it.source:o.source,date:it.date!==undefined?it.date:o.date,
+      confidence:it.confidence!==undefined?it.confidence:o.confidence}));c?added++:updated++;}
+    catch(e){rejected.push((it.row?'row '+it.row+': ':'')+e.message);}
+  });
+  tkSave(doc);return {added,updated,rejected};
+}
+function tkMdSplit(line){
+  let b=line.trim();if(b.startsWith('|'))b=b.slice(1);if(b.endsWith('|')&&!b.endsWith('\\|'))b=b.slice(0,-1);
+  return b.split(/(?<!\\)\|/).map(c=>c.trim());
+}
+function tkMdUnesc(c){const t=c.replace(/\\([\\|])/g,'$1').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim();return t==='-'?'':t;}
+function tkParseMd(text){
+  const AL={ioc:'ioc',indicator:'ioc',value:'ioc',tlp:'tlp',confidence:'confidence',source:'source',date:'date',context:'context',notes:'context',note:'context',description:'context'};
+  const rows=[];let cols=null;
+  String(text).split(/\r?\n/).forEach(line=>{
+    if(!line.trim().startsWith('|')){cols=null;return;}
+    const cells=tkMdSplit(line);
+    if(cols===null){const n=cells.map(c=>AL[c.replace(/^[`\s:*]+|[`\s:*]+$/g,'').toLowerCase()]||null);cols=n.includes('ioc')?n:[];return;}
+    if(!cols.length||cells.filter(Boolean).every(c=>/^:?-{1,}:?$/.test(c)))return;
+    const row={};cols.forEach((n,i)=>{if(n&&cells[i]!==undefined)row[n]=tkMdUnesc(cells[i]);});
+    row.ioc=String(row.ioc||'').replace(/^`+|`+$/g,'').trim();
+    if(row.ioc)rows.push(row);
+  });
+  return rows;
+}
+function tkDefang(v){if(/^[0-9a-fA-F]{32,64}$/.test(v))return v;return v.replace(/^http/i,'hxxp').replace(/\./g,'[.]');}
+function tkToMd(entries,defanged,maxTlp,withEv){
+  const rows=entries.slice().sort((a,b)=>(b.date.localeCompare(a.date))||(b.id-a.id));
+  const L=['# IOC tracker',''];
+  const cell=v=>{let t=String(v||'').replace(/\s+/g,' ').trim();if(defanged)t=t.replace(/https?:\/\/[^\s|<>]+/gi,m=>tkDefang(m));
+    t=t.replace(/\\/g,'\\\\').replace(/\|/g,'\\|').replace(/</g,'&lt;').replace(/>/g,'&gt;');return t||'-';};
+  if(rows.length){
+    const top=rows.reduce((a,e)=>TLP_RANK[e.tlp]>TLP_RANK[a]?e.tlp:a,'CLEAR');
+    const mix=TLP_LEVELS.map(l=>[l,rows.filter(e=>e.tlp===l).length]).filter(x=>x[1]).map(x=>x[1]+' '+x[0]).join(', ');
+    L.push('> **TLP:'+top+'**: handle this whole file at the highest label it contains.');
+    L.push('> '+plural(rows.length,'row')+' ('+mix+'). Exported '+today()+' by IntelScope '+APP_VERSION+'.'+(maxTlp?' Only rows up to TLP:'+normTlp(maxTlp)+'.':''));
+    L.push('>');L.push(defanged?'> Indicators are defanged.':'> Indicators are live: do not click.');
+    L.push('','| IOC | Type | TLP | Confidence | Source | Date | Context |','|---|---|---|---|---|---|---|');
+    rows.forEach(e=>{const v=defanged?tkDefang(e.ioc):e.ioc;
+      L.push('| '+['`'+v.replace(/`/g,'%60')+'`',e.type,e.tlp,e.confidence||'-',cell(e.source),e.date,cell(e.context)].join(' | ')+' |');});
+    if(withEv)tkMdEvidence(L,rows,defanged);
+  }else L.push('> Exported '+today()+' by IntelScope '+APP_VERSION+'.','','No indicators tracked yet.');
+  return L.join('\n')+'\n';
+}
+function tkMdEvidence(L,rows,defanged){
+  const withEv=rows.filter(e=>e.evidence);if(!withEv.length)return;
+  const t=v=>{let s=String(v??'').replace(/\s+/g,' ').trim();if(defanged)s=defangText(s);return s.replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+  L.push('','## Evidence','','What each source reported when the indicator was triaged.'+(defanged?' Addresses, domains and URLs below are defanged.':''),'');
+  withEv.forEach(e=>{
+    const ev=e.evidence,v=defanged?tkDefang(e.ioc):e.ioc;
+    L.push('### `'+v.replace(/`/g,'%60')+'` ('+e.type+')','');
+    const head=[];if(ev.verdict)head.push('Verdict '+ev.verdict+(ev.score!=null?', score '+ev.score:''));if(ev.checked)head.push('checked '+String(ev.checked).slice(0,10));
+    if(head.length)L.push(head.join(', ')+'.','');
+    (ev.sources||[]).forEach(s=>{
+      L.push('- **'+srcLabel(s.n).replace(/[<>*]/g,'')+'**: '+t(s.ok?s.summary:'error: '+(s.error||'')));
+      if(!s.ok)return;
+      Object.entries(s.data||{}).filter(evKeep).forEach(([k,x])=>{
+        const tx=evText(x);
+        if(Array.isArray(tx)){L.push('  - '+t(evLabel(k))+':');tx.forEach(y=>L.push('    - '+t(y)));}
+        else L.push('  - '+t(evLabel(k))+': '+t(tx));
+      });
+    });
+    if(!(ev.sources||[]).length)(ev.reasons||[]).slice(0,3).forEach(x=>L.push('- '+t(x)));
+    (ev.reasons||[]).filter(x=>String(x).startsWith('conflict:')).forEach(x=>L.push('- '+t(x)));
+    L.push('');
+  });
+
 }
 function tlpBadge(t){return `<span class="tlp" data-t="${esc(t)}">TLP:${esc(t)}</span>`;}
 function confBadge(c){return c?`<span class="conf" data-c="${esc(c)}">${esc(c)}</span>`:'<span class="mut">-</span>';}
 function confSelect(cls,val){return `<select class="t ${cls}">${['low','medium','high'].map(x=>`<option${x===val?' selected':''}>${x}</option>`).join('')}</select>`;}
 function tlpSelect(cls,val){return `<select class="t ${cls}">${TK.tlp.map(x=>`<option${x===val?' selected':''}>${esc(x)}</option>`).join('')}</select>`;}
 function tkMode(){
-  const el=$('#tk-mode');
-  const off=!TR.live;
-  ['tk-add','tk-export','tk-copy','tk-import','ts-add'].forEach(id=>{$('#'+id).disabled=off;});
-  el.innerHTML=off
-    ?'<b>Needs the server</b> The tracker is stored by IntelScope on this computer. Run <code>intelscope serve</code> and open the page it prints. Without it you can still use <code>intelscope track</code> on the command line.'
-    :(TR.demo?'<b>Demo</b> Rows live in memory and are gone when the server stops. Nothing is written to disk.'
-      :'<b>Local file</b> Rows are saved on this computer, so they are still here next time. The command line (<code>intelscope track</code>) reads and writes the same file.');
-  $('#tk-path').textContent=TR.live&&TK.path?('Stored in '+TK.path):'';
+  $('#tk-mode').innerHTML=STORAGE_OK
+    ?'<b>Saved in this browser</b> Rows are kept in this browser\'s local storage on this computer, so they are still here next time you open this file in the same browser. Clearing site data removes them: export a Markdown copy now and then.'
+    :'<b>Storage blocked</b> This browser refuses local storage for this page (private mode, or a strict setting). Rows will not be kept: export before you close the tab.';
+  $('#tk-path').textContent='';
 }
-async function tkLoad(){
-  tkMode();
-  if(!TR.live){TK.entries=[];tkRender();return;}
-  try{const j=await liveApi('/api/tracker');TK.entries=j.entries;TK.path=j.path;if(j.tlp_levels)TK.tlp=j.tlp_levels;}
-  catch(e){toast('Tracker: '+e.message);}
-  tkMode();tkRender();
-}
+function tkLoad(){tkMode();tkRender();}
 function tkShown(){
   const q=$('#tk-search').value.trim().toLowerCase(),f=$('#tk-filter').value;
-  return TK.entries.filter(e=>(!f||e.tlp===f)&&(!q||(e.ioc+' '+e.source+' '+e.context).toLowerCase().includes(q)))
+  const evs=e=>e.evidence?(e.evidence.sources||[]).map(s=>s.summary||'').join(' '):'';
+  return TK.entries.filter(e=>(!f||e.tlp===f)&&(!q||(e.ioc+' '+e.source+' '+e.context+' '+evs(e)).toLowerCase().includes(q)))
     .sort((a,b)=>(b.date.localeCompare(a.date))||(b.id-a.id));
 }
+function tkEvSummary(ev){
+  const s=ev.sources||[];const hit=s.filter(x=>x.ok&&x.found).map(x=>srcLabel(x.n));
+  if(!s.length)return (ev.reasons||[])[0]||'triage result';
+  return plural(s.length,'source')+(hit.length?' · seen by '+hit.slice(0,4).join(', ')+(hit.length>4?' +'+(hit.length-4):''):' · none has a record');
+}
+function tkEvRow(e){
+  const ev=e.evidence,io={type:e.type,value:e.ioc};
+  const items=(ev.sources||[]).map(s=>evItem(s.n,s,io,'t'+e.id+'|'+s.n,TK.evOpen));
+  if(!items.length)(ev.reasons||[]).slice(0,3).forEach(x=>items.push(`<li>${esc(x)}</li>`));
+  (ev.reasons||[]).filter(x=>String(x).startsWith('conflict:')).forEach(x=>items.push(`<li class="err">${esc(x)}</li>`));
+  const when=String(ev.checked||'').replace('T',' ').replace(/:\d\dZ$|Z$/,' UTC');
+  return `<tr class="evrow" data-id="${e.id}"><td colspan="8"><div class="evhead mut"><span>Evidence from triage${when?', checked '+esc(when):''}${ev.verdict?' · verdict '+esc(ev.verdict)+(ev.score!=null?' ('+(+ev.score)+')':''):''}</span>
+    <button class="btn sm" data-act="evdel" title="Delete the stored evidence of this row, keep the row">${TK.armed==='ev'+e.id?'Sure?':'Remove evidence'}</button></div><ul class="ev">${items.join('')}</ul></td></tr>`;
+}
 function tkRender(){
-  const rows=tkShown();
-  $('#tk-count').textContent=TK.entries.length?(rows.length===TK.entries.length?TK.entries.length+' rows':rows.length+' of '+TK.entries.length+' rows'):'';
+  const all=TK.entries,rows=tkShown();
+  $('#tk-count').textContent=all.length?(rows.length===all.length?all.length+' rows':rows.length+' of '+all.length+' rows'):'';
+  const withEv=rows.filter(e=>e.evidence);
+  const eb=$('#tk-evall');eb.disabled=!withEv.length;
+  eb.textContent=withEv.length&&withEv.every(e=>TK.open.has(e.id))?'Collapse all evidence':'Expand all evidence';
   $('#tk-table').querySelector('tbody').innerHTML=rows.map(e=>{
     if(TK.editing===e.id)return `<tr data-id="${e.id}"><td style="color:var(--paper)">${esc(e.ioc)}</td><td class="mut">${esc(e.type)}</td>
       <td>${tlpSelect('ed-tlp',e.tlp)}</td><td>${confSelect('ed-conf',e.confidence||'medium')}</td><td><input class="t ed-source" maxlength="200" value="${esc(e.source)}"></td>
       <td><input class="t ed-date" type="date" value="${esc(e.date)}"></td><td><input class="t ed-context" maxlength="2000" value="${esc(e.context)}"></td>
       <td style="white-space:nowrap"><button class="btn sm p" data-act="save">Save</button> <button class="btn sm" data-act="cancel">Cancel</button></td></tr>`;
     const verdict=e.verdict?`<div class="mut" style="font-size:10.5px">triage: ${esc(e.verdict)}${e.score!=null?' ('+(+e.score)+')':''}</div>`:'';
-    return `<tr data-id="${e.id}"><td style="color:var(--paper)">${esc(e.ioc)}${verdict}</td>
+    const open=!!e.evidence&&TK.open.has(e.id);
+    const tg=e.evidence?`<button class="evtg" data-act="ev" aria-expanded="${open}">${open?'&#9662;':'&#9656;'} Evidence: ${esc(tkEvSummary(e.evidence))}</button>`:'';
+    return `<tr data-id="${e.id}"${open?' class="evopen"':''}><td style="color:var(--paper)">${esc(e.ioc)}${verdict}${tg}</td>
       <td class="mut" style="text-transform:uppercase;letter-spacing:.1em;font-size:10px;white-space:nowrap">${esc(e.type)}</td><td>${tlpBadge(e.tlp)}</td><td>${confBadge(e.confidence)}</td>
       <td>${esc(e.source)||'<span class="mut">-</span>'}</td><td style="white-space:nowrap">${esc(e.date)}</td>
       <td class="ctx">${esc(e.context)||'<span class="mut">-</span>'}</td>
-      <td style="white-space:nowrap"><button class="btn sm" data-act="edit">Edit</button> <button class="btn sm" data-act="del">${TK.armed===e.id?'Sure?':'Delete'}</button></td></tr>`;
-  }).join('')||`<tr><td colspan="8" class="mut">${TK.entries.length?'No row matches.':'Nothing tracked yet. Add indicators above, or press Track on a triage result.'}</td></tr>`;
+      <td style="white-space:nowrap"><button class="btn sm" data-act="edit">Edit</button> <button class="btn sm" data-act="del">${TK.armed===e.id?'Sure?':'Delete'}</button></td></tr>`
+      +(open?tkEvRow(e):'');
+  }).join('')||`<tr><td colspan="8" class="mut">${all.length?'No row matches.':'Nothing tracked yet. Add indicators above, or press Track on a triage result.'}</td></tr>`;
 }
-async function tkImport(markdown){
-  try{
-    const j=await liveApi('/api/tracker/import',{markdown});
-    toast(j.added+' added, '+j.updated+' updated'+(j.errors.length?', '+j.errors.length+' skipped':''));
-    $('#tk-msg').textContent=j.errors.length?('Skipped: '+j.errors.slice(0,4).join('; ')+(j.errors.length>4?' ...':'')):'';
-    await tkLoad();
-  }catch(e){toast(e.message);$('#tk-msg').textContent=e.message;}
+function tkImport(markdown){
+  const rows=tkParseMd(markdown);
+  if(!rows.length){const m='No table with an IOC column found (expected columns like IOC | Type | TLP | Confidence | Source | Date | Context)';toast('No IOC table found');$('#tk-msg').textContent=m;return;}
+  const evs=tkParseEvidence(markdown);let withEv=0;
+  const evFor=r=>{const c=tiClassify(r.ioc);const ev=c?evs[c.type+'|'+c.value]:null;if(!ev)return null;withEv++;
+    return Object.assign({},ev,{sources:ev.sources.map(s=>Object.assign({},s,{data:JSON.parse(JSON.stringify(s.data))}))});};
+  const j=tkAddMany(rows.map((r,n)=>{const ev=evFor(r);return Object.assign({row:n+1},r,{tlp:r.tlp||'',context:r.context||'',source:r.source||'',date:r.date||'',confidence:r.confidence||'',
+    evidence:ev,verdict:ev?ev.verdict:'',score:ev?ev.score:null});}).reverse(),{});   /* bottom up, so a re-export keeps the file's order */
+  toast(j.added+' added, '+j.updated+' updated'+(withEv?', '+withEv+' with evidence':'')+(j.rejected.length?', '+j.rejected.length+' skipped':''));
+  $('#tk-msg').textContent=j.rejected.length?('Skipped: '+j.rejected.slice(0,4).join('; ')+(j.rejected.length>4?' ...':'')):'';
+  tkRender();
 }
-async function tkAdd(){
-  const text=$('#tk-in').value;
-  if(!text.trim())return toast('Paste indicators first');
-  if(/^\s*\|.*\b(ioc|indicator)\b/im.test(text)){await tkImport(text);$('#tk-in').value='';return;}  // a pasted Markdown table
-  const known={};
-  TR.results.forEach(r=>{if(Object.keys(r.sources||{}).length)known[r.ioc]={verdict:r.verdict,score:r.score};});
-  const btn=$('#tk-add');btn.disabled=true;
+function tkAdd(){
+  const text=$('#tk-in').value;if(!text.trim())return toast('Paste indicators first');
+  if(/^\s*\|.*\b(ioc|indicator)\b/im.test(text)){tkImport(text);$('#tk-in').value='';return;}
+  const known={};TR.results.forEach(r=>{if(Object.keys(r.sources||{}).length)known[r.ioc]={verdict:r.verdict,score:r.score,evidence:evFromResult(r)};});
+  const {iocs,rejected}=tiParse(text);
   try{
-    const j=await liveApi('/api/tracker/add',{text,known,tlp:$('#tk-tlp').value,confidence:$('#tk-conf').value,context:$('#tk-context').value,source:$('#tk-source').value,date:$('#tk-date').value});
-    toast(j.added+' added, '+j.updated+' updated'+(j.rejected.length?', '+j.rejected.length+' skipped':''));
-    $('#tk-in').value='';await tkLoad();
+    const j=tkAddMany(iocs.map(i=>Object.assign({ioc:i.value},known[i.value]||{})),
+      {tlp:$('#tk-tlp').value,confidence:$('#tk-conf').value,context:$('#tk-context').value,source:$('#tk-source').value,date:$('#tk-date').value});
+    const sk=rejected.length+j.rejected.length;
+    toast(j.added+' added, '+j.updated+' updated'+(sk?', '+sk+' skipped':''));
+    $('#tk-msg').textContent=j.rejected.length?j.rejected.slice(0,4).join('; '):'';
+    $('#tk-in').value='';tkRender();
   }catch(e){toast(e.message);}
-  btn.disabled=!TR.live;
 }
-async function tkExport(copyOnly){
-  try{
-    const j=await liveApi('/api/tracker/export',{max_tlp:$('#tk-max').value,defang:$('#tk-defang').value==='1'});
-    if(!j.rows)return toast('No rows to export');
-    if(copyOnly)copy(j.markdown,j.rows+' rows copied as Markdown');
-    else{dl(j.filename,j.markdown,'text/markdown');toast(j.rows+' rows exported');}
-  }catch(e){toast(e.message);}
+function tkExport(copyOnly){
+  const max=$('#tk-max').value,def=$('#tk-defang').value==='1',ev=$('#tk-ev').value==='1';
+  let rows=TK.entries;if(max)rows=rows.filter(e=>TLP_RANK[e.tlp]<=TLP_RANK[max]);
+  if(!rows.length)return toast('No rows to export');
+  const md=tkToMd(rows,def,max,ev);
+  if(copyOnly)copy(md,rows.length+' rows copied as Markdown');
+  else{dl('iocs-'+today()+'.md',md,'text/markdown');toast(rows.length+' rows exported');}
 }
 function trackSend(values){
   $('#tk-in').value=values.join('\n');go('tracker');
-  if(!TR.live)toast('Start intelscope serve to use the tracker');
-  else toast(values.length+' ready: set TLP, source and context, then Add to tracker');
+  toast(values.length+' ready: set TLP, source and context, then Add to tracker (the evidence comes along)');
 }
 function tkWire(){
   document.addEventListener('click',ev=>{const a=ev.target.closest('[data-jump]');if(a){ev.preventDefault();go(a.dataset.jump);}});
-  $('#tk-date').value=new Date().toISOString().slice(0,10);
+  $('#tk-date').value=today();
   $('#tk-add').addEventListener('click',tkAdd);
   $('#tk-clearin').addEventListener('click',()=>{$('#tk-in').value='';});
   $('#tk-export').addEventListener('click',()=>tkExport(false));
   $('#tk-copy').addEventListener('click',()=>tkExport(true));
   $('#tk-search').addEventListener('input',tkRender);
+  evWireToggle($('#tk-table'),TK.evOpen);
+  $('#tk-evall').addEventListener('click',()=>{const ids=tkShown().filter(e=>e.evidence).map(e=>e.id);const all=ids.every(i=>TK.open.has(i));ids.forEach(i=>all?TK.open.delete(i):TK.open.add(i));tkRender();});
+  $('#tk-ev').value=CFG.tkEvidence==='0'?'0':'1';
+  $('#tk-ev').addEventListener('change',()=>{CFG.tkEvidence=$('#tk-ev').value;cfgSave();});
   $('#tk-filter').addEventListener('change',tkRender);
   $('#ts-tlp').innerHTML=TK.tlp.map(x=>`<option${x==='AMBER'?' selected':''}>${esc(x)}</option>`).join('');
-  $('#ts-date').value=new Date().toISOString().slice(0,10);
+  $('#ts-date').value=today();
   $('#ts-open').addEventListener('click',()=>go('tracker'));
-  $('#ts-add').addEventListener('click',async()=>{
+  $('#ts-add').addEventListener('click',()=>{
     let rows=trShown();
     if($('#ts-scope').value==='bad')rows=rows.filter(r=>r.verdict==='malicious'||r.verdict==='suspicious');
     if(!rows.length)return toast($('#ts-scope').value==='bad'?'No malicious or suspicious results shown':'Nothing to add');
-    const btn=$('#ts-add');btn.disabled=true;
     try{
-      const j=await liveApi('/api/tracker/add',{items:rows.map(r=>({ioc:r.ioc,verdict:r.verdict,score:r.score})),
-        tlp:$('#ts-tlp').value,confidence:$('#ts-conf').value,context:$('#ts-context').value,source:$('#ts-source').value,date:$('#ts-date').value});
-      toast(j.added+' added, '+j.updated+' updated in the IOC list');
-      tkLoad();
+      const j=tkAddMany(rows.map(r=>({ioc:r.ioc,verdict:Object.keys(r.sources||{}).length?r.verdict:'',score:Object.keys(r.sources||{}).length?r.score:null,evidence:evFromResult(r)})),
+        {tlp:$('#ts-tlp').value,confidence:$('#ts-conf').value,context:$('#ts-context').value,source:$('#ts-source').value,date:$('#ts-date').value});
+      toast(j.added+' added, '+j.updated+' updated in the IOC list');tkRender();
     }catch(e){toast(e.message);}
-    btn.disabled=!TR.live;
   });
   $('#tk-import').addEventListener('click',()=>$('#tk-file').click());
-  $('#tk-file').addEventListener('change',async e=>{
-    const f=e.target.files[0];e.target.value='';if(!f)return;
-    await tkImport(await f.text());
-  });
-  $('#tk-table').addEventListener('click',async ev=>{
+  $('#tk-file').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;tkImport(await f.text());});
+  $('#tk-table').addEventListener('click',ev=>{
     const b=ev.target.closest('[data-act]');if(!b)return;
     const tr=b.closest('tr'),id=+tr.dataset.id;
-    if(b.dataset.act==='edit'){TK.editing=id;TK.armed=null;tkRender();}
+    if(b.dataset.act==='ev'){TK.open.has(id)?TK.open.delete(id):TK.open.add(id);tkRender();}
+    else if(b.dataset.act==='evdel'){
+      if(TK.armed!=='ev'+id){TK.armed='ev'+id;tkRender();setTimeout(()=>{if(TK.armed==='ev'+id){TK.armed=null;tkRender();}},3000);return;}
+      const doc=tkDoc();const e=doc.entries.find(x=>x.id===id);if(e){delete e.evidence;e.updated=nowZ();tkSave(doc);}TK.armed=null;TK.open.delete(id);tkRender();toast('Evidence removed from this row');
+    }
+    else if(b.dataset.act==='edit'){TK.editing=id;TK.armed=null;tkRender();}
     else if(b.dataset.act==='cancel'){TK.editing=null;tkRender();}
     else if(b.dataset.act==='save'){
       try{
-        await liveApi('/api/tracker/update',{id,fields:{tlp:$('.ed-tlp',tr).value,confidence:$('.ed-conf',tr).value,source:$('.ed-source',tr).value,date:$('.ed-date',tr).value,context:$('.ed-context',tr).value}});
-        TK.editing=null;await tkLoad();toast('Saved');
-      }catch(e){toast(e.message);}
+        const doc=tkDoc();const e=doc.entries.find(x=>x.id===id);if(!e)throw new Error('row is gone');
+        const src=cleanText($('.ed-source',tr).value,200,'source');
+        if(doc.entries.some(o=>o!==e&&o.type===e.type&&o.ioc===e.ioc&&String(o.source||'').toLowerCase()===src.toLowerCase()))throw new Error('that indicator already has a row for that source');
+        e.tlp=normTlp($('.ed-tlp',tr).value);e.confidence=normConf($('.ed-conf',tr).value)||'medium';e.source=src;
+        e.date=normDate($('.ed-date',tr).value);e.context=cleanText($('.ed-context',tr).value,2000,'context');e.updated=nowZ();
+        tkSave(doc);TK.editing=null;tkRender();toast('Saved');
+      }catch(err){toast(err.message);}
     }else if(b.dataset.act==='del'){
       if(TK.armed!==id){TK.armed=id;tkRender();setTimeout(()=>{if(TK.armed===id){TK.armed=null;tkRender();}},3000);return;}
-      try{await liveApi('/api/tracker/delete',{ids:[id]});TK.armed=null;await tkLoad();toast('Deleted');}catch(e){toast(e.message);}
+      const doc=tkDoc();doc.entries=doc.entries.filter(x=>x.id!==id);tkSave(doc);TK.armed=null;tkRender();toast('Deleted');
     }
   });
 }
 
-/* ---- API keys ---- */
-const KS={providers:[],path:'',demo:false};
-const KS_ORIGIN={session:'this session',saved:'saved file',environment:'environment / .env'};
-async function ksLoad(){
-  const el=$('#ks-mode');
-  if(!TR.live){
-    KS.providers=[];
-    el.innerHTML='<b>Needs the server</b> Keys are kept by IntelScope on this computer, never in this page. Run <code>intelscope serve</code> and open the page it prints.';
-    ksRender();return;
+/* ==================== 19 API KEYS & SETTINGS ==================== */
+const BROWSER_NOTE={
+  likely:['ok','Usually answers web pages directly.'],
+  unknown:['warn','May or may not answer web pages. Press Test to find out.'],
+  blocked:['bad','Normally refuses calls from web pages. Expect "blocked by the browser" unless you set up the relay below.'],
+  own:['warn','Depends on your platform\'s CORS settings.']
+};
+const RELAY_CODE=`// IntelScope relay: a tiny Cloudflare Worker that lets this page reach sources that block web pages.
+// Cloudflare dashboard > Workers & Pages > Create > Worker > Edit code > paste this > Deploy.
+// Then Settings > Variables and secrets > add a secret named TOKEN, and put the same value in IntelScope.
+const ALLOW = ["www.virustotal.com","api.abuseipdb.com","urlhaus-api.abuse.ch","threatfox-api.abuse.ch",
+  "api.greynoise.io","internetdb.shodan.io","api.platform.censys.io","search.censys.io","urlscan.io",
+  "rdap.org","api.mnemonic.no","stat.ripe.net","www.spamhaus.org"];
+  // add your own OpenCTI host here if you use it
+function cors(req) {
+  return {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": req.headers.get("Access-Control-Request-Headers") || "*",
+    "Access-Control-Max-Age": "86400", "Vary": "Access-Control-Request-Headers"};
+}
+export default {
+  async fetch(req, env) {
+    const h = cors(req);
+    if (req.method === "OPTIONS") return new Response(null, {status: 204, headers: h});
+    if (env.TOKEN && req.headers.get("X-Relay-Token") !== env.TOKEN) return new Response("forbidden", {status: 403, headers: h});
+    let u;
+    try { u = new URL(new URL(req.url).searchParams.get("url")); } catch (e) { return new Response("bad url", {status: 400, headers: h}); }
+    if (u.protocol !== "https:" || !ALLOW.includes(u.hostname)) return new Response("host not allowed", {status: 403, headers: h});
+    const fwd = new Headers();
+    for (const [k, v] of req.headers) {
+      const n = k.toLowerCase();
+      if (["host","origin","referer","cookie","x-relay-token","x-forwarded-for","x-real-ip"].includes(n) || n.startsWith("cf-")) continue;
+      fwd.set(k, v);
+    }
+    const r = await fetch(u.toString(), {method: req.method, headers: fwd,
+      body: req.method === "GET" || req.method === "HEAD" ? undefined : await req.arrayBuffer(), redirect: "follow"});
+    const out = new Response(r.body, r);
+    for (const [k, v] of Object.entries(h)) out.headers.set(k, v);
+    return out;
   }
-  try{const j=await liveApi('/api/settings');KS.providers=j.providers;KS.path=j.path;KS.demo=j.demo;}
-  catch(e){toast('Keys: '+e.message);}
-  el.innerHTML=KS.demo?'<b>Demo</b> Keys are not stored in demo mode.'
-    :'<b>Where keys live</b> <i>Use this session</i> keeps a key in the server\'s memory until it stops. <i>Save on this computer</i> writes it to <code>'+esc(KS.path)+'</code> as plain text, readable by anyone who can read your files. Keys in a <code>.env</code> file or the environment also work; a saved or session key wins.';
+};`;
+function ksLoad(){
+  $('#ks-mode').innerHTML=(STORAGE_OK?'':'<b>Storage blocked</b> This browser will not keep anything for this page, so keys last only until you close the tab. ')+
+    '<b>Where keys live</b> <i>Save in this browser</i> keeps a key in this browser\'s local storage on this computer, as plain text, readable by anyone who can use this browser profile. '+
+    '<i>This tab only</i> keeps it until you close the tab. A key is sent only to its own source (or to your relay, if you set one up), never anywhere else.';
   ksRender();
 }
 function ksRender(){
-  $('#ks-list').innerHTML=KS.providers.map(p=>`<div class="card" data-p="${esc(p.name)}">
-    <h3><span class="dot"></span>${esc(p.label)} <span class="src ${p.configured?'ready':'nokey'}">${p.configured?'ready':'no key'}</span></h3>
-    <p class="note">${esc(p.note||'')}${p.note?' ':''}Looks up: ${esc(p.types.join(', '))}.</p>
-    ${p.fields.map(f=>`<div class="kf"><label for="ks-${esc(p.name)}-${esc(f.name)}">${esc(f.label)}${f.required?'':' (optional)'}</label>
-      <input class="t" id="ks-${esc(p.name)}-${esc(f.name)}" data-f="${esc(f.name)}" data-secret="${f.secret?1:0}" type="${f.secret?'password':'text'}" autocomplete="off" spellcheck="false"
-        value="${f.secret?'':esc(f.value||'')}" placeholder="${f.set&&f.secret?esc(f.preview+'  set from '+(KS_ORIGIN[f.origin]||'')+', type to replace'):esc(f.hint||'')}"${KS.demo?' disabled':''}>
-      ${f.set&&!f.secret?`<div class="hint">set from ${esc(KS_ORIGIN[f.origin]||'')}</div>`:''}</div>`).join('')}
-    <div class="row"><button class="btn p" data-act="session"${KS.demo?' disabled':''}>Use this session</button><button class="btn" data-act="save"${KS.demo?' disabled':''}>Save on this computer</button>
-      <button class="btn" data-act="test"${KS.demo?' disabled':''}>Test</button><button class="btn" data-act="clear"${KS.demo?' disabled':''}>Clear</button></div>
-    <div class="kmsg" aria-live="polite"></div></div>`).join('')||'<p class="mut">No sources to show.</p>';
+  const fld=(s,f,c)=>`<div class="kf"><label for="ks-${s.name}-${f.name}">${esc(f.label)}${f.required?'':' (optional)'}</label>
+      <input class="t" id="ks-${s.name}-${f.name}" data-f="${esc(f.name)}" data-secret="${f.secret?1:0}" type="${f.secret?'password':'text'}" autocomplete="off" spellcheck="false"
+        value="${esc(c[f.name]||'')}" placeholder="${esc(f.hint||'')}"></div>`;
+  const cards=SOURCES.map(s=>{
+    const c=keysFor(s.name),org=keyOrigin(s.name),en=srcEnabled(s),cf=srcConfigured(s);
+    const bn=BROWSER_NOTE[s.browser]||BROWSER_NOTE.unknown;
+    const shared=s.shares&&!c.api_key&&keysFor(s.shares).api_key?`<div class="hint">Using the key saved for ${esc(srcLabel(s.shares))}.</div>`:'';
+    return `<div class="card" data-p="${esc(s.name)}">
+    <h3><span class="dot"></span>${esc(s.label)} <span class="src ${en&&cf?'ready':'nokey'}">${!en?'off':cf?'ready':'no key'}</span></h3>
+    <p class="note">${esc(s.note||'')} Looks up: ${esc(s.types.join(', '))}.${s.keyUrl?` <a href="${esc(s.keyUrl)}" target="_blank" rel="noopener noreferrer">Get a key</a>`:''}</p>
+    <p class="note"><span class="${bn[0]}">Browser access:</span> ${esc(bn[1])}</p>
+    <label class="kf" style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:11.5px;color:var(--text)">
+      <input type="checkbox" data-en ${en?'checked':''}> Use this source in triage</label>
+    ${s.fields.map(f=>fld(s,f,c)).join('')}${shared}
+    ${org?`<div class="hint">Stored: ${org==='session'?'this tab only':'in this browser'}</div>`:''}
+    <div class="row">${s.fields.length?`<button class="btn p" data-act="save">Save in this browser</button><button class="btn" data-act="session">This tab only</button>`:''}
+      <button class="btn" data-act="test">Test</button>${s.fields.length?`<button class="btn" data-act="clear">Clear</button>`:''}</div>
+    <div class="kmsg" aria-live="polite"></div></div>`;
+  }).join('');
+  const drop=stGet('asndrop',null);
+  const cacheN=stKeys('c.').length;
+  const settings=`
+  <div class="card" data-cfg="relay" style="grid-column:1/-1">
+    <h3><span class="dot"></span>Relay for sources that block web pages <span class="src ${relayOn()?'ready':'nokey'}">${relayOn()?'on':'off'}</span></h3>
+    <p class="note">Browsers only let a page read an answer when the source says web pages may call it. Shodan InternetDB, RDAP and RIPEstat normally do. VirusTotal, AbuseIPDB and Censys normally do not, so a page alone cannot use them. Two ways round it: use the <i>open</i> link in the evidence to check that source by hand, or run a small relay of your own. The relay below is a free Cloudflare Worker you set up in the Cloudflare website, no software to install. Your keys and indicators then pass through that Worker, which you control. Do not use public CORS proxies: they would see your keys.</p>
+    <div class="tkform">
+      <div class="wide"><label for="cf-relay">Relay URL</label><input class="t" id="cf-relay" placeholder="https://intelscope-relay.yourname.workers.dev" value="${esc(CFG.relay)}" autocomplete="off" spellcheck="false"></div>
+      <div><label for="cf-relaytoken">Relay token</label><input class="t" id="cf-relaytoken" type="password" value="${esc(CFG.relayToken)}" autocomplete="off" placeholder="The TOKEN secret of your Worker"></div>
+      <div><label for="cf-relaymode">Use the relay</label><select class="t" id="cf-relaymode">
+        <option value="off"${CFG.relayMode==='off'?' selected':''}>Never</option>
+        <option value="fallback"${CFG.relayMode==='fallback'?' selected':''}>Only when a source blocks the browser</option>
+        <option value="always"${CFG.relayMode==='always'?' selected':''}>For every call</option></select></div>
+    </div>
+    <div class="row"><button class="btn p" data-cfgact="relay-save">Save relay</button><button class="btn" data-cfgact="relay-code">Copy Worker code</button><button class="btn" data-cfgact="relay-show">Show Worker code</button></div>
+    <pre class="out" id="cf-code" style="display:none;max-height:300px"></pre>
+    <div class="kmsg" aria-live="polite"></div>
+  </div>
+  <div class="card" data-cfg="lists">
+    <h3><span class="dot"></span>Allowlist</h3>
+    <p class="note">Matches are marked benign and never sent to any source. One IP, CIDR or domain per line, <code>#</code> for comments. Hosts where anyone can publish (Google Drive, SharePoint, workers.dev and similar) are never allowlisted.</p>
+    <label class="kf" style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:11.5px;color:var(--text)"><input type="checkbox" id="cf-defal" ${CFG.defaultAllowlist?'checked':''}> Built-in list (public DNS resolvers, major vendor domains)</label>
+    <label class="kf" style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:11.5px;color:var(--text)"><input type="checkbox" id="cf-resv" ${CFG.skipReserved?'checked':''}> Skip private, reserved and documentation addresses</label>
+    <textarea class="t" id="cf-allow" style="min-height:90px" spellcheck="false" placeholder="10.20.0.0/16   # office&#10;intranet.example.org">${esc(CFG.allowlist)}</textarea>
+    <div class="row"><button class="btn p" data-cfgact="lists-save">Save allowlist</button></div>
+    <div class="kmsg" aria-live="polite"></div>
+  </div>
+  <div class="card" data-cfg="asn">
+    <h3><span class="dot"></span>ASN blocklists</h3>
+    <p class="note">Spamhaus ASN-DROP is downloaded at most once a day. If your browser blocks the download, open <a href="https://www.spamhaus.org/drop/asndrop.json" target="_blank" rel="noopener noreferrer">asndrop.json</a>, save it, and load it here. ${drop?'Loaded copy from '+esc(new Date(drop.t).toISOString().slice(0,10))+' ('+Object.keys(parseDrop(drop.text)).length+' ASNs).':'No copy loaded yet.'}</p>
+    <label class="kf" style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:11.5px;color:var(--text)"><input type="checkbox" id="cf-drop" ${CFG.useDrop?'checked':''}> Check Spamhaus ASN-DROP</label>
+    <div class="row"><button class="btn" data-cfgact="drop-file">Load asndrop.json...</button><button class="btn" data-cfgact="drop-fetch">Download now</button></div>
+    <input type="file" id="cf-dropfile" accept=".json,.txt,application/json,text/plain" style="display:none">
+    <label class="f">Your own ASNs, one per line, optional <code># reason</code></label>
+    <textarea class="t" id="cf-asn" style="min-height:70px" spellcheck="false" placeholder="AS64500   # bulletproof hoster seen in case 12">${esc(CFG.asnCustom)}</textarea>
+    <div class="row"><button class="btn p" data-cfgact="asn-save">Save ASN settings</button></div>
+    <div class="kmsg" aria-live="polite"></div>
+  </div>
+  <div class="card" data-cfg="cache">
+    <h3><span class="dot"></span>Cache and backup</h3>
+    <p class="note">Answers are kept in this browser so a re-run costs no quota. Failed lookups are never cached. ${cacheN} cached answer${cacheN===1?'':'s'} now.</p>
+    <label class="kf" style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font-size:11.5px;color:var(--text)"><input type="checkbox" id="cf-cache" ${CFG.useCache?'checked':''}> Use the cache</label>
+    <div class="tkform"><div><label for="cf-ttl">Keep answers (hours)</label><input class="t" id="cf-ttl" type="number" min="1" max="720" value="${+CFG.cacheHours||24}"></div>
+      <div><label for="cf-to">Timeout per call (seconds)</label><input class="t" id="cf-to" type="number" min="5" max="120" value="${+CFG.timeoutSec||20}"></div></div>
+    <div class="row"><button class="btn p" data-cfgact="cache-save">Save</button><button class="btn" data-cfgact="cache-clear">Clear cache</button></div>
+    <p class="note" style="margin-top:12px">Move everything to another browser or computer: settings, keys, IOC tracker and case file in one JSON file. <span class="warn">The file holds your keys in plain text.</span></p>
+    <div class="row"><button class="btn" data-cfgact="backup">Download backup</button><button class="btn" data-cfgact="restore">Restore backup...</button><button class="btn" data-cfgact="wipe">Forget everything</button></div>
+    <input type="file" id="cf-restore" accept=".json,application/json" style="display:none">
+    <div class="kmsg" aria-live="polite"></div>
+  </div>`;
+  $('#ks-list').innerHTML=settings+cards;
+}
+async function ksTest(s){
+  const probe={ipv4:'8.8.8.8',domain:'example.com',url:'https://example.com/',sha256:'275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'};
+  const type=['ipv4','domain','url','sha256'].find(t=>s.types.includes(t));
+  const ioc={value:probe[type],type,original:probe[type]};
+  if(!srcConfigured(s))return {ok:false,message:'a required field is empty'};
+  if(s.name==='asn')ASNCACHE=null;
+  try{
+    const r=Object.assign({provider:s.name},await s.lookup(ioc,credsFor(s)));
+    if(!r.ok)return {ok:false,message:r.error};
+    const via=VIA_RELAY.has(s.name)?' (through the relay)':BLOCKED.has(s.name)?'':' (directly from the browser)';
+    return {ok:true,message:'looked up '+ioc.value+via+': '+(r.summary||'answered')};
+  }catch(e){return {ok:false,message:e.message||String(e)};}
 }
 function ksWire(){
+  $('#ks-list').addEventListener('change',ev=>{
+    const cb=ev.target.closest('[data-en]');if(!cb)return;
+    const name=cb.closest('[data-p]').dataset.p;stSet('src.'+name,{enabled:cb.checked});ksRender();trSourcesRender();
+  });
   $('#ks-list').addEventListener('click',async ev=>{
+    const c=ev.target.closest('[data-cfgact]');
+    if(c){await cfgAction(c.dataset.cfgact,c.closest('[data-cfg]'));return;}
     const b=ev.target.closest('[data-act]');if(!b)return;
-    const card=b.closest('[data-p]'),name=card.dataset.p,msg=$('.kmsg',card),act=b.dataset.act;
-    const say=(t,cls)=>{msg.textContent=t;msg.className='kmsg'+(cls?' '+cls:'');};
-    b.disabled=true;
-    try{
-      if(act==='test'){
-        say('Checking with a lookup of 8.8.8.8 ...');
-        const j=await liveApi('/api/settings/test',{provider:name});
-        say((j.ok?'Works: ':'Failed: ')+j.message,j.ok?'ok':'bad');
-      }else{
-        const values={};
-        if(act==='clear')$$('[data-f]',card).forEach(i=>{values[i.dataset.f]='';});
-        else $$('[data-f]',card).forEach(i=>{const v=i.value.trim();if(v||i.dataset.secret==='0')values[i.dataset.f]=v;});
-        if(!Object.values(values).some(v=>v!==''||act==='clear'))throw new Error('Type a key first');
-        const j=await liveApi('/api/settings',{provider:name,values,persist:act==='save'});
-        KS.providers=j.providers;ksRender();trProbe();
-        const c2=$(`[data-p="${name}"] .kmsg`);
-        const p=j.providers.find(x=>x.name===name);
-        const still=act==='clear'&&p&&p.fields.some(f=>f.set);
-        c2.textContent=act==='clear'?(still?'Cleared here. A key is still set in your environment or .env.':'Cleared.'):(act==='save'?'Saved on this computer.':'Kept for this session only.');
-        c2.className='kmsg ok';
-      }
-    }catch(e){say(e.message,'bad');}
-    b.disabled=false;
+    const card=b.closest('[data-p]'),name=card.dataset.p,s=SRC[name],act=b.dataset.act;
+    const say=(t,cls)=>{const m=$(`[data-p="${name}"] .kmsg`);if(m){m.textContent=t;m.className='kmsg'+(cls?' '+cls:'');}};
+    if(act==='test'){
+      b.disabled=true;say('Checking with one lookup ...');
+      const vals={};$$('[data-f]',card).forEach(i=>{const v=i.value.trim();if(v)vals[i.dataset.f]=v;});
+      const prev=stGet('keys.'+name,null,'session');
+      if(Object.keys(vals).length)stSet('keys.'+name,Object.assign({},keysFor(name),vals),'session');   /* test what is typed, without saving it */
+      const j=await ksTest(s);
+      if(Object.keys(vals).length){if(prev)stSet('keys.'+name,prev,'session');else stDel('keys.'+name,'session');}
+      say((j.ok?'Works: ':'Failed: ')+j.message,j.ok?'ok':'bad');b.disabled=false;trSourcesRender();return;
+    }
+    if(act==='clear'){stDel('keys.'+name);stDel('keys.'+name,'session');ksRender();trSourcesRender();say('Cleared.');return;}
+    const vals={};$$('[data-f]',card).forEach(i=>{const v=i.value.trim();if(v)vals[i.dataset.f]=v;});
+    if(!Object.keys(vals).length)return say('Type a key first','bad');
+    if(act==='save'){stDel('keys.'+name,'session');if(!stSet('keys.'+name,vals))return say('This browser refused to store it','bad');}
+    else{stDel('keys.'+name);stSet('keys.'+name,vals,'session');}
+    ksRender();trSourcesRender();say(act==='save'?'Saved in this browser.':'Kept for this tab only.','ok');
+  });
+  $('#ks-list').addEventListener('change',async ev=>{
+    if(ev.target.id==='cf-dropfile'){
+      const f=ev.target.files[0];ev.target.value='';if(!f)return;
+      const text=await f.text();const n=Object.keys(parseDrop(text)).length;
+      const m=$('[data-cfg="asn"] .kmsg');
+      if(!n){m.textContent='That file holds no ASNs.';m.className='kmsg bad';return;}
+      stSet('asndrop',{t:Date.now(),text,via:'file'});ASNCACHE=null;ksRender();
+      const m2=$('[data-cfg="asn"] .kmsg');m2.textContent=n+' ASNs loaded.';m2.className='kmsg ok';
+    }else if(ev.target.id==='cf-restore'){
+      const f=ev.target.files[0];ev.target.value='';if(!f)return;
+      try{
+        const j=JSON.parse(await f.text());if(!j||j.tool!=='intelscope-web'||typeof j.data!=='object')throw 0;
+        Object.entries(j.data).forEach(([k,v])=>{if(k.startsWith(STORE_PREFIX)&&!k.startsWith(STORE_PREFIX+'c.'))localStorage.setItem(k,v);});
+        toast('Backup restored, reloading');setTimeout(()=>location.reload(),600);
+      }catch(e){toast('That is not an IntelScope backup');}
+    }
   });
 }
+async function cfgAction(act,card){
+  const say=(t,cls)=>{const m=card&&$('.kmsg',card);if(m){m.textContent=t;m.className='kmsg'+(cls?' '+cls:'');}};
+  if(act==='relay-save'){
+    const u=$('#cf-relay').value.trim();
+    if(u&&!/^https:\/\//i.test(u))return say('The relay URL must start with https://','bad');
+    CFG.relay=u;CFG.relayToken=$('#cf-relaytoken').value.trim();CFG.relayMode=$('#cf-relaymode').value;cfgSave();BLOCKED.clear();VIA_RELAY.clear();
+    ksRender();trSourcesRender();$('[data-cfg="relay"] .kmsg').textContent=u?'Relay saved. Use Test on a source to check it.':'Relay removed.';return;
+  }
+  if(act==='relay-code'){copy(RELAY_CODE,'Worker code copied');return;}
+  if(act==='relay-show'){const p=$('#cf-code');p.textContent=RELAY_CODE;p.style.display=p.style.display==='none'?'block':'none';return;}
+  if(act==='lists-save'){CFG.defaultAllowlist=$('#cf-defal').checked;CFG.skipReserved=$('#cf-resv').checked;CFG.allowlist=$('#cf-allow').value;cfgSave();say('Allowlist saved.','ok');return;}
+  if(act==='asn-save'){CFG.useDrop=$('#cf-drop').checked;CFG.asnCustom=$('#cf-asn').value;cfgSave();ASNCACHE=null;
+    say(Object.keys(parseCustomAsn(CFG.asnCustom)).length+' own ASNs saved.','ok');return;}
+  if(act==='drop-file'){$('#cf-dropfile').click();return;}
+  if(act==='drop-fetch'){stDel('asndrop');ASNCACHE=null;say('Downloading ...');const l=await asnLists();ksRender();
+    const m=$('[data-cfg="asn"] .kmsg');const n=Object.keys(l.drop).length;m.textContent=n?n+' ASNs loaded.':(l.note||'Download failed.');m.className='kmsg '+(n?'ok':'bad');return;}
+  if(act==='cache-save'){CFG.useCache=$('#cf-cache').checked;CFG.cacheHours=Math.max(1,Math.min(720,+$('#cf-ttl').value||24));CFG.timeoutSec=Math.max(5,Math.min(120,+$('#cf-to').value||20));cfgSave();say('Saved.','ok');return;}
+  if(act==='cache-clear'){cacheClear();ksRender();$('[data-cfg="cache"] .kmsg').textContent='Cache cleared.';return;}
+  if(act==='backup'){
+    const data={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith(STORE_PREFIX)&&!k.startsWith(STORE_PREFIX+'c.'))data[k]=localStorage.getItem(k);}}catch(e){}
+    dl('intelscope-backup-'+today()+'.json',JSON.stringify({tool:'intelscope-web',version:APP_VERSION,exported:new Date().toISOString(),data},null,2),'application/json');return;
+  }
+  if(act==='restore'){$('#cf-restore').click();return;}
+  if(act==='wipe'){
+    if(!confirm('Remove every key, setting, cached answer, tracked IOC and case entry this page stored in this browser?'))return;
+    stKeys('').forEach(k=>localStorage.removeItem(k));try{Object.keys(sessionStorage).filter(k=>k.startsWith(STORE_PREFIX)).forEach(k=>sessionStorage.removeItem(k));}catch(e){}
+    toast('Forgotten, reloading');setTimeout(()=>location.reload(),600);
+  }
+}
+
 function trWire(){
   $('#tr-go').addEventListener('click',trRun);
-  $('#tr-clear').addEventListener('click',()=>{$('#tr-in').value='';TR.results=[];TR.filter=null;trRender();});
+  evWireToggle($('#tr-table'),TR.open);
+  $('#tr-evall').addEventListener('click',()=>{const k=trEvKeys(trShown());const all=k.every(x=>TR.open.has(x));k.forEach(x=>all?TR.open.delete(x):TR.open.add(x));trRender();});
+  $('#tr-clear').addEventListener('click',()=>{if(TR.running)return;$('#tr-in').value='';TR.results=[];TR.filter=null;$('#tr-prog').textContent='';trRender();});
   $('#tr-demo').addEventListener('click',()=>{
-    if(TR.live&&TR.demo&&TR.demoIocs.length){$('#tr-in').value=TR.demoIocs.join(String.fromCharCode(10));trRun();return;}
     TR.results=JSON.parse(JSON.stringify(TR_DEMO));TR.filter=null;
     $('#tr-in').value=TR.results.map(r=>r.original||r.ioc).join('\n');trRender();
     toast('Demo data: canned answers on reserved ranges, nothing was looked up');
@@ -2988,12 +4167,12 @@ function trWire(){
       if(!Array.isArray(list)||!list.every(x=>x&&x.ioc&&x.verdict&&x.type))throw 0;
       TR.results=list.map(x=>({...x,score:+x.score||0,reasons:x.reasons||[],sources:x.sources||{}}));TR.filter=null;trRender();
       toast(list.length+' results imported');
-    }catch(err){toast('That is not IntelScope JSON output');}
+    }catch(err){toast('That is not IntelScope JSON');}
     e.target.value='';
   });
   $('#tr-json').addEventListener('click',()=>{
     if(!TR.results.length)return toast('Nothing to export');
-    dl('intelscope-'+Date.now()+'.json',JSON.stringify({tool:'IntelScope dashboard',generated:new Date().toISOString(),count:TR.results.length,results:TR.results},null,2)+'\n','application/json');
+    dl('intelscope-'+Date.now()+'.json',JSON.stringify({tool:'IntelScope',version:APP_VERSION,generated:new Date().toISOString(),count:TR.results.length,results:TR.results},null,2)+'\n','application/json');
   });
   $('#tr-csv').addEventListener('click',()=>{if(!TR.results.length)return toast('Nothing to export');dl('intelscope-'+Date.now()+'.csv',trCsv(),'text/csv');});
   $('#tr-stix').addEventListener('click',async()=>{
@@ -3008,7 +4187,7 @@ function trWire(){
   $('#tr-case').addEventListener('click',()=>{
     const rows=trShown();if(!rows.length)return toast('Nothing to log');
     rows.forEach(r=>addCase(r.ioc,r.type,`IntelScope: ${r.verdict}, score ${r.score}`+((r.reasons||[])[0]?' ('+r.reasons[0]+')':''),true));
-    renderCase();toast(rows.length+' logged to case');
+    setTimeout(renderCase,50);toast(rows.length+' logged to case');
   });
   $('#qtriage').addEventListener('click',()=>{const q=$('#q').value.trim();if(q)trSend([q]);});
   $('#ioc-triage').addEventListener('click',()=>{
@@ -3018,9 +4197,221 @@ function trWire(){
     trSend(vals);
   });
 }
+/* ==================== DERIVED PIVOTS ====================
+   One artifact usually hides others: an email holds a username and a mail domain, a URL holds a
+   host, a subdomain sits under a registered domain, an IP sits in a network, a TOX ID holds a
+   public key. Every place that builds links uses the same builder, so a username pulled out of
+   an email gets the same sweep as a username typed in directly.
+   ======================================================== */
+const FREEMAIL=new Set([...Object.keys(MAILNOTE),'gmail.com','googlemail.com','outlook.com','hotmail.com','live.com','msn.com',
+  'yahoo.com','ymail.com','icloud.com','me.com','mac.com','aol.com','gmx.net','gmx.at','gmx.ch','zoho.com','qq.com','163.com','126.com',
+  'mail.ru','inbox.ru','bk.ru','list.ru','yandex.ru','yandex.com','ya.ru','rambler.ru','hey.com','fastmail.com','pm.me','protonmail.ch',
+  'hotmail.co.uk','yahoo.co.uk','outlook.de','web.de','t-online.de','free.fr','orange.fr','laposte.net','libero.it','ziggo.nl','kpnmail.nl','hotmail.nl',
+  'guerrillamail.com','sharklasers.com','mailinator.com','10minutemail.com','temp-mail.org','yopmail.com']);
+const CANDIDATE_DOMAINS=['gmail.com','outlook.com','hotmail.com','yahoo.com','icloud.com','proton.me','protonmail.com','tutanota.com',
+  'gmx.com','mail.ru','yandex.ru','onionmail.org','cock.li','aol.com'];
+/* kind -> resource tags, plus groups where plain free-text engines also apply */
+const KIND={
+  username:{tags:['username'],text:['search','msg','dark'],label:'Username'},
+  email:{tags:['email'],text:['search','dark'],label:'Email'},
+  domain:{tags:['domain','org'],text:[],label:'Domain'},
+  url:{tags:['url'],text:[],label:'URL'},
+  ip:{tags:['ip'],text:[],label:'IP address'},
+  cidr:{tags:['cidr'],text:[],label:'Network'},
+  hash:{tags:['hash'],text:[],label:'Hash'},
+  tox:{tags:['tox'],text:['search','dark','msg'],label:'TOX ID'},
+  session:{tags:[],text:['search','dark'],label:'Session ID'},
+  onion:{tags:['onion'],text:['search'],label:'Onion'},
+  btc:{tags:['btc'],text:['search','dark'],label:'Bitcoin'},
+  eth:{tags:['eth'],text:['search'],label:'Ethereum'},
+  xmr:{tags:['xmr'],text:['search','dark'],label:'Monero'},
+  phone:{tags:['phone'],text:['search','msg'],label:'Phone'},
+  coord:{tags:['coord'],text:[],label:'Coordinates'},
+  org:{tags:['org'],text:['search','leak'],label:'Organisation'},
+  text:{tags:['text'],text:[],label:'Free text'}
+};
+const QUOTED=new Set(['username','email','tox','session','phone','btc','eth','xmr','onion','text','org']);
+const TYPE2KIND={ip:'ip',ipv6:'ip',cidr:'cidr',onion2:'onion'};
+function kindOf(t){return TYPE2KIND[t]||(KIND[t]?t:'text');}
+
+/* the value a kind should be searched with */
+function pivotValue(raw,type){
+  const q=raw.trim();
+  if(type==='username'){const m=q.match(/^(?:https?:\/\/)?(?:www\.)?t\.me\/(?:s\/)?([a-z0-9_]{3,})/i);if(m)return m[1];return q.replace(/^@/,'');}
+  if(type==='tox')return q.replace(/^tox:/i,'').replace(/\s+/g,'');
+  if(type==='onion'||type==='onion2')return q.toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'');
+  if(type==='phone'){const d=q.replace(/[^\d+]/g,'');return d;}
+  return q;
+}
+function regDomain(host){
+  const l=host.toLowerCase().split('.');if(l.length<=2)return host.toLowerCase();
+  const sl=l.slice(-2).join('.');
+  return /^(co|com|net|org|gov|ac|edu|ne|or|go|gob|mil|nic|ltd|plc|sch)\.[a-z]{2}$/.test(sl)?l.slice(-3).join('.'):sl;
+}
+function linkGroups(kind,v){
+  const k=KIND[kind]||KIND.text;
+  const out=[];
+  Object.keys(GROUPNAMES).forEach(g=>{
+    if(g==='upstream')return;
+    const list=R.filter(r=>r.g===g&&(r.t.some(t=>k.tags.includes(t))||(k.text.includes(g)&&r.t.includes('text'))));
+    if(!list.length)return;
+    const q=(g==='search'&&QUOTED.has(kind))?'"'+v+'"':v;
+    out.push({title:GROUPNAMES[g],list,q});
+  });
+  return out;
+}
+function renderLinks(el,kind,v){
+  let n=0;
+  linkGroups(kind,v).forEach(gr=>{n+=gr.list.length;renderGroup(el,gr.list,gr.q,gr.title);});
+  return n;
+}
+
+/* what else is inside a value */
+function derive(kind,v){
+  const d=[];
+  if(kind==='email'){
+    const m=v.match(/^([^@]+)@(.+)$/);if(!m)return d;
+    const local=m[1].split('+')[0],dom=m[2].toLowerCase();
+    d.push({kind:'username',value:local,title:'Mailbox name as a username',why:'People reuse the part before the @ as a handle on forums, code sites and social platforms, and at other mail providers.'});
+    if(FREEMAIL.has(dom))d.push({kind:'note',value:dom,title:'Mail domain '+dom,why:(MAILNOTE[dom]||'Free or disposable mail provider')+'. Infrastructure lookups on a shared provider say nothing about this person, so none are built.'});
+    else{
+      d.push({kind:'domain',value:dom,title:'Mail domain',why:'A private mail domain is infrastructure in its own right: who registered it, where its mail and web point, and who else uses it.'});
+      if(regDomain(dom)!==dom)d.push({kind:'domain',value:regDomain(dom),title:'Registered domain',why:'The mail domain is a subdomain; the registration and ownership sit on the parent.'});
+    }
+  }
+  if(kind==='url'){
+    let u;try{u=new URL(v);}catch(e){return d;}
+    const host=u.hostname.replace(/^\[|\]$/g,'').toLowerCase();
+    const tme=v.match(/^(?:https?:\/\/)?(?:www\.)?t\.me\/(?:s\/)?([a-z0-9_]{3,})/i);
+    if(tme)d.push({kind:'username',value:tme[1],title:'Telegram handle',why:'A t.me link names a Telegram account or channel. The same handle is often used elsewhere.'});
+    if(parseIPv4(host)||parseIPv6(host))d.push({kind:'ip',value:host,title:'Host address',why:'The URL points at a bare IP, which is unusual for legitimate sites and worth enriching on its own.'});
+    else if(host.endsWith('.onion'))d.push({kind:'onion',value:host,title:'Onion host',why:'The URL is a hidden service; work the host, not the page.'});
+    else{
+      d.push({kind:'domain',value:host,title:'Host',why:'Infrastructure lookups take the host name, not the full URL.'});
+      if(regDomain(host)!==host)d.push({kind:'domain',value:regDomain(host),title:'Registered domain',why:'Registration, sibling subdomains and certificates hang off the parent domain.'});
+    }
+    const file=decodeURIComponent(u.pathname.split('/').pop()||'');
+    if(/\.[a-z0-9]{2,5}$/i.test(file)&&file.length>4)d.push({kind:'text',value:file,title:'File name in the path',why:'Payload and lure file names are often reused across campaigns.'});
+  }
+  if(kind==='domain'&&regDomain(v)!==v.toLowerCase())d.push({kind:'domain',value:regDomain(v),title:'Registered domain',why:'This is a subdomain. Registration, sibling subdomains and certificates hang off the parent.'});
+  if(kind==='ip'){
+    const o=parseIPv4(v);
+    if(o)d.push({kind:'cidr',value:o.slice(0,3).join('.')+'.0/24',title:'Surrounding /24',why:'Attacker infrastructure is often rented in blocks. Neighbours in the same /24 can share the operator.'});
+  }
+  if(kind==='tox'&&/^[0-9a-f]{76}$/i.test(v))d.push({kind:'text',value:v.slice(0,64).toUpperCase(),title:'TOX public key',why:'The owner can change the nospam part at will; the 64 character public key is the durable identity.'});
+  if(kind==='phone'){
+    const dg=v.replace(/\D/g,'');
+    if(dg.length>=7){const s=new Set(['+'+dg,dg,'00'+dg]);s.delete(v);
+      [...s].forEach(x=>d.push({kind:'text',value:x,title:'Number written as '+x,why:'Pages write the same number in different forms; search each.'}));}
+  }
+  return d;
+}
+
+/* extra builders that are not plain link lists */
+const ENG={Google:'https://www.google.com/search?q=',Bing:'https://www.bing.com/search?q=',Yandex:'https://yandex.com/search/?text=',DDG:'https://duckduckgo.com/?q='};
+const USER_DORKS=[
+ ['Exact handle','"{t}"'],
+ ['Forums and marketplaces','"{t}" (forum OR "member since" OR reputation OR joined OR posts)'],
+ ['Paste sites','"{t}" (site:pastebin.com OR site:rentry.co OR site:justpaste.it OR site:controlc.com OR site:paste.ee)'],
+ ['Telegram','site:t.me "{t}"'],
+ ['Reddit','site:reddit.com "{t}"'],
+ ['Code sites','"{t}" (site:github.com OR site:gitlab.com OR site:gist.github.com OR site:bitbucket.org)'],
+ ['Handle inside a URL','inurl:"{t}"'],
+ ['Handle used as a mailbox','"{t}@"'],
+ ['Breach and stealer chatter','"{t}" (combolist OR dump OR leak OR stealer OR logs)']
+];
+const EMAIL_DORKS=[
+ ['Exact address','"{t}"'],
+ ['Outside LinkedIn','"{t}" -site:linkedin.com'],
+ ['Paste sites','"{t}" (site:pastebin.com OR site:rentry.co OR site:justpaste.it OR site:controlc.com)'],
+ ['In documents','"{t}" (filetype:pdf OR filetype:xlsx OR filetype:docx OR filetype:csv OR filetype:txt)'],
+ ['Breach and stealer chatter','"{t}" (combolist OR dump OR leak OR stealer OR "email:pass")'],
+ ['Ransom and extortion','"{t}" (ransomware OR decrypt OR "your files")']
+];
+const DOMAIN_DORKS=[
+ ['Addresses at this domain','"@{t}" -site:{t}'],
+ ['Indexed pages','site:{t}'],
+ ['Documents','site:{t} (filetype:pdf OR filetype:docx OR filetype:xlsx OR filetype:csv)'],
+ ['Login and admin pages','site:{t} (inurl:login OR inurl:admin OR inurl:portal)'],
+ ['Breach or leak mention','"{t}" (ransomware OR leak OR breach OR extortion)'],
+ ['On paste sites','"{t}" (site:pastebin.com OR site:rentry.co OR site:justpaste.it)']
+];
+function dorkCard(el,title,recipes,v){
+  const h=document.createElement('div');
+  h.innerHTML=`<div class="grouphead">${esc(title)}<span class="c">${recipes.length}</span></div><div class="reslist">`+
+    recipes.map(([n,tpl])=>{const q=tpl.replace(/\{t\}/g,v);
+      return `<div class="res"><span><span class="nm">${esc(n)}</span><span class="ds" style="font-family:var(--mono)">${esc(q)}</span>
+        <span class="ds">${Object.entries(ENG).map(([e,u])=>`<a href="${esc(u+encodeURIComponent(q))}" target="_blank" rel="noopener noreferrer">${e}</a>`).join(' &middot; ')}</span></span></div>`;}).join('')+`</div>`;
+  el.appendChild(h);return recipes.length;
+}
+function emailCandidates(el,u){
+  const base=u.toLowerCase();
+  const rows=CANDIDATE_DOMAINS.map(d=>{
+    const e=base+'@'+d,h=md5(e);
+    const links=[['Gravatar','https://gravatar.com/avatar/'+h+'?d=404&s=200'],['EmailRep','https://emailrep.io/'+encodeURIComponent(e)],
+      ['Hunter','https://hunter.io/email-verifier/'+encodeURIComponent(e)],['Google','https://www.google.com/search?q='+encodeURIComponent('"'+e+'"')],
+      ['Ahmia','https://ahmia.fi/search/?q='+encodeURIComponent(e)]];
+    return `<tr><td style="color:var(--paper)">${esc(e)}</td><td>${links.map(([n,l])=>`<a href="${esc(l)}" target="_blank" rel="noopener noreferrer">${n}</a>`).join(' &middot; ')}</td>
+      <td style="white-space:nowrap"><button class="btn sm" data-repivot="${esc(e)}">Pivot</button></td></tr>`;
+  }).join('');
+  const h=document.createElement('div');
+  h.innerHTML=`<div class="grouphead">Same handle as an email address<span class="c">${CANDIDATE_DOMAINS.length}</span></div>
+    <p class="note mut" style="margin:0 0 8px">Guesses, not findings. A Gravatar image (instead of a 404) proves the address has an account there. Breach services such as Have I Been Pwned need the address pasted in their page.</p>
+    <div class="card" style="overflow-x:auto;padding:6px 8px"><table class="tb"><thead><tr><th>Candidate</th><th>Check</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  el.appendChild(h);return CANDIDATE_DOMAINS.length*5;
+}
+function variantChips(el,u){
+  const v=variants(u).filter(x=>x!==u.toLowerCase()).slice(0,28);
+  const h=document.createElement('div');
+  h.innerHTML=`<div class="grouphead">Handle variants<span class="c">${v.length}</span></div>
+    <p class="note mut" style="margin:0 0 8px">Click one to pivot on it. Sweep the plausible ones, do not brute force every string.</p>
+    <div>${v.map(x=>`<span class="chip" data-repivot="${esc(x)}">${esc(x)}</span>`).join('')}</div>`;
+  el.appendChild(h);
+}
+function extras(el,kind,v,opts){
+  let n=0;opts=opts||{};
+  if(kind==='username'){n+=emailCandidates(el,v);n+=dorkCard(el,'Handle in the wild (search dorks)',USER_DORKS,v);if(opts.variants!==false)variantChips(el,v);}
+  if(kind==='email')n+=dorkCard(el,'Address in the wild (search dorks)',EMAIL_DORKS,v);
+  if(kind==='domain')n+=dorkCard(el,'Domain in the wild (search dorks)',DOMAIN_DORKS,v);
+  return n;
+}
+function derivedBlock(el,d){
+  const box=document.createElement('div');
+  box.className='derived';
+  box.innerHTML=`<div class="card" style="margin-top:22px;border-left:3px solid var(--iris)">
+    <h3><span class="dot"></span>${esc(d.title)} <span class="badge">${esc((KIND[d.kind]||{label:'note'}).label)}</span></h3>
+    <p class="note">${esc(d.why)}</p>
+    <dl class="kv"><dt>Value</dt><dd style="color:var(--paper)">${esc(d.value)}</dd></dl>
+    ${d.kind==='note'?'':`<div class="row"><button class="btn sm p" data-repivot="${esc(d.value)}">Pivot on this</button><button class="btn sm" data-copyv="${esc(d.value)}">Copy</button><button class="btn sm" data-logv="${esc(d.value)}" data-logk="${esc(d.kind)}">Log to case</button></div>`}</div>`;
+  el.appendChild(box);
+  if(d.kind==='note')return 0;
+  return renderLinks(box,d.kind,d.value)+extras(box,d.kind,d.value,{variants:false});
+}
+/* the whole set for one value: its own links, its extras, and everything derived from it */
+function buildAll(el,kind,v,opts){
+  opts=opts||{};
+  let n=renderLinks(el,kind,v);
+  n+=extras(el,kind,v,opts);
+  const ds=derive(kind,v);
+  ds.forEach(d=>{n+=derivedBlock(el,d);});
+  return {links:n,derived:ds};
+}
+function pivotOn(v){$('#q').value=v;classify();pivot();}
+function wireDerivedActions(root){
+  root.addEventListener('click',e=>{
+    const p=e.target.closest('[data-repivot]');if(p){e.preventDefault();pivotOn(p.dataset.repivot);return;}
+    const c=e.target.closest('[data-copyv]');if(c){copy(c.dataset.copyv);return;}
+    const l=e.target.closest('[data-logv]');if(l){addCase(l.dataset.logv,l.dataset.logk||'text','Derived pivot from '+(CURRENT.q||'the artifact bar'));}
+  });
+}
 
 function init(){
-  trWire();tkWire();ksWire();trProbe();trRender();
+  /* forget keys and switches of sources this version no longer has */
+  ['keys.','src.'].forEach(p=>{const L=STORE_PREFIX+p;const gone=k=>k.startsWith(L)&&!SRC[k.slice(L.length)];
+    try{stKeys(p).filter(gone).forEach(k=>localStorage.removeItem(k));Object.keys(sessionStorage).filter(gone).forEach(k=>sessionStorage.removeItem(k));}catch(e){}});
+  stKeys('c.').filter(k=>!k.startsWith(STORE_PREFIX+CACHE_PFX)).forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
+  trWire();tkWire();ksWire();tkLoad();ksLoad();trSourcesRender();trRender();caseLoad();
+  ['#pivotout','#un-out','#em-links-out','#pivotvalidate'].forEach(s=>wireDerivedActions($(s)));
   $('#dk-recipe').innerHTML=DORKS.map((d,i)=>`<option value="${i}">${esc(d.n)}</option>`).join('');
   $('#dk-term').addEventListener('input',dorkSync);
   $('#dk-recipe').addEventListener('change',dorkSync);
@@ -3045,7 +4436,8 @@ function init(){
     ['Onion v3','duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion'],
     ['Bitcoin','bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'],
     ['IP','185.220.101.1'],['Hash','44d88612fea8a8f36de82e1278abb02f'],
-    ['Email','support@onionmail.org'],['Domain','ransomware.live'],['Handle','lockbitsupp']];
+    ['Email','support@onionmail.org'],['Domain','ransomware.live'],['Handle','lockbitsupp'],
+    ['URL','hxxps://login.portal-update[.]example/verify.php'],['Telegram','@medusa_support']];
   $('#startchips').innerHTML=samples.map(s=>`<span class="chip" data-sample="${esc(s[1])}">${esc(s[0])}</span>`).join('');
   $$('[data-sample]').forEach(c=>c.addEventListener('click',()=>{
     $('#q').value=c.dataset.sample;classify();pivot();
@@ -3054,7 +4446,7 @@ function init(){
   $('#offlinelist').innerHTML=['TOX ID checksum validation','Onion v3 SHA3-256 checksum validation',
     'Bitcoin base58check and bech32','Monero keccak checksum','Ethereum EIP-55 casing',
     'EXIF, GPS and PNG metadata reader','Perceptual image hashing','File and text hashing',
-    'Indicator extraction, defang and refang','IOC parsing, filtering and export (JSON, CSV, STIX 2.1)','CIDR maths','Coordinate conversion',
+    'Indicator extraction, defang and refang','IOC parsing, filtering and export (JSON, CSV, STIX 2.1)','Derived pivots (username from email, host from URL, parent domain, /24)','CIDR maths','Coordinate conversion',
     'Timestamp conversion','Activity-hour plotting','Ransom note parsing and family scoring']
     .map(x=>'&middot; '+x).join('<br>');
 
@@ -3062,7 +4454,7 @@ function init(){
   renderLibChips();renderLib();
   renderCase();
   drawMap();
-  const VIEWS=['map','pivot','triage','search','social','email','image','geo','network','dark','note','lab','crypto','case','play','lib','opsec'];
+  const VIEWS=['map','pivot','triage','tracker','search','social','email','image','geo','network','dark','note','lab','crypto','case','play','lib','opsec','keys'];
   const fromHash=()=>{const h=location.hash.replace('#','');return VIEWS.includes(h)?h:null;};
   go(fromHash()||'map');
   window.addEventListener('hashchange',()=>{const h=fromHash();if(h&&!$('#v-'+h).classList.contains('on'))go(h);});
